@@ -3,7 +3,7 @@
 // Developed By: Heriberto Nieto
 //               Texas Advanced Computing Center
 
-/* @pjs font='./data/MonoSpaced.ttf, ./data/MonoSpacedBold.ttf, ./data/Digital.ttf'; */
+/* @pjs font='../data/MonoSpaced.ttf, ../data/MonoSpacedBold.ttf, ../data/Digital.ttf'; */
 
 import java.util.Map;
 HashMap<String, Country> countryMap = new HashMap<String, Country>();
@@ -61,9 +61,9 @@ void setup() {
   // font stuff
   fontSize = 7;//lerp(0,20, sketchWidth/(3840*0.46)); // 0.46 is percentage of canvas relative to browser window width
 //  defaultFont = loadFont("./data/Helvetica.ttf");
-  monoSpacedFont = createFont("./data/MonoSpaced.ttf", fontSize); 
-  monoSpacedBold = createFont("./data/MonoSpacedBold.ttf", fontSize);
-  digitalFont = createFont("./data/Digital.ttf", fontSize*4);
+  monoSpacedFont = createFont("../data/MonoSpaced.ttf", fontSize); 
+  monoSpacedBold = createFont("../data/MonoSpacedBold.ttf", fontSize);
+  digitalFont = createFont("../data/Digital.ttf", fontSize*4);
   textAlign(CENTER);
   
   // time controls
@@ -74,8 +74,8 @@ void setup() {
   timecontroller.init();
   
   // parsing
-  parseCategories("./data/us_categorization_061814.csv");
-  parseRights("./data/dj_rights_060214.csv");
+  parseCategories("../data/us_categorization_061814.csv");
+  parseRights("../data/dj_rights_060214.csv");
   findCountriesInRange(yearRange[0], yearRange[1]);  
   
   // javascript function to create HTML buttons using the category titles as labels
