@@ -1,0 +1,22 @@
+body {
+	width: 90%;
+}
+
+#mainTitle {
+	font-family: "Monotype Corsiva";
+  font-size: 3.5vh; /*24px;*/
+}
+
+.question {
+	font-family: "Segoe Print";
+  font-size: 2.0vh; /*14px;*/
+}
+
+p,li {
+	color: white;
+	font-size: 1.6vh; /*11px;*/
+}
+
+a {
+	color: blue;
+}
