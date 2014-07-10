@@ -86,10 +86,11 @@ void setup() {
 /*             MAIN DRAW LOOP                */
 /*********************************************/
 void draw() {  
+//  println(frameRate);
   background(background_color);
   
   pushMatrix();
-  translate(width/2, (height)/2);
+  translate(width/2, height/2);
   rotate(-HALF_PI);
   
   pushMatrix();
