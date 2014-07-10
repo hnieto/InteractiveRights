@@ -1,22 +1,26 @@
 class Country {
-  String name;
-  ArrayList<Year> years = new ArrayList<Year>();
-  color border_color = color(5);
+    
+  String          name;
+  ArrayList<Year> years        = new ArrayList<Year>();
+  color           border_color = color(5);
 
+  
   Country(String name) {
     this.name = name;
   }
 
+  
   void addYear(Year year) {
     years.add(year);
   }
 
+  
   void printRights() {
     for (int i=0; i<years.size(); i++) {
       Year thisYear = years.get(i);
       println(thisYear.number + " (total=" + thisYear.rights.size() + "): ");
       for (int j=0; j<thisYear.rights.size(); j++) {
-        String right = thisYear.rights.get(j);
+        String right    = thisYear.rights.get(j);
         String category = thisYear.categories.get(j).name;
         println(right + ", " + category);
       }
@@ -46,6 +50,7 @@ class Country {
       }
     }
 
+    
     float currentRadius = radius;
     // compare every right in the Category object passed in with the rights listed for that Year for this Country
     for (int i=category.rights.size()-1; i>=0; i--) {
@@ -63,6 +68,7 @@ class Country {
     }
   }
 
+  
   void drawCategories(int year, float startTheta, float endTheta, float delta, float radius, float thickness, boolean stack) { 
     // check if Country had any rights during Year
     int yearIndex = -1;
@@ -114,6 +120,7 @@ class Country {
     }
   } 
 
+  
   int countIncludedRightsFromCategory(Category category, int yearIndex) {
     int counter = 0;
     ArrayList<String> rightsInThisYear = years.get(yearIndex).rights;

@@ -2,75 +2,76 @@
 // Description: Cross-Country Comparison of Adopted Constitutional Rights Across Time
 // Developed By: Heriberto Nieto
 //               Texas Advanced Computing Center
+// Modified by: Luis Francisco-Revilla
 
 /* @pjs font='../data/MonoSpaced.ttf, ../data/MonoSpacedBold.ttf, ../data/Digital.ttf'; */
 
 import java.util.Map;
-HashMap<String, Country> countryMap = new HashMap<String, Country>();
-ArrayList<Country> countryList = new ArrayList<Country>();
-ArrayList<Category> categoryList = new ArrayList<Category>();
-ArrayList<String> rightsColumns = new ArrayList<String>();
+HashMap<String, Country> countryMap     = new HashMap<String, Country>();
+ArrayList<Country>       countryList    = new ArrayList<Country>();
+ArrayList<Category>      categoryList   = new ArrayList<Category>();
+ArrayList<String>        rightsColumns  = new ArrayList<String>();
 
-TimeController timecontroller;
-int[] yearRange = { 1850, 2012 };
-int currentCircumplex, numberOfRights;
-float controllerRadius, circumplexRadius, shortestDistanceFromCenter;
-float circumplexRotationAngle, mouseStartAngle;
-float highlightRadius, highlightThickness, highlightedRightIndex;
+TimeController           timecontroller;
+int[]                    yearRange      = { 1850, 2012 };
+int                      currentCircumplex, numberOfRights;
+float                    controllerRadius, circumplexRadius, shortestDistanceFromCenter;
+float                    circumplexRotationAngle, mouseStartAngle;
+float                    highlightRadius, highlightThickness, highlightedRightIndex;
+                         
+PFont                    defaultFont, monoSpacedFont, monoSpacedBold, digitalFont;
+int                      fontSize;
 
-PFont defaultFont, monoSpacedFont, monoSpacedBold, digitalFont;
-int fontSize;
+color[]                  categoryColors = new color[7];
+color                    background_color, letter_color, wedgeBorder_color;
 
-color[] categoryColors = new color[7];
-color background_color, letter_color, wedgeBorder_color;
-
-float sketchWidth, sketchHeight;
-
-boolean stackRights = true;
-boolean highlightRing = false;
+float                    sketchWidth, sketchHeight;
+                         
+boolean                  stackRights    = true;
+boolean                  highlightRing  = false;
 
 /*********************************************/
 /*            Initialization                 */
 /*********************************************/
 void setup() {
   // colors
-  categoryColors[6] = #113C5D; // outer
-  categoryColors[5] = #FEDC1C; 
-  categoryColors[4] = #76A0D5; 
-  categoryColors[3] = #D43266;
-  categoryColors[2] = #0065A0;
-  categoryColors[1] = #00A871;
-  categoryColors[0] = #80304A; // inner
-  background_color = color(0, 0, 0);        // black
-  letter_color = color(255, 255, 255);      // white
-  wedgeBorder_color = color(255, 255, 255); // black 
-
-  // circumplex
-  currentCircumplex = 0;
-  numberOfRights = 0;
-  circumplexRotationAngle = 0.0; 
-  mouseStartAngle = 0.0;
-  highlightRadius = 0.0;
-  highlightThickness = 0.0;
-  highlightedRightIndex = -1;
+  categoryColors[6]          = #113C5D; // outer
+  categoryColors[5]          = #FEDC1C; 
+  categoryColors[4]          = #76A0D5; 
+  categoryColors[3]          = #D43266;
+  categoryColors[2]          = #0065A0;
+  categoryColors[1]          = #00A871;
+  categoryColors[0]          = #80304A; // inner
+  background_color           = color(0, 0, 0);        // black
+  letter_color               = color(255, 255, 255);      // white 
+  wedgeBorder_color          = color(255, 255, 255); // black 
+                             
+  // circumplex              
+  currentCircumplex          = 0;
+  numberOfRights             = 0;
+  circumplexRotationAngle    = 0.0; 
+  mouseStartAngle            = 0.0;
+  highlightRadius            = 0.0;
+  highlightThickness         = 0.0;
+  highlightedRightIndex      = -1;
   
   // javascript function to set sketch size according to the width of the browser
   setCanvasSize();
   size(sketchWidth, sketchHeight);
   
   // font stuff
-  fontSize = 7;//lerp(0,20, sketchWidth/(3840*0.46)); // 0.46 is percentage of canvas relative to browser window width
-//  defaultFont = loadFont("./data/Helvetica.ttf");
-  monoSpacedFont = createFont("../data/MonoSpaced.ttf", fontSize); 
-  monoSpacedBold = createFont("../data/MonoSpacedBold.ttf", fontSize);
-  digitalFont = createFont("../data/Digital.ttf", fontSize*4);
+  fontSize                   = lerp(0,20, sketchWidth/(3840*0.49)); // 0.49 is percentage of canvas relative to browser window width
+//  defaultFont               = loadFont("./data/Helvetica.ttf");
+  monoSpacedFont             = createFont("../data/MonoSpaced.ttf", fontSize); 
+  monoSpacedBold             = createFont("../data/MonoSpacedBold.ttf", fontSize);
+  digitalFont                = createFont("../data/Digital.ttf", fontSize*4);
   textAlign(CENTER);
   
   // time controls
-  shortestDistanceFromCenter =  min(width, height)/2;
-  circumplexRadius = shortestDistanceFromCenter-(textAscent() + textDescent()); // account for letter height
-  controllerRadius =  shortestDistanceFromCenter/3;
-  timecontroller = new TimeController(controllerRadius, yearRange);
+  shortestDistanceFromCenter = min(width, height)/2;
+  circumplexRadius           = shortestDistanceFromCenter-(textAscent() + textDescent()); // account for letter height
+  controllerRadius           = shortestDistanceFromCenter/3;
+  timecontroller             = new TimeController(controllerRadius, yearRange);
   timecontroller.init();
   
   // parsing
@@ -85,12 +86,12 @@ void setup() {
 /*********************************************/
 /*             MAIN DRAW LOOP                */
 /*********************************************/
-void draw() {  
-//  println(frameRate);
+void draw() {
+  
   background(background_color);
   
   pushMatrix();
-  translate(width/2, height/2);
+  translate(width/2, (height)/2);
   rotate(-HALF_PI);
   
   pushMatrix();
@@ -131,9 +132,10 @@ void draw() {
 /*            RENDER CIRCUMPLEX              */
 /*********************************************/
 void drawCategoryCircumplex() {
-  float delta = TWO_PI/countryList.size(); 
-  float theta = delta/2; // shift by half the width of the US slice so as to center it
-  float thickness = (circumplexRadius-controllerRadius)/numberOfRights;
+
+  float delta          = TWO_PI/countryList.size(); 
+  float theta          = delta/2; // shift by half the width of the US slice so as to center it
+  float thickness      = (circumplexRadius-controllerRadius)/numberOfRights;
   float adjustedRadius = circumplexRadius-thickness/2; // wedge thickens up/down from current radius, we have to adjust for that
 
   for (int i=countryList.size()-1; i>=0; i--) {
@@ -142,10 +144,12 @@ void drawCategoryCircumplex() {
   }
 }
 
+
 void drawRightsCircumplex(Category category) {
-  float delta = TWO_PI/countryList.size(); // +2 to account for US taking up 3 slices
-  float theta = delta/2; // shift by half the width of the US slice so as to center it
-  float thickness = (circumplexRadius-controllerRadius)/category.rights.size();
+
+  float delta          = TWO_PI/countryList.size(); // +2 to account for US taking up 3 slices
+  float theta          = delta/2; // shift by half the width of the US slice so as to center it
+  float thickness      = (circumplexRadius-controllerRadius)/category.rights.size();
   float adjustedRadius = circumplexRadius-thickness/2; // wedge thickens up/down from current radius, we have to adjust for that
 
   for (int i=countryList.size()-1; i>=0; i--) {
@@ -158,6 +162,7 @@ void drawRightsCircumplex(Category category) {
 /*              OVERLAYS                     */
 /*********************************************/
 void highlightUS(){
+
   float delta = TWO_PI/countryList.size();
   float theta = -delta/2;
   
@@ -167,10 +172,11 @@ void highlightUS(){
   popStyle();  
 }
 
+
 void drawRightsBorders(Category category){
   int borderThickness = 1;
-  int numberOfRings = category.rights.size();
-  int numberOfSlices = countryList.size();
+  int numberOfRings   = category.rights.size();
+  int numberOfSlices  = countryList.size();
   
   pushStyle();
   noFill();
@@ -178,8 +184,9 @@ void drawRightsBorders(Category category){
   strokeWeight(borderThickness);
   
   // create rings
-  float thickness = (circumplexRadius-controllerRadius)/numberOfRings;
+  float thickness       = (circumplexRadius-controllerRadius)/numberOfRings;
   float shrinkingRadius = circumplexRadius;
+  
   for(int i=0; i<=numberOfRings; i++){
     ellipse(0, 0, shrinkingRadius*2, shrinkingRadius*2);
     shrinkingRadius -= thickness;
@@ -188,6 +195,7 @@ void drawRightsBorders(Category category){
   // create slices
   float delta = TWO_PI/numberOfSlices;
   float angle = delta/2;
+  
   for(int i=0; i<numberOfSlices; i++){
     line(0, 0);
     line(circumplexRadius*cos(angle), circumplexRadius*sin(angle));
@@ -200,10 +208,12 @@ void drawRightsBorders(Category category){
   popStyle();
 }
 
+
 void drawCategoryBorders(){
+
   int borderThickness = 1;
-  int numberOfRings = categoryList.size();
-  int numberOfSlices = countryList.size();
+  int numberOfRings   = categoryList.size();
+  int numberOfSlices  = countryList.size();
   
   pushStyle();
   noFill();
@@ -212,8 +222,10 @@ void drawCategoryBorders(){
   
   // create rings
   float individualRightThickness = (circumplexRadius-controllerRadius)/numberOfRights;
-  float growingRadius = controllerRadius;
+  float growingRadius            = controllerRadius;
+  
   for(int i=0; i<numberOfRings; i++){
+  
     Category category = categoryList.get(i);
     ellipse(0, 0, growingRadius*2, growingRadius*2);
     growingRadius += individualRightThickness*category.rights.size();
@@ -223,6 +235,7 @@ void drawCategoryBorders(){
   // create slices
   float delta = TWO_PI/numberOfSlices;
   float angle = delta/2;
+  
   for(int i=0; i<numberOfSlices; i++){
     line(0, 0);
     line(circumplexRadius*cos(angle), circumplexRadius*sin(angle));
@@ -234,25 +247,29 @@ void drawCategoryBorders(){
   popStyle();
 }
 
+
 void drawCountryNames() {   
-  float delta = TWO_PI/countryList.size(); 
-  float startTheta = delta/2; // shift by half the width of the US slice so as to center it
-  float thickness = (circumplexRadius-controllerRadius)/numberOfRights;
-  float adjustedRadius = circumplexRadius-thickness/2; // wedge thickens up/down from current radius, we have to adjust for that
+
+  float delta           = TWO_PI/countryList.size(); 
+  float startTheta      = delta/2; // shift by half the width of the US slice so as to center it
+  float thickness       = (circumplexRadius-controllerRadius)/numberOfRights;
+  float adjustedRadius  = circumplexRadius-thickness/2; // wedge thickens up/down from current radius, we have to adjust for that
 
   for (int i=countryList.size()-1; i>=0; i--) {
+  
     String name = countryList.get(i).name;
     if(name.equals("United States")) textSize(fontSize*1.5);
     else textSize(fontSize);
     
-    float outerRadius = adjustedRadius + thickness/2;
+    float outerRadius   = adjustedRadius + thickness/2;
     float txtStartAngle = (startTheta+delta*0.5) - (getTextLength(name)/outerRadius)*0.5;
-    float arclength = 0; // We must keep track of our position along the curve
+    float arclength     = 0; // We must keep track of our position along the curve
   
     for (int j=0; j<name.length(); j++) {
+    
       // Instead of a constant width, we check the width of each character.
-      String currentChar = name.substring(j,j+1);//name.charAt(j);
-      float currentCharWidth = textWidth(currentChar);
+      String currentChar      = name.substring(j,j+1);//name.charAt(j);
+      float  currentCharWidth = textWidth(currentChar);
   
       // Each box is centered so we move half the width
       arclength += currentCharWidth/2;
@@ -262,10 +279,13 @@ void drawCountryNames() {
       float theta = arclength / outerRadius;    
   
       pushMatrix();
+      
       // position text starting from given angle
       rotate(txtStartAngle);
+      
       // Polar to cartesian coordinate conversion
       translate(outerRadius*cos(theta), outerRadius*sin(theta));
+      
       // Rotate the box
       rotate(theta+PI/2); // rotation is offset by 90 degrees
       
@@ -285,16 +305,19 @@ void drawCountryNames() {
   }
 }
 
+
 void drawRightNames() {
-  Category category = categoryList.get(currentCircumplex);
-  float delta = TWO_PI/countryList.size(); 
-  float startTheta = -delta/2; // shift by half the width of the US slice so as to center it
-  float thickness = (circumplexRadius-controllerRadius)/category.rights.size();
-  float adjustedRadius = circumplexRadius-thickness/2; // wedge thickens up/down from current radius, we have to adjust for that
-  float adjustedFontSize = fontSize*15/category.rights.size(); // font size must be inversely proportional to the number of rings 
-  String rightText;
+
+  Category category         = categoryList.get(currentCircumplex);
+  float    delta            = TWO_PI/countryList.size(); 
+  float    startTheta       = -delta/2; // shift by half the width of the US slice so as to center it
+  float    thickness        = (circumplexRadius-controllerRadius)/category.rights.size();
+  float    adjustedRadius   = circumplexRadius-thickness/2; // wedge thickens up/down from current radius, we have to adjust for that
+  float    adjustedFontSize = fontSize*15/category.rights.size(); // font size must be inversely proportional to the number of rings 
+  String   rightText;
   
   for (int i=category.rights.size()-1; i>=0; i--) {
+  
     if(i == highlightedRightIndex) {
       textFont(monoSpacedBold, adjustedFontSize*1.5);
       rightText = category.descriptions.get(i); 
@@ -304,15 +327,16 @@ void drawRightNames() {
       rightText = category.rights.get(i);
     }
     
-    float textHeight = textAscent() + textDescent();
-    float radius = adjustedRadius-textHeight/2;
+    float textHeight    = textAscent() + textDescent();
+    float radius        = adjustedRadius-textHeight/2;
     float txtStartAngle = (startTheta+delta*0.5) - (getTextLength(rightText)/radius)*0.5;
-    float arclength = 0; // We must keep track of our position along the curve
+    float arclength     = 0; // We must keep track of our position along the curve
   
     for (int j=0; j<rightText.length(); j++) {
+    
       // Instead of a constant width, we check the width of each character.
-      String currentChar = rightText.substring(j,j+1);//text.charAt(j);
-      float currentCharWidth = textWidth(currentChar);
+      String currentChar      = rightText.substring(j,j+1);//text.charAt(j);
+      float  currentCharWidth = textWidth(currentChar);
   
       // Each box is centered so we move half the width
       arclength += currentCharWidth/2;
@@ -324,15 +348,19 @@ void drawRightNames() {
       pushMatrix();
       // position text starting from given angle
       rotate(txtStartAngle);
+      
       // Polar to cartesian coordinate conversion
       translate(radius*cos(theta), radius*sin(theta));
+      
       // Rotate the box
       rotate(theta+PI/2); // rotation is offset by 90 degrees
       
       // Display the character
       pushStyle();
+      
       if(i == highlightedRightIndex) fill(255, 255, 0, 150);
       else fill(letter_color, 150);
+      
       text(currentChar, 0, 0);
       popStyle();
       
@@ -346,25 +374,29 @@ void drawRightNames() {
   }
 }
 
-void drawCategoryNames() {
-  textSize(fontSize*4);
-  float delta = TWO_PI/countryList.size(); 
-  float startTheta = -delta/2; // shift by half the width of the US slice so as to center it
-  float rightThickness = (circumplexRadius-controllerRadius)/numberOfRights;
-  float categoryOuterRadius = circumplexRadius;
-  float textHeight = textAscent() + textDescent();
 
-  for (int i=categoryList.size()-1; i>=0; i--) {    
-    String categoryText = categoryList.get(i).name;
-    float categoryThickness = rightThickness*categoryList.get(i).rights.size();
-    float categoryInnerRadius = categoryOuterRadius-categoryThickness;
-    float txtStartAngle = (startTheta+delta*0.5) - (getTextLength(categoryText)/categoryInnerRadius)*0.5;
-    float arclength = 0; // We must keep track of our position along the curve
+void drawCategoryNames() {
+
+  textSize(fontSize*4);
+  float delta               = TWO_PI/countryList.size(); 
+  float startTheta          = -delta/2; // shift by half the width of the US slice so as to center it
+  float rightThickness      = (circumplexRadius-controllerRadius)/numberOfRights;
+  float categoryOuterRadius = circumplexRadius;
+  float textHeight          = textAscent() + textDescent();
+
+  for (int i=categoryList.size()-1; i>=0; i--) {
+      
+    String categoryText         = categoryList.get(i).name;
+    float categoryThickness     = rightThickness*categoryList.get(i).rights.size();
+    float categoryInnerRadius   = categoryOuterRadius-categoryThickness;
+    float txtStartAngle         = (startTheta+delta*0.5) - (getTextLength(categoryText)/categoryInnerRadius)*0.5;
+    float arclength             = 0; // We must keep track of our position along the curve
       
     for (int j=0; j<categoryText.length(); j++) {
+    
       // Instead of a constant width, we check the width of each character.
-      String currentChar = categoryText.substring(j,j+1);
-      float currentCharWidth = textWidth(currentChar);
+      String currentChar      = categoryText.substring(j,j+1);
+      float  currentCharWidth = textWidth(currentChar);
   
       // Each box is centered so we move half the width
       arclength += currentCharWidth/2;
@@ -374,10 +406,13 @@ void drawCategoryNames() {
       float theta = arclength / categoryInnerRadius;    
   
       pushMatrix();
+      
       // position text starting from given angle
       rotate(txtStartAngle);
+      
       // Polar to cartesian coordinate conversion
       translate(categoryInnerRadius*cos(theta), categoryInnerRadius*sin(theta));
+      
       // Rotate the box
       rotate(theta+PI/2); // rotation is offset by 90 degrees
       
@@ -388,6 +423,7 @@ void drawCategoryNames() {
       popStyle();
       
       popMatrix();
+      
       // Move halfway again
       arclength += currentCharWidth/2;
     }
@@ -396,7 +432,9 @@ void drawCategoryNames() {
   }
 }
 
+
 int getTextLength(String text) {
+
   int totalLength = 0;
   if (text.length() < 1) return 0;
   else {
@@ -408,23 +446,28 @@ int getTextLength(String text) {
   }
 }
 
+
 /*********************************************/
 /*                PARSE CSVs                 */
 /*********************************************/
 void parseCategories(String csv) {
-  String[] lines = loadStrings(csv);
+
+  String[] lines          = loadStrings(csv);
   String[] categoryTitles = split(lines[0].replaceAll("\"", ""), ',');
 
-  for (int i=0; i<categoryTitles.length; i++) {     
+  for (int i=0; i<categoryTitles.length; i++) {
+       
     Category category = new Category(categoryTitles[i], categoryColors[i]);
     categoryList.add(category);
 
     // add all rights to newly created Category object
     for(int j=1; j<lines.length; j++){
-      String[] row = split(lines[j], ',');
+    
+      String[] row       = split(lines[j], ',');
       String[] rightInfo = split(row[i], " : ");
+      
       if(rightInfo[0].length() != 0) {
-          String right = rightInfo[0];
+          String right       = rightInfo[0];
           String description = rightInfo[1];
           if (right.length() != 0) {
             category.addRight(right);
@@ -442,9 +485,11 @@ void parseCategories(String csv) {
   }
 }
 
+
 void parseRights(String csv) {
+
   // reads CSV header column and returns only the Right strings
-  String[] lines = loadStrings(csv);
+  String[] lines   = loadStrings(csv);
   String[] columns = split(lines[0].replaceAll("\"", ""), ',');
   int countryColumnIndex, rightColumnIndex, yearColumnIndex;
   
@@ -470,9 +515,9 @@ void parseRights(String csv) {
 
   // parse dj_rights.csv and use rightsColumn array to filter results
   for (int i=2; i<lines.length; i++) {
-    String[] row = split(lines[i], ',');
-    String keyword = row[countryColumnIndex]; // get string in column titled "country"
-    Country value = countryMap.get(keyword);
+    String[] row     = split(lines[i], ',');
+    String   keyword = row[countryColumnIndex]; // get string in column titled "country"
+    Country  value   = countryMap.get(keyword);
 
     // first time this country was read in table
     if (value == null) {  
@@ -480,11 +525,14 @@ void parseRights(String csv) {
       countryMap.put(keyword, value);
 
       // find all rights available for this country on this year
-      Year year = new Year(int(row[yearColumnIndex]));
-      int naCounter = 0;
+      Year year      = new Year(int(row[yearColumnIndex]));
+      int  naCounter = 0;
+      
       for (int j=0, rightIterator=rightColumnIndex; j<rightsColumns.size(); j++, rightIterator++) {
-        String right = rightsColumns.get(j);
+      
+        String right             = rightsColumns.get(j);
         String rightAvailability = row[rightIterator];
+        
         if (rightAvailability.equals("1. yes") || rightAvailability.equals("2. full")) {
           year.addRight(right);
           year.addCateogry(findCategoryForRight(right));
@@ -499,11 +547,14 @@ void parseRights(String csv) {
     // country already exists in hashmap, just add another Year object to it
     else {
       // find all rights available for this country on this year
-      Year year = new Year(int(row[yearColumnIndex]));
-      int naCounter = 0;
+      Year year      = new Year(int(row[yearColumnIndex]));
+      int  naCounter = 0;
+      
       for (int j=0, rightIterator=rightColumnIndex; j<rightsColumns.size(); j++, rightIterator++) {
-        String right = rightsColumns.get(j);
+      
+        String right             = rightsColumns.get(j);
         String rightAvailability = row[rightIterator];
+        
         if (rightAvailability.equals("1. yes")  || rightAvailability.equals("2. full")) {
           year.addRight(right);
           year.addCateogry(findCategoryForRight(right));
@@ -517,8 +568,10 @@ void parseRights(String csv) {
   }
 }
 
+
 // find the category that a right belongs to
 Category findCategoryForRight(String rightToSearch) {
+
   for (int i=0; i<categoryList.size(); i++) {
     Category category = categoryList.get(i);
     if (category.rights.contains(rightToSearch)) return category;
@@ -526,8 +579,10 @@ Category findCategoryForRight(String rightToSearch) {
   return null;
 }
 
+
 // searches for countries that have existed in the given time frame
 void findCountriesInRange(int startYear, int endYear) {
+
   for (Map.Entry me : countryMap.entrySet()) {
     Country countryObject = (Country)me.getValue();
     if (countryObject.checkConstitutionExistence(startYear, endYear)) {
@@ -543,6 +598,7 @@ void findCountriesInRange(int startYear, int endYear) {
   }
 }
 
+
 /*********************************************/
 /*       MOUSE/KEYBOARD INTERACTION          */
 /*********************************************/
@@ -550,17 +606,21 @@ void keyPressed() {
   if (key == 's') stackRights = !stackRights;
 }
 
+
 void mouseClicked() {
+
   timecontroller.playButtonClicked(width/2, height/2);
   timecontroller.ffButtonClicked(width/2, height/2);
   timecontroller.rewindButtonClicked(width/2, height/2);
   
   // if in "All Rights" circumplex, check for category selection via mouse click
   if(currentCircumplex == categoryList.size()){
+  
     float categoryThickness = (circumplexRadius-controllerRadius)/categoryList.size();
-    float r = circumplexRadius;
-    float x = width/2;
-    float y = height/2;
+    float r                 = circumplexRadius;
+    float x                 = width/2;
+    float y                 = height/2;
+    
     for(int i=categoryList.size()-1; i>=0; i--) {
       float disX = x - mouseX;
       float disY = y - mouseY;
@@ -572,8 +632,10 @@ void mouseClicked() {
   } 
 }
 
+
 void mousePressed(){ 
-  float disX = width/2 - mouseX;
+
+  float disX = width/2  - mouseX;
   float disY = height/2 - mouseY;
   
   // check if circumplex should be rotated
@@ -584,28 +646,32 @@ void mousePressed(){
   
   // highlight right ring when clicked wedge is selected via mouse press
   if(currentCircumplex == categoryList.size()){
+  
     float rightThickness = (circumplexRadius-controllerRadius)/numberOfRights;
-    float r = circumplexRadius;
+    float r              = circumplexRadius;
+    
     for(int i=categoryList.size()-1; i>=0; i--) {
+    
       float categoryThickness = rightThickness*categoryList.get(i).rights.size();
       if (sqrt(sq(disX) + sq(disY)) > r-categoryThickness && sqrt(sq(disX) + sq(disY)) < r) {
-        highlightRing = true;
-        highlightRadius = r;
+        highlightRing      = true;
+        highlightRadius    = r;
         highlightThickness = categoryThickness;
       } 
       r -= categoryThickness;
     }
   } 
-  
   else {
-    Category category = categoryList.get(currentCircumplex);
-    float rightThickness = (circumplexRadius-controllerRadius)/category.rights.size();
-    float r = circumplexRadius;
+    Category category       = categoryList.get(currentCircumplex);
+    float    rightThickness = (circumplexRadius-controllerRadius)/category.rights.size();
+    float    r              = circumplexRadius;
+    
     for(int i=category.rights.size()-1; i>=0; i--) {
+    
       if (sqrt(sq(disX) + sq(disY)) > r-rightThickness && sqrt(sq(disX) + sq(disY)) < r) {
-        highlightRing = true;
-        highlightRadius = r;
-        highlightThickness = rightThickness;
+        highlightRing         = true;
+        highlightRadius       = r;
+        highlightThickness    = rightThickness;
         highlightedRightIndex = i;
       } 
       r -= rightThickness;
@@ -615,44 +681,54 @@ void mousePressed(){
   timecontroller.timelineTickClicked(width/2, height/2);
 }
 
+
 void mouseReleased(){
+
   timecontroller.timelineActive = false;
-  highlightRing = false;
-  highlightedRightIndex = -1;
+  highlightRing                 = false;
+  highlightedRightIndex         = -1;
 }
 
+
 void mouseDragged(){
+
   // check if circumplex should be rotated
-  float disX = width/2 - mouseX;
+  float disX = width/2  - mouseX;
   float disY = height/2 - mouseY;
+  
   if(sqrt(sq(disX) + sq(disY)) > controllerRadius && sqrt(sq(disX) + sq(disY)) < circumplexRadius) {
+  
      // get the angle from the center to the mouse position
     float mouseEndAngle = atan2(mouseY - height/2, mouseX - width/2);
-    float angleOffset = mouseEndAngle - mouseStartAngle;
+    float angleOffset   = mouseEndAngle - mouseStartAngle;
+    
     circumplexRotationAngle += angleOffset;
-    mouseStartAngle = mouseEndAngle;  
+    mouseStartAngle          = mouseEndAngle;  
   } 
 }
+
 
 /*********************************************/
 /*       PDE/JAVASCRIPT COMMUNICATION        */
 /*********************************************/
 function generateHTMLbuttons(listSize){    
+
   // loop through categories array and create a button for each entry
   for (var i=0; i<listSize; i++) {
+  
     if(i == listSize-1) {
       var button = document.createElement('button');
-      var text = document.createTextNode("All Rights");
+      var text   = document.createTextNode("All Rights");
+      
       button.appendChild(text);
       button.setAttribute("id", "categoryButton" + i);
       button.setAttribute('onclick', 'changeCircumplex("'+i+'")');
       button.style.width = "100%";
       document.getElementById('parent').appendChild(button); 
     }
-    
     else {
       var button = document.createElement('button');
-      var text = document.createTextNode(categoryList.get(i).name);
+      var text   = document.createTextNode(categoryList.get(i).name);
       button.appendChild(text);
       button.setAttribute("id", "categoryButton" + i);
       button.setAttribute('onclick', 'changeCircumplex("'+i+'")');
@@ -662,15 +738,18 @@ function generateHTMLbuttons(listSize){
   }
 }
   
+  
 function setCanvasSize(){
-  var buttonDivHeight =  document.getElementById('buttonContainer').clientHeight;
-  var browserWidth = window.innerWidth;
-  var browserHeight = window.innerHeight;
-  sketchWidth = browserWidth * 0.46;
-  sketchHeight = browserHeight * 0.95 - buttonDivHeight;
+
+  var buttonDivHeight = document.getElementById('buttonContainer').clientHeight;
+  var browserWidth    = window.innerWidth;
+  var browserHeight   = window.innerHeight;
+  sketchWidth         = browserWidth * 0.49;
+  sketchHeight        = browserHeight * 0.95 - buttonDivHeight;
   
   document.getElementById('visDiv').setAttribute("style","width:"+sketchWidth+"px");
 }
+
 
 void setCircumplexFromJS(int circumplexID){
   currentCircumplex = circumplexID;

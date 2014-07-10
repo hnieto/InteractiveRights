@@ -1,71 +1,77 @@
-class TimeController{
-  float containerRadius;
-  int numberOfYears;
-  int[] years;
-  int year;
-  
+class TimeController {
+    
+  float   containerRadius;
+  int     numberOfYears;
+  int[]   years;
+  int     year;
+          
   boolean play, rewind, fastforward, timelineActive;
-  float rectW, rectH;
-  float buttonW, buttonH;
-  float timelineX, timelineY, timelineW, timelineH;
-  float tickX, tickY, tickR;
-  float playButtonX, playButtonY, playButtonW, playButtonH;
-  float pauseButtonX, pauseButtonY;
-  float rewindButtonX, rewindButtonY;
-  float ffButtonX, ffButtonY;
-  float padding;
+  float   rectW,         rectH;
+  float   buttonW,       buttonH;
+  float   timelineX,     timelineY,   timelineW, timelineH;
+  float   tickX,         tickY,       tickR;
+  float   playButtonX,   playButtonY, playButtonW, playButtonH;
+  float   pauseButtonX,  pauseButtonY;
+  float   rewindButtonX, rewindButtonY;
+  float   ffButtonX,     ffButtonY;
+  float   padding;
   
    
   TimeController(float containerRadius, int[] years){
+      
     this.containerRadius = containerRadius*.6;
-    this.years = years;
-    this.numberOfYears = years[1]-years[0];
-    this.year = years[0];
-    this.play = false;
-    this.fastforward = false;
-    this.rewind = false;
+    this.years           = years;
+    this.numberOfYears   = years[1]-years[0];
+    this.year            = years[0];
+    this.play            = false;
+    this.fastforward     = false;
+    this.rewind          = false;
   } 
   
+  
   void init(){
-    rectW = (containerRadius*cos(PI/4))*2;
-    rectH = (containerRadius*sin(PI/4))*2;  
+      
+    rectW         = (containerRadius*cos(PI/4))*2;
+    rectH         = (containerRadius*sin(PI/4))*2;  
     
     // timeline
-    timelineW = rectW;
-    timelineH = rectH/32;
-    timelineX = 0;
-    timelineY = -timelineH;
+    timelineW     = rectW;
+    timelineH     = rectH/32;
+    timelineX     = 0;
+    timelineY     = -timelineH;
     
     // timeline tick marker
-    tickX = timelineX-timelineW/2;
-    tickY = timelineY;
-    tickR = timelineW/10;
+    tickX         = timelineX-timelineW/2;
+    tickY         = timelineY;
+    tickR         = timelineW/10;
     
     // generic button geometry
-    padding = rectW/12;
-    buttonW = (rectW-padding*5)/3;
-    buttonH = rectH/4;
+    padding       = rectW/12;
+    buttonW       = (rectW-padding*5)/3;
+    buttonH       = rectH/4;
     
     // rewind
     rewindButtonX = -buttonW-padding*2;
     rewindButtonY = rectH/2-buttonH/2-padding;
     
     // play
-    playButtonX = 0;
-    playButtonY = rectH/2-buttonH/2-padding;
-    playButtonW = (buttonW*cos(PI/4))*2;
-    playButtonH = (buttonW*sin(PI/4))*2;
+    playButtonX   = 0;
+    playButtonY   = rectH/2-buttonH/2-padding;
+    playButtonW   = (buttonW*cos(PI/4))*2;
+    playButtonH   = (buttonW*sin(PI/4))*2;
     
     // pause
-    pauseButtonX = playButtonX;
-//    pauseButtonY = pauseButtonY;
+    pauseButtonX  = playButtonX;
+//    pauseButtonY  = pauseButtonY;
     
     // fast forward
-    ffButtonX = buttonW+padding*2;
-    ffButtonY = rectH/2-buttonH/2-padding;
+    ffButtonX     = buttonW+padding*2;
+    ffButtonY     = rectH/2-buttonH/2-padding;
   }
   
+  
   void draw(){
+      
     pushStyle();
     pushMatrix();
     rotate(PI/2);
@@ -135,78 +141,92 @@ class TimeController{
     popStyle();
   }
   
-  void update(){
+  
+  void update() {
+      
     if(play){
       if(frameCount%1 == 0){
         year++;
-        if(year > years[1]) year = years[0];
+        if(year > years[1]) { year = years[0]; }
         tickX = map(year, years[0], years[1], timelineX-timelineW/2, timelineW/2);
       }  
     }
     
     if(fastforward){
       year++;
-      if(year > years[1]) year = years[0];
+      if(year > years[1]) { year = years[0]; }
       fastforward = false;
-      tickX = map(year, years[0], years[1], timelineX-timelineW/2, timelineW/2);
+      tickX       = map(year, years[0], years[1], timelineX-timelineW/2, timelineW/2);
     }
     
     if(rewind){
       year--;
-      if(year < years[0]) year = years[1]; 
+      if(year < years[0]) { year = years[1]; }
       rewind = false;
-      tickX = map(year, years[0], years[1], timelineX-timelineW/2, timelineW/2);
+      tickX  = map(year, years[0], years[1], timelineX-timelineW/2, timelineW/2);
     }
     
     if(timelineActive){
       tickX = mouseX-width/2;
-      if(tickX < timelineX-timelineW/2) tickX = timelineX-timelineW/2;
-      if(tickX > timelineW/2) tickX = timelineW/2;
-      year = (int)map(tickX, timelineX-timelineW/2, timelineW/2, years[0], years[1]);
+      if(tickX < timelineX-timelineW/2) { tickX = timelineX-timelineW/2; }
+      if(tickX > timelineW/2)           { tickX = timelineW/2;           }
+      year  = (int)map(tickX, timelineX-timelineW/2, timelineW/2, years[0], years[1]);
     }
   }
     
   
   void playButtonClicked(float xOffset, float yOffset){
-    float disX = playButtonX+xOffset - mouseX;
-    float disY = playButtonY+yOffset - mouseY;
+      
+    float disX = playButtonX + xOffset - mouseX;
+    float disY = playButtonY + yOffset - mouseY;
+    
     if (sqrt(sq(disX) + sq(disY)) < buttonW) {
-      if(play) play = false;
-      else play = true; 
-      rewind = false;
-      fastforward = false;
+        
+      if(play) { play = false; }
+      else     { play = true;  }
+      
+      rewind         = false;
+      fastforward    = false;
       timelineActive = false;
     }
   }
+  
   
   void ffButtonClicked(float xOffset, float yOffset){
+      
     if(mouseX >= ffButtonX+xOffset-buttonW/2 && mouseX <= ffButtonX+xOffset+buttonW/2 && 
        mouseY >= ffButtonY+yOffset-buttonH/2 && mouseY <= ffButtonY+yOffset+buttonH/2){
-      fastforward = true; 
-      play = false;
-      rewind = false;
+        
+      fastforward    = true; 
+      play           = false;
+      rewind         = false;
       timelineActive = false;
     }
   }
+  
   
   void rewindButtonClicked(float xOffset, float yOffset){
+      
     if(mouseX >= rewindButtonX+xOffset-buttonW/2 && mouseX <= rewindButtonX+xOffset+buttonW/2 && 
        mouseY >= rewindButtonY+yOffset-buttonH/2 && mouseY <= rewindButtonY+yOffset+buttonH/2){
-      rewind = true; 
-      play = false;
-      fastforward = false;
+        
+      rewind         = true; 
+      play           = false;
+      fastforward    = false;
       timelineActive = false;
     }
   }
   
+  
   void timelineTickClicked(float xOffset, float yOffset){
+      
     float mouseDist = dist(tickX+xOffset, tickY+yOffset, mouseX, mouseY);
 
     if(mouseDist < tickR){
       timelineActive = true;
-      play = false;
-      rewind = false; 
-      fastforward = false;
+      play           = false;
+      rewind         = false; 
+      fastforward    = false;
     }    
   }
 }
