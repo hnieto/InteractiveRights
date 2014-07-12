@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="radialBarGraph.css">
+    <script src="../../processing.min.js"></script>
+    <script type="text/javascript">
+        function changeCircumplex(newCircumplexID){ 
+          //we assign our processing sketch to the variable processingInstance
+            var processingInstance = Processing.getInstanceById('sketch');
+            
+            // we call setCircumplet() inside our Processing sketch
+            // and pass it the new circumplex id based on which button
+            // was pressed    
+            processingInstance.setCircumplexFromJS(newCircumplexID);
+}
+    </script>
+</head>
+
+<body>
+	<div id="visDiv">
+  	<div id="buttonContainer">
+    	<ul id="buttonTree">
+      	<li id="parent"></li>
+       	<li id="children"></li>
+      </ul>
+    </div>
+  </div>
+	<canvas id="sketch" data-processing-sources="../RadialBarGraph.pde ../Country.pde ../Category.pde ../Year.pde ../TimeController.pde"></canvas>
+</body>
+</html>

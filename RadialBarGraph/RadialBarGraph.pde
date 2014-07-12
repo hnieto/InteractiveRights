@@ -174,6 +174,7 @@ void highlightUS(){
 
 
 void drawRightsBorders(Category category){
+  
   int borderThickness = 1;
   int numberOfRings   = category.rights.size();
   int numberOfSlices  = countryList.size();
@@ -744,7 +745,7 @@ function setCanvasSize(){
   var buttonDivHeight = document.getElementById('buttonContainer').clientHeight;
   var browserWidth    = window.innerWidth;
   var browserHeight   = window.innerHeight;
-  sketchWidth         = browserWidth * 0.49;
+  sketchWidth         = browserWidth;
   sketchHeight        = browserHeight * 0.95 - buttonDivHeight;
   
   document.getElementById('visDiv').setAttribute("style","width:"+sketchWidth+"px");
