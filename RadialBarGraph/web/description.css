@@ -3,6 +3,7 @@ body {
     overflow:    hidden;
     color:       #eeeeff;
     font-family: "Segoe UI Light";
+    background-color: #000000;
 }
 
 #mainTitle {
