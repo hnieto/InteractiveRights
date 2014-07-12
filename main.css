@@ -19,6 +19,12 @@ iframe {
 		margin: 					5px;
 }
 
+#left-top img {
+    max-height: 			100%; 
+		display: 					block; 
+		margin: 					auto;
+}
+
 #left-bottom {
     position:         absolute; 
     left:             0vw; 
