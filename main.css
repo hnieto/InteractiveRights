@@ -16,6 +16,7 @@ iframe {
 		height:						30vh; 
 		background-color: #000000; 
 		box-shadow: 			5px 5px 5px #212D3A; 
+		border-radius: 		5px;
 		margin: 					5px;
 }
 
@@ -33,6 +34,7 @@ iframe {
     height:           63vh; 
     background-color: #000000; 
     box-shadow:       5px 5px 5px #212D3A; 
+		border-radius:    5px;
     margin:           5px;
 }
 
@@ -68,17 +70,4 @@ iframe {
 #carousel img {
 		visibility:				hidden;  /* hide images until carousel can handle them */
 		cursor:						pointer; /* otherwise it's not as obvious items can be clicked */
-}
-
-#buttonTree {
-    width:			100%;
-    margin:     0 auto;
-    padding:    0px;
-}
-
-canvas {
-    outline:    none; 
-/*    border-style:   solid; 
-    border-width:   0px;
-    border-color:   #000000; */
 }
