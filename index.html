@@ -14,12 +14,13 @@
         });
       });
 
-/*			$(document).ready(function () { */
-				function changeVis(newVis, newDesc) {
-					document.getElementById('visDiv').src = newVis;
-					document.getElementById('descriptionDiv').src = newDesc;
-				}		
-/*			}); */
+			function changeVis(newVis, newDesc) {
+					var currentVis = document.getElementById('visDiv').src.split("/InteractiveRights/");
+					if(currentVis[1] != newVis) { // do not reload vis if re-selected
+						document.getElementById('visDiv').src = newVis;
+						document.getElementById('descriptionDiv').src = newDesc;
+					}
+			}		
 		</script>
 </head>
 
