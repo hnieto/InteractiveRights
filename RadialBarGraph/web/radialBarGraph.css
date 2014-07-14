@@ -11,6 +11,6 @@ body {
 
 canvas {
     outline:    none; 
-		position:   fixed;
-    bottom:     0px;
+/*		position:   fixed;
+    bottom:     0px; */
 }
