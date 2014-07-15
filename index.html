@@ -34,6 +34,7 @@
 			// stop draw loop if sketch is hidden
 			function changeVis(frameIndex) {
 				var numberOfFrames = document.getElementById("center").getElementsByTagName("iframe").length;
+				alert(numberOfFrames);
 
 				for(i = 1; i <= numberOfFrames; i++) {
 					if(i == frameIndex) { 
@@ -62,18 +63,16 @@
     	<div id="carousel">
       	<a href="#"><img src="images/radialBarGraph.jpg" 			id="item-1" onclick="changeVis(1)" /></a>
       	<a href="#"><img src="images/rightBubbles.jpg" 				id="item-2" onclick="changeVis(2)" /></a>
-				<!-- <a href="#"><img src="images/originAndInfluence.jpg" 	id="item-3" /></a>
-      	<a href="#"><img src="images/game1.jpg" 							id="item-4" /></a>
-      	<a href="#"><img src="images/game2.jpg" 							id="item-5" /></a> -->
+      	<a href="#"><img src="images/trueOrFalse.jpg" 				id="item-3" onclick="changeVis(3)" /></a>
+      	<!--<a href="#"><img src="images/game2.jpg" 							id="item-4" /></a> -->
     	</div>
     </div>
 
     <div id="center">
 			<iframe id="visDiv1" src="RadialBarGraph/web/radialBarGraph.html" width="100%" height="100%" style="visibility:visible; " seamless></iframe>
       <iframe id="visDiv2" src="Bubbles/web/bubbles.html" 							width="100%" height="100%" style="visibility:hidden; "  seamless></iframe>
-      <!-- <iframe id="visDiv3" src="RadialBarGraph/web/radialBarGraph.html" width="100%" height="100%" style="visibility:hidden; "  seamless></iframe>
-      <iframe id="visDiv4" src="RadialBarGraph/web/radialBarGraph.html" width="100%" height="100%" style="visibility:hidden; "  seamless></iframe>
-      <iframe id="visDiv5" src="RadialBarGraph/web/radialBarGraph.html" width="100%" height="100%" style="visibility:hidden; "  seamless></iframe> -->
+      <iframe id="visDiv3" src="TrueOrFalse/web/trueOrFalse.html"       width="100%" height="100%" style="visibility:hidden; "  seamless></iframe>
+      <!--<iframe id="visDiv4" src="RadialBarGraph/web/radialBarGraph.html" width="100%" height="100%" style="visibility:hidden; "  seamless></iframe> -->
     </div>
 
     <div id="right">
