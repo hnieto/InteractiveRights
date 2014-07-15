@@ -72,10 +72,10 @@ void setup() {
   balls = new ArrayList<Ball>();//setting balls, as a new empty array list
   //Creating an object from a text file
   amendments = new ArrayList<Ball>();//setting amendments, as a new empty array list
-  data = loadStrings("../true_statements.txt");
+  data = loadStrings("../data/true_statements.txt");
 
-  imgTrue= loadImage("../Btrue.jpg");
-  imgFalse= loadImage("../Bfalse.jpg");
+  imgTrue= loadImage("../data/Btrue.jpg");
+  imgFalse= loadImage("../data/Bfalse.jpg");
 }
 
 
@@ -217,8 +217,6 @@ function setCanvasSize(){
   var browserWidth    = window.innerWidth;
   var browserHeight   = window.innerHeight;
   sketchWidth         = browserWidth;
-  sketchHeight        = browserHeight * 0.95;
-  
-  //document.getElementById('visDiv').setAttribute("style","width:"+sketchWidth+"px");
+  sketchHeight        = browserHeight * 0.95;  
 }
 
