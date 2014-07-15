@@ -21,25 +21,35 @@ iframe {
     left:                     0vw; 
     top:                      0vh; 
     width:                    24.5vw; 
-    height:                   30vh; 
+    height:                   10vh; 
     background-color:         #000000; 
     box-shadow:               5px 5px 5px #212D3A; 
     border-radius:            5px;
     margin:                   5px;
-}                             
-                              
-#left-top img {               
-    max-height:               100%; 
-    display:                  block; 
-    margin:                   auto;
-}                             
+
+    display:                  table;
+		text-align:               center;
+}
+
+@font-face {
+    font-family:              Florencesans;
+		src:                      url('Florencesans.ttf');
+}        
+
+#left-top span {
+    color:                    #FFFFFF;
+		font-family:              Florencesans;
+		font-size:                5vh;
+		display:                  table-cell;
+    vertical-align:           middle;
+}                     
                               
 #left-bottom {                
     position:                 absolute; 
     left:                     0vw; 
-    top:                      30.5vh; 
+    top:                      10.5vh; 
     width:                    24.5vw; 
-    height:                   64.5vh; 
+    height:                   84.5vh; 
     background-color:         #000000; 
     box-shadow:               5px 5px 5px #212D3A; 
     border-radius:            5px;

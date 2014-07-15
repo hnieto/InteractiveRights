@@ -7,13 +7,13 @@ body {
 }
 
 #mainTitle {
-	color:       #cccc00;
+   	color:       #cccc00;
     font-family: "Monotype Corsiva";
     font-size:   4vh; /*24px;*/
 }
 
 .question {
-	color:       #ccaa22;
+	  color:       #ccaa22;
     font-family: "Segoe Print";
     font-size:   2.0vh; /*14px;*/
 }
