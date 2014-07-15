@@ -76,6 +76,8 @@ void setup() {
 
   imgTrue= loadImage("../data/Btrue.jpg");
   imgFalse= loadImage("../data/Bfalse.jpg");
+  
+  noLoop(); // do not draw anything until vis is selected in html
 }
 
 
