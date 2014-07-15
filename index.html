@@ -30,6 +30,7 @@
         });
       }
 
+			// hide all iframes except the one selected via carousel
 			function changeVis(frameIndex) {
 				var numberOfFrames = document.getElementById("center").getElementsByTagName("iframe").length;
 
@@ -39,22 +40,6 @@
 				}
 						
 			}		
-/*
-        var frameStatus = "visible";
-        var frameIndex  = 1;
-        function toggleFrame(){
-            
-            var f1 = document.getElementById("visDiv" + frameIndex);
-            alert("f1.style.visibility = "  + f1.style.visibility );
-            f1.style.visibility = "hidden"; 
-        
-            frameIndex++;
-            if(frameIndex>5) { frameIndex = 1; }
-            
-            var f2 = document.getElementById("visDiv" + frameIndex);
-            alert("f2.style.visibility = "  + f2.style.visibility );
-            f2.style.visibility = "visible"; 
-        } */
 
 		</script>
 </head>
