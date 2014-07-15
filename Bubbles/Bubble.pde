@@ -57,7 +57,9 @@ class Bubble {
             vx *= friction;
             vy *= friction;
             bub.vx *= friction;
-            bub.vy *= friction;     
+            bub.vy *= friction;
+//            if(vx < 1 && vx > -1)  vx = 0;   
+//            if(vy < 1 && vy > -1)  vy = 0;   
         }
       }
     }   
@@ -153,13 +155,36 @@ class Bubble {
     
     strokeWeight(1);
     
-    if(right.category == 1)  fill(0, 101, 160, random(253, 255));
-    else if(right.category == 2)  fill(0, 168, 113, random(253, 255));
-    else if(right.category == 3)  fill(128, 48, 74, random(253, 255));
-    else if(right.category == 4)  fill(255, 0, 0, random(253, 255));
-    else if(right.category == 5)  fill(0, 255, 0, random(253, 255));
-    else if(right.category == 6)  fill(0, 0, 255, random(253, 255));
-    else  fill(160, 230, 255, random(150, 150));
+    int alpha = 35;
+    
+    if(right.category == 1){
+      if(selected == 1 || selected == 0)  fill(0, 101, 160);
+      else                                fill(0, 101, 160, alpha);
+    }
+    else if(right.category == 2){
+      if(selected == 2 || selected == 0)  fill(0, 168, 113);
+      else                                fill(0, 168, 113, alpha);
+    }
+    else if(right.category == 3){
+      if(selected == 3 || selected == 0)  fill(128, 48, 74);
+      else                                fill(128, 48, 74, alpha);
+    }
+    else if(right.category == 4){
+      if(selected == 4 || selected == 0)  fill(255, 0, 0);
+      else                                fill(255, 0, 0, alpha);
+    }
+    else if(right.category == 5){
+      if(selected == 5 || selected == 0)  fill(0, 255, 0);
+      else                                fill(0, 255, 0, alpha);
+    }
+    else if(right.category == 6){
+      if(selected == 6 || selected == 0)  fill(0, 0, 255);
+      else                                fill(0, 0, 255, alpha);
+    }
+    else{
+      if(selected == 0)                   fill(0x8B, 0xA7, 0xA7);
+      else                                fill(0x8B, 0xA7, 0xA7, alpha);
+    }
     
     translate(x, y);
     
@@ -175,9 +200,9 @@ class Bubble {
     text(str(right.count[Year-start_year].year_count), 0, radius/5);
     
     //debugging text: displays x and y velocities
-    //text(vx+"",  0, (0-radius/3)+10, radius*1.8, 4*fontSize);
-    //text(vy+"",  0, (0-radius/3)+25, radius*1.8, 4*fontSize);
-    
+//    text(vx+"",  0, (0-radius/3)+10, radius*1.8, 4*fontSize);
+//    text(vy+"",  0, (0-radius/3)+25, radius*1.8, 4*fontSize);
+//    
     popStyle();
     popMatrix();
   }

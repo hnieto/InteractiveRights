@@ -3,6 +3,17 @@
 <head>
     <link rel="stylesheet" type="text/css" href="bubbles.css">
     <script src="../../processing.min.js"></script>
+	<script type="text/javascript">
+        function changeSelected(newID){ 
+          //we assign our processing sketch to the variable processingInstance
+            var processingInstance = Processing.getInstanceById('sketch');
+            
+            // we call setSelected() inside our Processing sketch
+            // and pass it the new id based on which button
+            // was pressed    
+            processingInstance.setSelectedFromJS(newID);
+}
+    </script>
 </head>
 
 <body>

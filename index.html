@@ -5,43 +5,82 @@
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
 		<script type="text/javascript" src="jquery.waterwheelCarousel.min.js"></script>
 		<script type="text/javascript">
-      $(document).ready(function () {
+      
+      function loadCarousel(){
+				
+				// Resize carousel images
+        var carouselContainerWidth = document.getElementById('left-bottom').offsetWidth;
+				var oldCarouselImageWidth = document.getElementById('item-1').offsetWidth;
+				var oldCarouselImageHeight = document.getElementById('item-1').offsetHeight;
+				var oldCarouselImageRatio = oldCarouselImageWidth / oldCarouselImageHeight;
+				var newCarouselImageWidth = carouselContainerWidth * 0.90;
+				var newCarouselImageHeight = newCarouselImageWidth / oldCarouselImageRatio;
+
+				var allCarouselImages = document.getElementById('carousel').getElementsByTagName('img');
+				for(i = 0; i < allCarouselImages.length; i++) {
+					allCarouselImages[i].width = newCarouselImageWidth;
+					allCarouselImages[i].height = newCarouselImageHeight;
+				}			  	
+				
         var carousel = $("#carousel").waterwheelCarousel({
           orientation: 'vertical',
-          separation: 130,
+          separation: newCarouselImageHeight*0.75,
           opacityMultiplier: .4,
           flankingItems: 1
         });
-      });
+      }
 
-			function changeVis(newVis, newDesc) {
-					var currentVis = document.getElementById('visDiv').src.split("/InteractiveRights/");
-					if(currentVis[1] != newVis) { // do not reload vis if re-selected
-						document.getElementById('visDiv').src = newVis;
-						document.getElementById('descriptionDiv').src = newDesc;
-					}
+			function changeVis(frameIndex) {
+				var numberOfFrames = document.getElementById("center").getElementsByTagName("iframe").length;
+
+				for(i = 1; i <= numberOfFrames; i++) {
+					if(i == frameIndex) { document.getElementById("visDiv" + frameIndex).style.visibility = "visible"; }
+          else           			{ document.getElementById("visDiv" + i).style.visibility = "hidden"; }	
+				}
+						
 			}		
+/*
+        var frameStatus = "visible";
+        var frameIndex  = 1;
+        function toggleFrame(){
+            
+            var f1 = document.getElementById("visDiv" + frameIndex);
+            alert("f1.style.visibility = "  + f1.style.visibility );
+            f1.style.visibility = "hidden"; 
+        
+            frameIndex++;
+            if(frameIndex>5) { frameIndex = 1; }
+            
+            var f2 = document.getElementById("visDiv" + frameIndex);
+            alert("f2.style.visibility = "  + f2.style.visibility );
+            f2.style.visibility = "visible"; 
+        } */
+
 		</script>
 </head>
 
-<body>
+<body onload="loadCarousel();">
 
     <div id="left-top">
 			<img src="images/ir_logo.jpg">
     </div>
 
-    <div id="left-bottom">
+    <div id="left-bottom" style="width:24.5vw">
     	<div id="carousel">
-      	<a href="#"><img src="images/radialBarGraph.jpg" id="item-1" onclick="changeVis('RadialBarGraph/web/radialBarGraph.html','RadialBarGraph/web/description.html')" /></a>
-      	<a href="#"><img src="images/rightBubbles.jpg" id="item-2" onclick="changeVis('Bubbles/web/bubbles.html','Bubbles/web/description.html')" /></a>
-				<a href="#"><img src="images/originAndInfluence.jpg" id="item-3" /></a>
-      	<a href="#"><img src="images/game1.jpg" id="item-4" /></a>
-      	<a href="#"><img src="images/game2.jpg" id="item-5" /></a>
+      	<a href="#"><img src="images/radialBarGraph.jpg" 			id="item-1" onclick="changeVis(1)" /></a>
+      	<a href="#"><img src="images/rightBubbles.jpg" 				id="item-2" onclick="changeVis(2)" /></a>
+				<!-- <a href="#"><img src="images/originAndInfluence.jpg" 	id="item-3" /></a>
+      	<a href="#"><img src="images/game1.jpg" 							id="item-4" /></a>
+      	<a href="#"><img src="images/game2.jpg" 							id="item-5" /></a> -->
     	</div>
     </div>
 
     <div id="center">
-			<iframe id="visDiv" src="RadialBarGraph/web/radialBarGraph.html" width="100%" height="100%" seamless></iframe>
+			<iframe id="visDiv1" src="RadialBarGraph/web/radialBarGraph.html" width="100%" height="100%" style="visibility:visible; " seamless></iframe>
+      <iframe id="visDiv2" src="Bubbles/web/bubbles.html" 							width="100%" height="100%" style="visibility:hidden; "  seamless></iframe>
+      <!-- <iframe id="visDiv3" src="RadialBarGraph/web/radialBarGraph.html" width="100%" height="100%" style="visibility:hidden; "  seamless></iframe>
+      <iframe id="visDiv4" src="RadialBarGraph/web/radialBarGraph.html" width="100%" height="100%" style="visibility:hidden; "  seamless></iframe>
+      <iframe id="visDiv5" src="RadialBarGraph/web/radialBarGraph.html" width="100%" height="100%" style="visibility:hidden; "  seamless></iframe> -->
     </div>
 
     <div id="right">

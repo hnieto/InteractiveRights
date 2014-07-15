@@ -14,9 +14,9 @@
 
 //Check out BouncyBubbles.pde in Documents/Processing/. Messed around a bit with that and it looks magnificent.
 
-//TODO: add pin functionality, markers for year?, marker for US (flag), US amendment markers on time line, TUIO (eddy), change theme of time bar and stuff, category legend BUTTons from Eddy(adjust alpha), GG map(don't worry abou thtis yet)
+//TODO: add pin functionality, markers for year?, marker for US (flag), US amendment markers on time line, TUIO (eddy), change theme of time bar and stuff, category legend BUTTons from Eddy(adjust alpha), GG map(don't worry about this yet)
 
-float Gravity = 0.3;
+float Gravity = 0.25;
 float friction = 0.9;
 float wallFriction = 0.4;
 float terminalVY = 15;
@@ -43,6 +43,7 @@ int PreviousYear;
 int count;
 int created_counter;
 boolean play;
+int selected;
 
 boolean fullscreen = false;
 boolean lasso = true;
@@ -83,6 +84,7 @@ void setup() {
   created_counter = 0;
   slider_flag = false;
   play = false;
+  selected = 0; // 0 shows all rights
 
   //size(3840, 2160);
   smooth();
@@ -109,6 +111,9 @@ void setup() {
   playpause = new PlayPause(slide.x, slide.y + height/36, height/43.2, height/54);
   previousbutton = new PreviousButton(slide.x - height/36, slide.y + height/36, height/54, height/72);
   nextbutton = new NextButton(slide.x + height/36, slide.y + height/36, height/54, height/72);
+  
+  // javascript function to create HTML buttons using the category titles as labels
+  generateHTMLbuttons(categories.length+1);
   
   frameRate(60);
 }
@@ -288,9 +293,42 @@ void mouseReleased(){
 }
 
 //Moves slider to current year
-void moveSlider()
-{
+void moveSlider(){
   slide.moveTo(map(Year, start_year, end_year, slide.x-slide.bar_length/2, slide.x+slide.bar_length/2), slide.y);
+}
+
+void setSelectedFromJS(int i){
+  selected = i;
+}
+
+/*********************************************/
+/* PDE/JAVASCRIPT COMMUNICATION */
+/*********************************************/
+function generateHTMLbuttons(listSize){
+
+  // loop through categories array and create a button for each entry
+  for (var i=0; i<listSize; i++) {
+  
+    if(i == 0) {
+      var button = document.createElement('button');
+      var text = document.createTextNode("All Rights");
+      
+      button.appendChild(text);
+      button.setAttribute("id", "categoryButton" + i);
+      button.setAttribute('onclick', 'changeSelected("'+i+'")');
+      button.style.width = "100%";
+      document.getElementById('parent').appendChild(button);
+    }
+    else {
+      var button = document.createElement('button');
+      var text = document.createTextNode(categories[i-1]);
+      button.appendChild(text);
+      button.setAttribute("id", "categoryButton" + i);
+      button.setAttribute('onclick', 'changeSelected("'+i+'")');
+      button.style.width = 100/(listSize-1) + "%"
+      document.getElementById('children').appendChild(button);
+    }
+  }
 }
 
 //javascript function for resizing sketch
