@@ -1,0 +1,32 @@
+body {
+    width: 90%;
+    overflow: hidden;
+    color: #eeeeff;
+    font-family: "Segoe UI Light";
+    background-color: #000000;
+}
+
+#mainTitle {
+color: #cccc00;
+    font-family: "Monotype Corsiva";
+    font-size: 4vh; /*24px;*/
+}
+
+.question {
+color: #ccaa22;
+    font-family: "Segoe Print";
+    font-size: 2.0vh; /*14px;*/
+}
+
+p,li {
+    color: white;
+    font-size: 1.4vh; /*11px;*/
+}
+
+a {
+    color: #6699ff;
+}
+
+strong {
+    color: #ffffbb;
+}

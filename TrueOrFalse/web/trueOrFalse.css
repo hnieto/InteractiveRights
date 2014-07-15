@@ -1,0 +1,16 @@
+body {
+    background-color: #000000;
+    margin: 0px;
+}
+/*
+#buttonTree {
+    width:      100%;
+    margin:     0 auto;
+    padding:    0px;
+} */
+
+canvas {
+    outline:    none; 
+/*		position:   fixed;
+    bottom:     0px; */
+}
