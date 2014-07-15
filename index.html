@@ -31,12 +31,20 @@
       }
 
 			// hide all iframes except the one selected via carousel
+			// stop draw loop if sketch is hidden
 			function changeVis(frameIndex) {
 				var numberOfFrames = document.getElementById("center").getElementsByTagName("iframe").length;
 
 				for(i = 1; i <= numberOfFrames; i++) {
-					if(i == frameIndex) { document.getElementById("visDiv" + frameIndex).style.visibility = "visible"; }
-          else           			{ document.getElementById("visDiv" + i).style.visibility = "hidden"; }	
+					if(i == frameIndex) { 
+						document.getElementById("visDiv" + i).style.visibility = "visible"; 
+						document.getElementById("visDiv" + i).contentWindow.restartDraw();
+					}
+          
+					else { 
+						document.getElementById("visDiv" + i).style.visibility = "hidden"; 
+						document.getElementById("visDiv" + i).contentWindow.pauseDraw();
+					}	
 				}
 						
 			}		

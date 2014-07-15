@@ -12,7 +12,22 @@
             // and pass it the new id based on which button
             // was pressed    
             processingInstance.setSelectedFromJS(newID);
-}
+				}
+
+        function pauseDraw() {
+          //we assign our processing sketch to the variable processingInstance
+          var processingInstance = Processing.getInstanceById('sketch');
+
+          processingInstance.noLoop();  
+        }
+
+        function restartDraw() {
+          //we assign our processing sketch to the variable processingInstance
+          var processingInstance = Processing.getInstanceById('sketch');
+
+          processingInstance.loop();  
+        }
+
     </script>
 </head>
 

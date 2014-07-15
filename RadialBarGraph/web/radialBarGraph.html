@@ -4,15 +4,30 @@
     <link rel="stylesheet" type="text/css" href="radialBarGraph.css">
     <script src="../../processing.min.js"></script>
     <script type="text/javascript">
-        function changeCircumplex(newCircumplexID){ 
+        function changeCircumplex(newCircumplexID) { 
           //we assign our processing sketch to the variable processingInstance
-            var processingInstance = Processing.getInstanceById('sketch');
+          var processingInstance = Processing.getInstanceById('sketch');
             
-            // we call setCircumplet() inside our Processing sketch
-            // and pass it the new circumplex id based on which button
-            // was pressed    
-            processingInstance.setCircumplexFromJS(newCircumplexID);
-}
+          // we call setCircumplet() inside our Processing sketch
+          // and pass it the new circumplex id based on which button
+          // was pressed    
+          processingInstance.setCircumplexFromJS(newCircumplexID);
+				}
+
+				function pauseDraw() {
+          //we assign our processing sketch to the variable processingInstance
+          var processingInstance = Processing.getInstanceById('sketch');
+
+					processingInstance.noLoop();	
+				}
+
+        function restartDraw() {
+          //we assign our processing sketch to the variable processingInstance
+          var processingInstance = Processing.getInstanceById('sketch');
+
+          processingInstance.loop();  
+        }
+
     </script>
 </head>
 
