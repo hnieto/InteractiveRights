@@ -3,7 +3,6 @@
 // Developed By: Heriberto Nieto
 //               Texas Advanced Computing Center
 // Modified by: Luis Francisco-Revilla
-//               TACC
 
 /* @pjs font='../data/MonoSpaced.ttf, ../data/MonoSpacedBold.ttf, ../data/Digital.ttf'; */
 
