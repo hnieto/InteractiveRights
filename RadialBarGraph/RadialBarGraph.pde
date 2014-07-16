@@ -718,25 +718,32 @@ function generateHTMLbuttons(listSize){
   for (var i=0; i<listSize; i++) {
   
     if(i == listSize-1) {
-      var button = document.createElement('button');
+      var button = document.createElement('a');
       var text   = document.createTextNode("All Rights");
       
       button.appendChild(text);
       button.setAttribute("id", "categoryButton" + i);
+      button.setAttribute("class", "button");
       button.setAttribute('onclick', 'changeCircumplex("'+i+'")');
       button.style.width = "100%";
       document.getElementById('parent').appendChild(button); 
     }
     else {
-      var button = document.createElement('button');
+      var button = document.createElement('a');
       var text   = document.createTextNode(categoryList.get(i).name);
+      var buttonSpacing = 0.25; // in percent
+      
       button.appendChild(text);
       button.setAttribute("id", "categoryButton" + i);
+      button.setAttribute("class", "button");
       button.setAttribute('onclick', 'changeCircumplex("'+i+'")');
-      button.style.width = 100/(listSize-1) + "%"
+      button.style.width = (100/(listSize-1))-buttonSpacing + "%";
+      
+      if(i != 0) { button.style.marginLeft = (buttonSpacing + buttonSpacing/(listSize-2)) + "%"; }
       document.getElementById('children').appendChild(button); 
     }
   }
+  
 }
   
   
