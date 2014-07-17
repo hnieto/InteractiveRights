@@ -16,6 +16,11 @@ body {
     padding:               0px;
 }
 
+@font-face {
+    font-family:           Refrigerator-Deluxe-Light;
+    src:                   url('../../refrigerator_deluxe_light.ttf');
+}    
+
 .button {
     border-top:            1px solid #c8c8c8;
     background:            #d2d2d2;
@@ -25,7 +30,7 @@ body {
     display:               inline-block;
     color:                 #ffffff;
     font-size:             2vh;
-    font-family:           Helvetica, Arial, Sans-Serif;
+    font-family:           Refrigerator-Deluxe-Light;
     text-decoration:       none;
     vertical-align:        middle;
 		margin-bottom:         0.5vh;
@@ -51,39 +56,6 @@ body {
     border-top-color:      #646464;
     background:            #646464;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 canvas {
     outline:    none; 

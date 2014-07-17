@@ -4,7 +4,7 @@
 //               Texas Advanced Computing Center
 // Modified by: Luis Francisco-Revilla
 
-/* @pjs font='../data/MonoSpaced.ttf, ../data/MonoSpacedBold.ttf, ../data/Digital.ttf'; */
+/* @pjs font='../data/RefrigeratorDeluxeLight.ttf, ../data/MonoSpaced.ttf, ../data/MonoSpacedBold.ttf, ../data/Digital.ttf'; */
 
 import java.util.Map;
 HashMap<String, Country> countryMap     = new HashMap<String, Country>();
@@ -15,7 +15,7 @@ ArrayList<String>        rightsColumns  = new ArrayList<String>();
 TimeController           timecontroller;
 int[]                    yearRange      = { 1850, 2012 };
 int                      currentCircumplex, numberOfRights;
-float                    controllerRadius, circumplexRadius, shortestDistanceFromCenter;
+float                    controllerRadius, circumplexRadius, shortestDistanceFromCenter, paddingTop;
 float                    circumplexRotationAngle, mouseStartAngle;
 float                    highlightRadius, highlightThickness, highlightedRightIndex;
                          
@@ -58,18 +58,23 @@ void setup() {
   // javascript function to set sketch size according to the width of the browser
   setCanvasSize();
   size(sketchWidth, sketchHeight);
+  paddingTop                 = sketchHeight * 0.01; 
+
   
   // font stuff
   fontSize                   = lerp(0,20, sketchWidth/(3840*0.49)); // 0.49 is percentage of canvas relative to browser window width
-//  defaultFont               = loadFont("./data/Helvetica.ttf");
+  defaultFont                = createFont("../data/RefrigeratorDeluxeLight.ttf", fontSize);
   monoSpacedFont             = createFont("../data/MonoSpaced.ttf", fontSize); 
   monoSpacedBold             = createFont("../data/MonoSpacedBold.ttf", fontSize);
   digitalFont                = createFont("../data/Digital.ttf", fontSize*4);
   textAlign(CENTER);
+  textFont(defaultFont);
   
   // time controls
   shortestDistanceFromCenter = min(width, height)/2;
-  circumplexRadius           = shortestDistanceFromCenter-(textAscent() + textDescent()); // account for letter height
+  //textFont(defaultFont*1.5); // account for extra large font for US
+  circumplexRadius           = shortestDistanceFromCenter-(textAscent() + textDescent())-paddingTop; // account for letter height and add some extra padding
+  //textFont(defaultFont); 
   controllerRadius           = shortestDistanceFromCenter/3;
   timecontroller             = new TimeController(controllerRadius, yearRange);
   timecontroller.init();
