@@ -72,8 +72,9 @@ class Ball {
     //    text(this.xSpeed + " " + this.ySpeed, this.x - radius, this.y + 0.5*radius );
     textLeading(lineSpacing);
 
-    //    rect(this.x, this.y, radius, radius);
-    text(newRightText, this.x, this.y, radius*1.5, radius*1.5);
+    //fill(255, 0, 0);
+    //rect(this.x, this.y, radius*1.5, radius*1.5);
+    text(newRightText, this.x-radius*0.75, this.y-radius/2, radius*1.5, radius*1.5);
   }
 
   void updatePosition() {

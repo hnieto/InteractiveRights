@@ -92,13 +92,13 @@ void reset() {
 
    // Adding the squares into the squareC arrayList
     if (i<5){ /// if there are at least 5 answers-- 5 squares 
-      squareC.add(new Square(10+(i*110),400,100,80,res)); //add the squares into the arrayList scuareC- put the squares into the position
+      squareC.add(new Square(sketchWidth*0.05+(i*sketchWidth/6.5),sketchHeight/1.5,sketchWidth/7,sketchHeight/8,res)); //add the squares into the arrayList scuareC- put the squares into the position
     } else {
-      squareC.add(new Square(squareC.get(i-5).x,500,100, 80, res)); ///else add the squares at the position below of the first ones 
+      squareC.add(new Square(squareC.get(i-5).x,sketchHeight/1.2,sketchWidth/7, sketchHeight/8, res)); ///else add the squares at the position below of the first ones 
     }
    
     fill(0, 0, 255, 128); //set the color for the squares
-    rect( squareC.get(i).x, squareC.get(i).y, 40, 40); ///draw each rectangle with the assigned answer and position as stated above 
+    rect( squareC.get(i).x, squareC.get(i).y, sketchHeight/16, sketchHeight/16); ///draw each rectangle with the assigned answer and position as stated above 
     
 }
 }
@@ -137,18 +137,18 @@ void draw() {
   {    
     //display each square
     squareC.get(i).display(); 
-    textSize(10);
+    textSize(sketchHeight/63.7);
     fill(255);
     text(squareC.get(i).answer, squareC.get(i).x+5, squareC.get(i).y+40); // text to appear
     
  // }
   
-  textSize(16);
+  textSize(sketchWidth/37.5);
   fill(255);
-  text(pregC.get(count).question, 10, 130); //display question
-  text(anuncio,100, 450); //displays if its correct
+  text(pregC.get(count).question, (sketchWidth-textWidth(pregC.get(count).question))/2, sketchHeight/6); //display question
+  text(anuncio,sketchWidth*0.05, sketchHeight/1.4); //displays if its correct
   int Score = score;
-  text("Score:" + Score, 480, 30); 
+  text("Score:" + Score, sketchWidth*0.05, sketchHeight/21); 
   
   if(timerOn){
     if(millis()-startTime > 1000) {
@@ -163,7 +163,7 @@ void draw() {
       startTime = millis();
     }
   }
-  text("Time:" + timer, 20, 30); 
+  text("Time:" + timer, sketchWidth-sketchWidth*0.05-textWidth("Time:" + timer), sketchHeight/21); 
 }
    
 }
