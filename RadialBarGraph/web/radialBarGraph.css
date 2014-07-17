@@ -28,6 +28,7 @@ body {
     font-family:           Helvetica, Arial, Sans-Serif;
     text-decoration:       none;
     vertical-align:        middle;
+		margin-bottom:         0.5vh;
     
     background:            -webkit-gradient(linear, left top, left bottom, from(#dcdcdc), to(#d2d2d2));
     background:            -webkit-linear-gradient(top, #dcdcdc, #d2d2d2);

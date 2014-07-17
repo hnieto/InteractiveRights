@@ -27,7 +27,7 @@ class Square {
 
     rect(x, y, w, h); 
 
-    if (y > 200 && newCuestionX) { // condition to display the square along the y axis
+    if (y > sketchHeight/3.8 && newCuestionX) { // condition to display the square along the y axis
       y -=3; //variable that states how fast are the squares going to move along the y axis
     } else {
       if(!timerOn) {
@@ -38,8 +38,8 @@ class Square {
       newCuestionX= false;
     }
 
-    if (x < 1100 && newCuestionY) { //when newCuestionY is true, the questions will be moved to the right along the x-axis
-      x+=6;
+    if (x < sketchWidth*2 && newCuestionY) { //when newCuestionY is true, the questions will be moved to the right along the x-axis
+      x+=sketchWidth*0.01;
     } else {
       if (newCuestionY) {
         count++;

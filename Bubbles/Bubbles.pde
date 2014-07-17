@@ -22,6 +22,8 @@ float wallFriction = 0.4;
 float terminalVY = 15;
 float terminalVX = 3;
 
+int play_time = 10;//Number of frames before year changes
+
 float throwEase = 2;//Higher the throwEase, the harder to throw
 
 // A list we'll use to track fixed objects
@@ -98,24 +100,29 @@ void setup() {
 
   // Add a bunch of fixed boundaries
   float boundary_size = 10;
-  boundaries.add(new Boundary(width/2,boundary_size/2,width,boundary_size,0));
-  boundaries.add(new Boundary(width/2,height*7/8,width,boundary_size,0));
-  boundaries.add(new Boundary(width-boundary_size/2,height/2,boundary_size,height,0));
-  boundaries.add(new Boundary(boundary_size/2,height/2,boundary_size,height,0));
+//  boundaries.add(new Boundary(width/2,boundary_size/2,width,boundary_size,0));
+//  boundaries.add(new Boundary(width/2,height*7/8,width,boundary_size,0));
+//  boundaries.add(new Boundary(width-boundary_size/2,height/2,boundary_size,height,0));
+//  boundaries.add(new Boundary(boundary_size/2,height/2,boundary_size,height,0));
   
-  boundaries.add(new Boundary(width/2,height-boundary_size/2,width,boundary_size,0));
+//  boundaries.add(new Boundary(width/2,height-boundary_size/2,width,boundary_size,0));
   
-  slide = new Slider(width/2,height*15/16, height/30, height/30, width*5/6, height/60);
+  slide = new Slider(width/2,height*15/16, height/30, height/30, width*5/6, height/120);
   moveSlider();
   
-  playpause = new PlayPause(slide.x, slide.y + height/36, height/43.2, height/54);
-  previousbutton = new PreviousButton(slide.x - height/36, slide.y + height/36, height/54, height/72);
-  nextbutton = new NextButton(slide.x + height/36, slide.y + height/36, height/54, height/72);
+  playpause = new PlayPause(slide.x, slide.y + height/27, height*tan(PI/3)/54, height/27);
+  previousbutton = new PreviousButton(slide.x - height/18, slide.y + height/27, height/36, height/36);
+  nextbutton = new NextButton(slide.x + height/18, slide.y + height/27, height/36, height/36);
+  
+//  playpause = new PlayPause(slide.x, slide.y + height/36, height/43.2, height/54);
+//  previousbutton = new PreviousButton(slide.x - height/36, slide.y + height/36, height/54, height/72);
+//  nextbutton = new NextButton(slide.x + height/36, slide.y + height/36, height/54, height/72);
   
   // javascript function to create HTML buttons using the category titles as labels
   generateHTMLbuttons(categories.length+1);
   
   frameRate(60);
+  noLoop();
 }
 
 void draw() {
@@ -125,7 +132,7 @@ void draw() {
   if(play){
     //spring.destroy();
     count++;
-    if(count == 10){
+    if(count == play_time){
       if(Year == end_year){
         Year = start_year;
       }
@@ -136,13 +143,6 @@ void draw() {
       moveSlider();
     }
   }
-  
-  fill(255);
-  textAlign(CENTER, CENTER);
-  textSize(height/72);
-  text(Year, slide.x, slide.y-height/24);
-  textSize(height/108);
-  text(created_counter, slide.x, slide.y-height/18);
 
   // Display all the boundaries
   for (Boundary wall: boundaries) {
@@ -159,8 +159,14 @@ void draw() {
       bubble.display();
     }
     else{
-      bubbles.remove(bubble);
-      created_counter--;
+      bubble.destroy();
+      if(bubble.destroying){
+        bubble.display();
+      }
+//      else{
+//        bubbles.remove(bubble);
+//        created_counter--;
+//      }
     }
   }
   PreviousYear = Year;

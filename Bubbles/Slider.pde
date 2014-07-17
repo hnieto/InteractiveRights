@@ -47,31 +47,40 @@ class Slider {
 
   // Drawing the box
   void display() {
+    
     textAlign(CENTER, CENTER);
     rectMode(PConstants.CENTER);
     pushMatrix();
     
-    fill(175);
-    stroke(255);
+    strokeWeight(0); 
     
-    strokeWeight(2);
-    rect(x, y, bar_length, bar_height);
+    fill(40, 10, 10);
+    stroke(255, 0, 0, 0);//150);
+    rect(width/2, height*15/16, width, height/8);
+       
+    fill(255, 0, 0, 150);
+    rect(x, y, bar_length, bar_height, bar_height/2);
     
-    strokeWeight(4);
+    fill(255, 0, 0);
     if(sliding){
-      rect(slidingX, y, w, h);
+      ellipse(slidingX, y, w, h);
       slidingV += ((thumbX + initialX)/2 - slidingX)/1;
       slidingX += slidingV;
       if(slidingX == thumbX)  sliding = false;
     }
     else{ 
-      rect(thumbX, thumbY, w, h);
+      ellipse(thumbX, thumbY, w, h);
     }
     
     popMatrix();
     
+    textAlign(CENTER, CENTER);
+    textSize(height/72);
+    text(Year, slide.x, slide.y-height/24);
+//    textSize(height/108);
+//    text(created_counter, slide.x, slide.y-height/18);
+    
     int numberOfIndents = 7;
-    fill(255);
     textSize(height/108);
     for(int i = start_year; i <= end_year; i += floor((end_year-start_year+1)/numberOfIndents)){
       //if((i-start_year+1)>((end_year-start_year)*(numberOfIndents-1)/numberOfIndents))  i = 2012;

@@ -776,7 +776,7 @@ function setCanvasSize(){
   var browserWidth    = window.innerWidth;
   var browserHeight   = window.innerHeight;
   sketchWidth         = browserWidth;
-  sketchHeight        = browserHeight;// * 0.95 - buttonDivHeight;
+  sketchHeight        = browserHeight * 0.95;
   
   document.getElementById('buttonContainer').setAttribute("style","width:"+(sketchWidth/5)+"px");
 }

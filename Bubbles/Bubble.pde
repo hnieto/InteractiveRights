@@ -19,6 +19,8 @@ class Bubble {
   float terminalVy;
   
   boolean hasSpring;
+  
+  boolean destroying;
 
   // Constructor
   Bubble(float x, float y, Right right) {
@@ -34,6 +36,12 @@ class Bubble {
     
     this.rightName = right.right_name;
     this.radius = getRadius();
+    
+    destroying = false;
+  }
+  
+  void destroy(){
+    destroying = true;
   }
   
   void collide() {
@@ -109,17 +117,19 @@ class Bubble {
       y += vy;
     }
     
+    float boundary_size = 0;
+    
     //Collision detection against boundaries 
-    if (x + radius + 10 > width) {
-      x = width - radius - 10;
+    if (x + radius + boundary_size > width) {
+      x = width - radius - boundary_size;
       vx *= 0 - wallFriction; 
     }
-    else if (x - radius - 10 < 0) {
-      x = radius + 10;
+    else if (x - radius - boundary_size < 0) {
+      x = radius + boundary_size;
       vx *= 0 - wallFriction;
     }
-    if (y + radius + 5 > height*7/8) {
-      y = height*7/8 - radius - 5;
+    if (y + radius > height*7/8) {
+      y = height*7/8 - radius;
       vy *= 0 - friction; 
     } 
     else if (y - radius < 0) {
@@ -135,13 +145,22 @@ class Bubble {
   }
 
   void display() {
-
-    
     pushMatrix();
     pushStyle();
     
-    //set radius of bubble based on year
-    radius = getRadius();
+    if(destroying){//if bubble's count has now become zero
+      if(radius >= 0.5){
+        radius /= 1.5;
+      }else{
+        destroying = false;//bubble will now be removed from arraylist
+        bubbles.remove(this);
+        created_counter--;
+      }
+    }
+    else{
+      //set radius of bubble based on year
+      radius = getRadius();
+    }
    
     
     //set drawing modes
@@ -216,63 +235,42 @@ class Bubble {
   }
  
  void showText(){
-    rectMode(CENTER);
-    //textAlign(CENTER);
+    rectMode(CORNER);    //this was LEFT before
+    textAlign(CENTER, TOP);
     
     fill(255,255,255);
     float regFont = width/96;   //font size of 20 on lasso
     float boldFont = width/80;  //bolded font for title 
     stroke(255);
     textSize(boldFont);
+    //misspelled on purpose, because cannot use Width and Height.
+    float wdith = width/3.84;//(500)
     float txtWdith = textWidth(right.description);
-    float wdith = height/4.32;//(500)
+    float txtHieght = textAscent() + textDescent();
+    float hieght = (ceil(txtWdith/wdith) + 3)*txtHieght; //this is based on the number of lines to write: description is variable length, but there are always 3 more lines
     
-    //if desciption fits in one line
-//    if(txtWdith <= 480 && textWidth(right.right_name+":") <= 480){
-//      rect(mouseX+(txtWdith+20)/2, mouseY-40, txtWdith+20, 6*boldFont, 10);
-//      fill(0,0,0);
-//      text(right.right_name+":", mouseX+(txtWdith+20)/2, mouseY-60, 500, 2*boldFont);
-//      textSize(regFont);
-//      text(right.description, mouseX+(txtWdith+20)/2, mouseY-20, 500, 2*boldFont);
-//      if(right.introduced != 0){
-//        text("This right was first introduced in the US in "+right.introduced+".", mouseX+(txtWdith+20)/2, mouseY, 500, 2*boldFont);
-//      }
-//      else{
-//        text("This right was never introduced in the US.", mouseX+(txtWdith+20)/2, mouseY, 500, 2*boldFont);
-//      }
-//      //Print "This right was guaranteed by 89 countries in the year 1890."
-//    }else{
-      rect(mouseX+250, mouseY, wdith, (ceil(txtWdith/wdith)-.9)*40 + 6*boldFont, 10);
-      fill(0,0,0);
-      if(procjs){
-        text(right.right_name+":", mouseX, mouseY - 55 - (ceil(txtWdith/wdith)-.9)*15- (ceil(txtWdith/wdith)-.9)*40/2, wdith, (ceil(txtWdith/wdith)-.9)*height/54 + 6*boldFont);
-        textSize(regFont);
-        text(right.description, mouseX, mouseY - 25 - (ceil(txtWdith/wdith)-.9)*40/2, wdith, ceil(txtWdith/wdith)*6*boldFont);
-        if(right.introduced != 0){
-          text("This right was first introduced in the US in "+right.introduced+".", mouseX, mouseY - 25 + ceil(txtWdith/510)*height/72 - (ceil(txtWdith/wdith)-.9)*40/2, wdith, 6*boldFont);
-        }
-        else{
-          text("This right was never introduced in the US.", mouseX, mouseY - 25 + ceil(txtWdith/510)*30 - (ceil(txtWdith/wdith)-.9)*40/2, wdith, 6*boldFont);
-        }
-      }else{
-        text(right.right_name+":", mouseX+250, mouseY - 55 - (ceil(txtWdith/wdith)-.9)*15, wdith, (ceil(txtWdith/wdith)-.9)*height/54 + 6*boldFont);
-        textSize(regFont);
-        text(right.description, mouseX+250, mouseY - 25, wdith, ceil(txtWdith/wdith)*6*boldFont);
-        if(right.introduced != 0){
-          text("This right was first introduced in the US in "+right.introduced+".", mouseX+250, mouseY - 25 + ceil(txtWdith/510)*height/72, wdith, 6*boldFont);
-        }
-        else{
-          text("This right was never introduced in the US.", mouseX+250, mouseY - 25 + ceil(txtWdith/510)*30, wdith, 6*boldFont);
-        }
-      }
-      String plurality = " countries in ";
-      if(right.count[Year-start_year].year_count == 1)  plurality = " country in ";
-      if(procjs){
-        text("This right was guaranteed in "+right.count[Year-start_year].year_count+plurality+Year+".", mouseX, mouseY + 5 + ceil(txtWdith/510)*30 - (ceil(txtWdith/wdith)-.9)*40/2, wdith, 6*boldFont);
-      }else{
-        text("This right was guaranteed in "+right.count[Year-start_year].year_count+plurality+Year+".", mouseX+250, mouseY + 5 + ceil(txtWdith/510)*30, wdith, 6*boldFont);
-      }  
-  //}
+    pushMatrix();
+    translate(x+radius, y - hieght);
     
+    rect(0, 0, wdith, hieght, 10);
+    fill(0,0,0);
+    
+    text(right.right_name+":", 0, 0, wdith, txtHieght*2);
+    textSize(regFont);
+    text(right.description, 0, txtHieght, wdith, ceil(txtWdith/wdith)*txtHieght*2);
+    //this next line is the second to last line
+    if(right.introduced != 0){
+        text("This right was first introduced in the US in "+right.introduced+".", 0, hieght - txtHieght*2, wdith, (hieght-(3*txtHieght))*2);
+    }
+    else{
+        text("This right was never introduced in the US.",0,hieght - txtHieght*2, wdith, (hieght-(3*txtHieght)+10)*2);
+    }
+
+    String plurality = " countries in ";
+    if(right.count[Year-start_year].year_count == 1)  plurality = " country in ";
+    //This should always be the last line in the box
+    text("This right was guaranteed in "+right.count[Year-start_year].year_count+plurality+Year+".", 0, hieght - txtHieght, wdith, txtHieght*2);      
+ 
+    popMatrix();
  } 
 }

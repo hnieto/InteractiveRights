@@ -19,17 +19,18 @@ class PlayPause {
   }
 
   void display() {
-    fill(255);
-    strokeWeight(0);
+    strokeWeight(1);
+    stroke(255, 100, 100);
+    fill(255, 0, 0);
     if(play){
       rectMode(CENTER);
       rect(x - w/4, y, (w/3), (h));
       rect(x + w/4, y, (w/3), (h));
     }
     else{
-      triangle((x - w/2), (y - h/2),
-                (x - w/2), (y + h/2),
-                (x + w/2), (y));
+      triangle((x - w/2 + w/12), (y - h/2),
+                (x - w/2 + w/12), (y + h/2),
+                (x + w/2 + w/12), (y));
     }
   } 
   
@@ -59,13 +60,18 @@ class NextButton {
   }
 
   void display() {
-    fill(255);
-    strokeWeight(0);
+    strokeWeight(1);
+    stroke(255, 100, 100);
+    fill(255, 0, 0);
     rectMode(CENTER);
-    triangle((x - w/2), (y - h/2),
-              (x - w/2), (y + h/2),
-              (x + w/4), (y));
-    rect(x + 3*w/8, y, w/4, h);
+//    triangle((x - w/2), (y - h/2),
+//              (x - w/2), (y + h/2),
+//              (x + w/4), (y));
+//    rect(x + 3*w/8, y, w/4, h);
+    triangle((x), (y - h/2),
+              (x), (y + h/2),
+              (x + w/2), (y));
+    rect(x - 2*w/8, y, w/6, h);
   } 
   
   boolean contains(float x, float y) {
@@ -93,13 +99,18 @@ class PreviousButton {
   }
 
   void display() {
-    fill(255);
-    strokeWeight(0);
+    strokeWeight(1);
+    stroke(255, 100, 100);
+    fill(255, 0, 0);
     rectMode(CENTER);
-    triangle((x + w/2), (y - h/2),
-              (x + w/2), (y + h/2),
-              (x - w/4), (y));
-    rect(x - 3*w/8, y, w/4, h);
+//    triangle((x + w/2), (y - h/2),
+//              (x + w/2), (y + h/2),
+//              (x - w/4), (y));
+//    rect(x - 3*w/8, y, w/4, h);
+    triangle((x), (y - h/2),
+              (x), (y + h/2),
+              (x - w/2), (y));
+    rect(x + 2*w/8, y, w/6, h);
   } 
   
   boolean contains(float x, float y) {

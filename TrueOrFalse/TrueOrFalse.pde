@@ -53,7 +53,7 @@ void setup() {
   uBB=sketchHeight-heightuBB;
   radius = heightuBB*.45;
   diameter= 2*radius;
-  fontSize=radius*.17;
+  fontSize=radius*.14;
   lineSpacing=fontSize;
   
   background(0);
