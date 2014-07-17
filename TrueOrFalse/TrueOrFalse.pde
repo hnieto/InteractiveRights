@@ -5,8 +5,8 @@ String       [] data;
 
 //setting the window speceifications and boundaries
 //lasso specs (for 2 rows and 1 column): width=1920, height=2160 
-float        sketchWidth;//sets the width of the window
-float        sketchHeight;//sets the height of the window
+int        sketchWidth = 600;//sets the width of the window
+int        sketchHeight = 600;//sets the height of the window
 float        heightuBB;//the height of the height of the window and the upper bottom boundary
 float        uBB;//sets the upper bottom boundary 
 
@@ -45,7 +45,7 @@ PImage       imgFalse;
 
 void setup() {
   // javascript function to set sketch size according to the width of the browser
-  setCanvasSize();
+  //setCanvasSize();
   size(sketchWidth, sketchHeight);
   
   // initialize variables who's value is based off sketchHeight

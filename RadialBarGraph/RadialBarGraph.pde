@@ -269,7 +269,7 @@ void drawCountryNames() {
     for (int j=0; j<name.length(); j++) {
     
       // Instead of a constant width, we check the width of each character.
-      String currentChar      = name.substring(j,j+1);//name.charAt(j);
+      String currentChar      = name.substring(j,j+1);
       float  currentCharWidth = textWidth(currentChar);
   
       // Each box is centered so we move half the width
@@ -434,13 +434,13 @@ void drawCategoryNames() {
 }
 
 
-int getTextLength(String text) {
+int getTextLength(String txt) {
 
   int totalLength = 0;
-  if (text.length() < 1) return 0;
+  if (txt.length() < 1) return 0;
   else {
-    for (int i=0; i<text.length(); i++) {
-      char currentChar = text.charAt(i);
+    for (int i=0; i<txt.length(); i++) {
+      String currentChar = txt.substring(i,i+1); //txt.charAt(i);
       totalLength += textWidth(currentChar);
     } 
     return totalLength;
@@ -713,35 +713,58 @@ void mouseDragged(){
 /*       PDE/JAVASCRIPT COMMUNICATION        */
 /*********************************************/
 function generateHTMLbuttons(listSize){    
-
-  // loop through categories array and create a button for each entry
-  for (var i=0; i<listSize; i++) {
+  var browserWidth    = window.innerWidth;
+  var buttonDivHeight = document.getElementById('buttonContainer').clientHeight;
   
-    if(i == listSize-1) {
-      var button = document.createElement('a');
-      var text   = document.createTextNode("All Rights");
-      
-      button.appendChild(text);
-      button.setAttribute("id", "categoryButton" + i);
-      button.setAttribute("class", "button");
-      button.setAttribute('onclick', 'changeCircumplex("'+i+'")');
-      button.style.width = "100%";
-      document.getElementById('parent').appendChild(button); 
-    }
-    else {
-      var button = document.createElement('a');
-      var text   = document.createTextNode(categoryList.get(i).name);
-      var buttonSpacing = 0.25; // in percent
-      
-      button.appendChild(text);
-      button.setAttribute("id", "categoryButton" + i);
-      button.setAttribute("class", "button");
-      button.setAttribute('onclick', 'changeCircumplex("'+i+'")');
-      button.style.width = (100/(listSize-1))-buttonSpacing + "%";
-      
-      if(i != 0) { button.style.marginLeft = (buttonSpacing + buttonSpacing/(listSize-2)) + "%"; }
-      document.getElementById('children').appendChild(button); 
-    }
+  // create "All Categories" button
+  var button = document.createElement('div');
+  var text   = document.createTextNode("All Rights");
+  
+  button.setAttribute("id", "categoryButton" + (listSize-1));
+  button.setAttribute("class", "button");
+  button.setAttribute('onclick', 'changeCircumplex("'+(listSize-1)+'")');
+  button.style.width = "100%";
+    
+    // BUG: for loop throws error "Cannot read property 'charAt' of undefined"
+    // loop through categoryList to create a colored square for each category
+//  for (i=0, i<listSize-1; i++) {  
+    var colorBox =  document.createElement('div');
+    colorBox.style.width = (browserWidth * 0.015) + "px";
+    colorBox.style.height = (buttonDivHeight * 0.25) + "px";
+    colorBox.style.backgroundColor = "#" + hex(categoryList.get(0).colour, 6);
+    colorBox.style.display = "inline-block";
+    colorBox.style.marginLeft = (browserWidth * 0.01) + "px"
+    colorBox.style.marginRight = (browserWidth * 0.01) + "px"
+    button.appendChild(colorBox);
+//  }
+ 
+  button.appendChild(text);
+  document.getElementById('parent').appendChild(button); 
+
+  // create other buttons. one for each category
+  for (j=0; j<listSize-1; j++) {
+    var button = document.createElement('div');
+    var colorBox = document.createElement('div');
+    var text   = document.createTextNode(categoryList.get(j).name);
+    //var buttonSpacing = 0.25; // in percent
+    
+    button.setAttribute("id", "categoryButton" + j);
+    button.setAttribute("class", "button");
+    button.setAttribute('onclick', 'changeCircumplex("'+j+'")');
+    button.style.width = "80%";
+    //button.style.width = (100/(listSize-1))-buttonSpacing + "%";
+    //if(j != 0) { button.style.marginLeft = (buttonSpacing + buttonSpacing/(listSize-2)) + "%"; }
+    
+    colorBox.style.width = (browserWidth * 0.015) + "px";
+    colorBox.style.height = (buttonDivHeight * 0.25) + "px";
+    colorBox.style.backgroundColor = "#" + hex(categoryList.get(j).colour, 6);
+    colorBox.style.display = "inline-block";
+    colorBox.style.marginLeft = (browserWidth * 0.01) + "px"
+    colorBox.style.marginRight = (browserWidth * 0.01) + "px"
+    button.appendChild(colorBox);
+    button.appendChild(text);
+    
+    document.getElementById('children').appendChild(button); 
   }
   
 }
@@ -753,9 +776,9 @@ function setCanvasSize(){
   var browserWidth    = window.innerWidth;
   var browserHeight   = window.innerHeight;
   sketchWidth         = browserWidth;
-  sketchHeight        = browserHeight * 0.95 - buttonDivHeight;
+  sketchHeight        = browserHeight;// * 0.95 - buttonDivHeight;
   
-  document.getElementById('visDiv').setAttribute("style","width:"+sketchWidth+"px");
+  document.getElementById('buttonContainer').setAttribute("style","width:"+(sketchWidth/5)+"px");
 }
 
 

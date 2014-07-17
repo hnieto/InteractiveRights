@@ -3,6 +3,13 @@ body {
     margin:                0px;
 }
 
+#buttonContainer {
+    display:               inline-block;
+    position:              absolute;
+		top:                   1%;
+    left:                  1%;
+}
+
 #buttonTree {
     width:                 100%;
     margin:                0 auto;
@@ -21,7 +28,6 @@ body {
     font-family:           Helvetica, Arial, Sans-Serif;
     text-decoration:       none;
     vertical-align:        middle;
-		text-align:            center;
     
     background:            -webkit-gradient(linear, left top, left bottom, from(#dcdcdc), to(#d2d2d2));
     background:            -webkit-linear-gradient(top, #dcdcdc, #d2d2d2);
