@@ -3,24 +3,24 @@
 <head>
     <link rel="stylesheet" type="text/css" href="main.css">
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
-		<script type="text/javascript" src="jquery.waterwheelCarousel.min.js"></script>
-		<script type="text/javascript">
+    <script type="text/javascript" src="jquery.waterwheelCarousel.min.js"></script>
+    <script type="text/javascript">
       
       function loadCarousel(){
 				
-				// Resize carousel images
-        var carouselContainerWidth = document.getElementById('left-bottom').offsetWidth;
-				var oldCarouselImageWidth = document.getElementById('item-1').offsetWidth;
-				var oldCarouselImageHeight = document.getElementById('item-1').offsetHeight;
-				var oldCarouselImageRatio = oldCarouselImageWidth / oldCarouselImageHeight;
-				var newCarouselImageWidth = carouselContainerWidth * 0.90;
-				var newCarouselImageHeight = newCarouselImageWidth / oldCarouselImageRatio;
+	      // Resize carousel images
+        var carouselContainerWidth = document.getElementById('left').offsetWidth;
+       	var oldCarouselImageWidth = document.getElementById('item-1').offsetWidth;
+	      var oldCarouselImageHeight = document.getElementById('item-1').offsetHeight;
+	      var oldCarouselImageRatio = oldCarouselImageWidth / oldCarouselImageHeight;
+	      var newCarouselImageWidth = carouselContainerWidth * 0.90;
+	      var newCarouselImageHeight = newCarouselImageWidth / oldCarouselImageRatio;
 
-				var allCarouselImages = document.getElementById('carousel').getElementsByTagName('img');
-				for(i = 0; i < allCarouselImages.length; i++) {
-					allCarouselImages[i].width = newCarouselImageWidth;
-					allCarouselImages[i].height = newCarouselImageHeight;
-				}			  	
+	      var allCarouselImages = document.getElementById('carousel').getElementsByTagName('img');
+	      for(i = 0; i < allCarouselImages.length; i++) {
+	        allCarouselImages[i].width = newCarouselImageWidth;
+       	  allCarouselImages[i].height = newCarouselImageHeight;
+        }			  	
 				
         var carousel = $("#carousel").waterwheelCarousel({
           orientation: 'vertical',
@@ -30,53 +30,62 @@
         });
       }
 
-			// hide all iframes except the one selected via carousel
-			// stop draw loop if sketch is hidden
-			function changeVis(frameIndex) {
-				var numberOfFrames = document.getElementById("center").getElementsByTagName("iframe").length;
+      // hide all iframes except the one selected via carousel
+      // stop draw loop if sketch is hidden
+      function changeVis(frameIndex) {
+        var numberOfFrames = document.getElementById("center").getElementsByTagName("iframe").length;
 
-				for(i = 1; i <= numberOfFrames; i++) {
-					if(i == frameIndex) { 
-						document.getElementById("visDiv" + i).style.visibility = "visible"; 
-						document.getElementById("visDiv" + i).contentWindow.restartDraw();
-					}
+	      for(i = 1; i <= numberOfFrames; i++) {
+	        if(i == frameIndex) { 
+ 	          document.getElementById("visDiv" + i).style.visibility = "visible"; 
+	          document.getElementById("visDiv" + i).contentWindow.restartDraw();
+	        }
           
-					else { 
-						document.getElementById("visDiv" + i).style.visibility = "hidden"; 
-						document.getElementById("visDiv" + i).contentWindow.pauseDraw();
-					}	
-				}
-						
-			}		
+          else { 
+	         document.getElementById("visDiv" + i).style.visibility = "hidden"; 
+	         document.getElementById("visDiv" + i).contentWindow.pauseDraw();
+	        }	
+        }
+      }		
 
-		</script>
+    </script>
 </head>
 
 <body onload="loadCarousel();">
-
-    <div id="left-top">
-			<span>Rights Interactive</span>
-    </div>
-
-    <div id="left-bottom" style="width:24.5vw">
-    	<div id="carousel">
-      	<a href="#"><img src="images/radialBarGraph.jpg" 			id="item-1" onclick="changeVis(1)" /></a>
-      	<a href="#"><img src="images/rightBubbles.jpg" 				id="item-2" onclick="changeVis(2)" /></a>
-      	<a href="#"><img src="images/trueOrFalse.jpg" 				id="item-3" onclick="changeVis(3)" /></a>
-      	<a href="#"><img src="images/trivia.jpg" 							id="item-4" onclick="changeVis(4)" /></a> 
-    	</div>
+		<div id="header">
+			<div id="title">
+			  <span>Interactive Rights</span>
+      </div>
+      <div id="nav-bar">
+        <a href="#"><img src="images/TimelineIcon_w.png"   onclick="changeVis(1)" /></a>
+        <a href="#"><img src="images/PrevalenceIcon_w.png" onclick="changeVis(2)" /></a>
+        <a href="#"><img src="images/ProcessIcon_w.png"    onclick="changeVis(3)" /></a>
+        <a href="#"><img src="images/SimilarityIcon_w.png" onclick="changeVis(4)" /></a> 	
+      </div>
+		</div>
+		
+    <div id="left">
+      <div id="carousel">
+      	<a href="#"><img src="images/radialBarGraph.jpg"  id="item-1" onclick="changeVis(1)" /></a>
+      	<a href="#"><img src="images/rightBubbles.jpg" 	  id="item-2" onclick="changeVis(2)" /></a>
+      	<a href="#"><img src="images/trueOrFalse.jpg" 	  id="item-3" onclick="changeVis(3)" /></a>
+      	<a href="#"><img src="images/trivia.jpg"          id="item-4" onclick="changeVis(4)" /></a> 
+      </div>
     </div>
 
     <div id="center">
-			<iframe id="visDiv1" src="RadialBarGraph/web/radialBarGraph.html" width="100%" height="100%" style="visibility:visible; " seamless></iframe>
-      <iframe id="visDiv2" src="Bubbles/web/bubbles.html" 							width="100%" height="100%" style="visibility:hidden; "  seamless></iframe>
+      <iframe id="visDiv1" src="RadialBarGraph/web/radialBarGraph.html" width="100%" height="100%" style="visibility:visible; " seamless></iframe>
+      <iframe id="visDiv2" src="Bubbles/web/bubbles.html" 	        width="100%" height="100%" style="visibility:hidden; "  seamless></iframe>
       <iframe id="visDiv3" src="TrueOrFalse/web/trueOrFalse.html"       width="100%" height="100%" style="visibility:hidden; "  seamless></iframe>
       <iframe id="visDiv4" src="Trivia/web/trivia.html"                 width="100%" height="100%" style="visibility:hidden; "  seamless></iframe> 
     </div>
 
     <div id="right">
-        <iframe id="descriptionDiv" src="RadialBarGraph/web/description.html" width="100%" height="100%" seamless></iframe>
+      <iframe id="descriptionDiv" src="RadialBarGraph/web/description.html" width="100%" height="100%" seamless></iframe>
     </div>
+
+		<div id="footer">
+		</div>
     
 </body>
 </html>
