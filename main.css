@@ -36,25 +36,37 @@ iframe {
     left:                    0;
     top:                     0;
     width:                   24.5vw;
-    height:                  100%;
     text-align:              center;
+    margin:                  0.8% 0;
 }        
 
 #title span {
     color:                   #ffffff;
-    font-size:               7vh;
+    font-size:               6vh;
 }
 
-#nav-bar {
+#nav-bar-top {
     position:                absolute;
     left:                    24.8vw;
     width:                   50vw;
     height:                  100%;
 }
 
-#nav-bar img {
+#nav-bar-top img {
     height:                  100%;
-    padding:                 0 6.75%;
+    margin:                 0 6.3%;
+}
+
+#nav-bar-bottom {
+    position:                absolute;
+    left:                    24.8vw;
+    width:                   50vw;
+    height:                  100%;
+}
+
+#nav-bar-bottom img {
+    height:                  100%;
+    margin:                  0 9.8%;
 }
 
 #left {                
@@ -91,7 +103,20 @@ iframe {
    width:                     99.6vw;
    height:                    4vh;
    background-color:          #204B7B; 
-}            
+}   
+
+#ut-branding {
+    position:                absolute;
+    left:                    75.3vw;  
+    width:                   24.5vw;
+    text-align:              center;
+    margin:                  0.26% 0;
+}    
+
+#ut-branding span {
+    color:                   #ffffff;
+    font-size:               2.5vh;
+}
                               
 #carousel {                   
     width:                    100%;

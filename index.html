@@ -6,30 +6,6 @@
     <script type="text/javascript" src="jquery.waterwheelCarousel.min.js"></script>
     <script type="text/javascript">
       
-      function loadCarousel(){
-				
-	      // Resize carousel images
-        var carouselContainerWidth = document.getElementById('left').offsetWidth;
-       	var oldCarouselImageWidth = document.getElementById('item-1').offsetWidth;
-	      var oldCarouselImageHeight = document.getElementById('item-1').offsetHeight;
-	      var oldCarouselImageRatio = oldCarouselImageWidth / oldCarouselImageHeight;
-	      var newCarouselImageWidth = carouselContainerWidth * 0.90;
-	      var newCarouselImageHeight = newCarouselImageWidth / oldCarouselImageRatio;
-
-	      var allCarouselImages = document.getElementById('carousel').getElementsByTagName('img');
-	      for(i = 0; i < allCarouselImages.length; i++) {
-	        allCarouselImages[i].width = newCarouselImageWidth;
-       	  allCarouselImages[i].height = newCarouselImageHeight;
-        }			  	
-				
-        var carousel = $("#carousel").waterwheelCarousel({
-          orientation: 'vertical',
-          separation: newCarouselImageHeight * 0.9,
-          opacityMultiplier: .4,
-          flankingItems: 1
-        });
-      }
-
       // hide all iframes except the one selected via carousel
       // stop draw loop if sketch is hidden
       function changeVis(frameIndex) {
@@ -39,11 +15,15 @@
 	        if(i == frameIndex) { 
  	          document.getElementById("visDiv" + i).style.visibility = "visible"; 
 	          document.getElementById("visDiv" + i).contentWindow.restartDraw();
+						document.getElementById("visDivIcon" + i +"a").src = "images/visDivIcon" + i + "_y.png";
+            document.getElementById("visDivIcon" + i +"b").src = "images/visDivIcon" + i + "_y.png";
 	        }
           
           else { 
 	         document.getElementById("visDiv" + i).style.visibility = "hidden"; 
 	         document.getElementById("visDiv" + i).contentWindow.pauseDraw();
+           document.getElementById("visDivIcon" + i + "a").src = "images/visDivIcon" + i + "_w.png";
+           document.getElementById("visDivIcon" + i + "b").src = "images/visDivIcon" + i + "_w.png";
 	        }	
         }
       }		
@@ -51,31 +31,25 @@
     </script>
 </head>
 
-<body onload="loadCarousel();">
+<body>
 		<div id="header">
 			<div id="title">
 			  <span>Interactive Rights</span>
       </div>
-      <div id="nav-bar">
-        <a href="#"><img src="images/TimelineIcon_w.png"   onclick="changeVis(1)" /></a>
-        <a href="#"><img src="images/PrevalenceIcon_w.png" onclick="changeVis(2)" /></a>
-        <a href="#"><img src="images/ProcessIcon_w.png"    onclick="changeVis(3)" /></a>
-        <a href="#"><img src="images/SimilarityIcon_w.png" onclick="changeVis(4)" /></a> 	
+      <div id="nav-bar-top">
+        <a href="#"><img src="images/visDivIcon1_y.png" id="visDivIcon1a" onclick="changeVis(1)" /></a>
+        <a href="#"><img src="images/visDivIcon2_w.png" id="visDivIcon2a" onclick="changeVis(2)" /></a>
+        <a href="#"><img src="images/visDivIcon3_w.png" id="visDivIcon3a" onclick="changeVis(3)" /></a>
+        <a href="#"><img src="images/visDivIcon4_w.png" id="visDivIcon4a" onclick="changeVis(4)" /></a> 	
       </div>
 		</div>
 		
     <div id="left">
-      <div id="carousel">
-      	<a href="#"><img src="images/radialBarGraph.jpg"  id="item-1" onclick="changeVis(1)" /></a>
-      	<a href="#"><img src="images/rightBubbles.jpg" 	  id="item-2" onclick="changeVis(2)" /></a>
-      	<a href="#"><img src="images/trueOrFalse.jpg" 	  id="item-3" onclick="changeVis(3)" /></a>
-      	<a href="#"><img src="images/trivia.jpg"          id="item-4" onclick="changeVis(4)" /></a> 
-      </div>
     </div>
 
     <div id="center">
       <iframe id="visDiv1" src="RadialBarGraph/web/radialBarGraph.html" width="100%" height="100%" style="visibility:visible; " seamless></iframe>
-      <iframe id="visDiv2" src="Bubbles/web/bubbles.html" 	        width="100%" height="100%" style="visibility:hidden; "  seamless></iframe>
+      <iframe id="visDiv2" src="Bubbles/web/bubbles.html" 	            width="100%" height="100%" style="visibility:hidden; "  seamless></iframe>
       <iframe id="visDiv3" src="TrueOrFalse/web/trueOrFalse.html"       width="100%" height="100%" style="visibility:hidden; "  seamless></iframe>
       <iframe id="visDiv4" src="Trivia/web/trivia.html"                 width="100%" height="100%" style="visibility:hidden; "  seamless></iframe> 
     </div>
@@ -85,6 +59,15 @@
     </div>
 
 		<div id="footer">
+      <div id="nav-bar-bottom">
+        <a href="#"><img src="images/visDivIcon1_y.png" id="visDivIcon1b" onclick="changeVis(1)" /></a>
+        <a href="#"><img src="images/visDivIcon2_w.png" id="visDivIcon2b" onclick="changeVis(2)" /></a>
+        <a href="#"><img src="images/visDivIcon3_w.png" id="visDivIcon3b" onclick="changeVis(3)" /></a>
+        <a href="#"><img src="images/visDivIcon4_w.png" id="visDivIcon4b" onclick="changeVis(4)" /></a>  
+      </div>
+      <div id="ut-branding">
+        <span>The University of Texas at Austin</span>
+      </div> 
 		</div>
     
 </body>

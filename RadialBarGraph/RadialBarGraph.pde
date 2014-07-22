@@ -18,6 +18,7 @@ int                      currentCircumplex, numberOfRights;
 float                    controllerRadius, circumplexRadius, shortestDistanceFromCenter, paddingTop;
 float                    circumplexRotationAngle, mouseStartAngle;
 float                    highlightRadius, highlightThickness, highlightedRightIndex;
+int                      largestCategoryLength;
                          
 PFont                    defaultFont, monoSpacedFont, monoSpacedBold, digitalFont;
 int                      fontSize;
@@ -84,7 +85,15 @@ void setup() {
   parseRights("../data/dj_rights_060214.csv");
   findCountriesInRange(yearRange[0], yearRange[1]);  
   
-  // javascript function to create HTML buttons using the category titles as labels
+  // determine number of rights in largest category
+  // used to calculate font size for right description 
+  largestCategoryLength = 0;
+  for(int i=0; i<categoryList.size(); i++){
+    int categorySize = categoryList.get(i).rights.size();
+    if(categorySize > largestCategoryLength) largestCategoryLength = categorySize;
+  }
+  
+  // javascript function to create HTML buttdons using the category titles as labels
   generateHTMLbuttons(categoryList.size()+1);
 }
 
@@ -318,14 +327,15 @@ void drawRightNames() {
   float    delta            = TWO_PI/countryList.size(); 
   float    startTheta       = -delta/2; // shift by half the width of the US slice so as to center it
   float    thickness        = (circumplexRadius-controllerRadius)/category.rights.size();
-  float    adjustedRadius   = circumplexRadius-thickness/2; // wedge thickens up/down from current radius, we have to adjust for that
+  float    adjustedRadius   = circumplexRadius-thickness;
   float    adjustedFontSize = fontSize*15/category.rights.size(); // font size must be inversely proportional to the number of rings 
   String   rightText;
   
   for (int i=category.rights.size()-1; i>=0; i--) {
   
     if(i == highlightedRightIndex) {
-      textFont(monoSpacedBold, adjustedFontSize*1.5);
+      float descriptionFontSize = fontSize*22/largestCategoryLength;
+      textFont(monoSpacedBold, descriptionFontSize);
       rightText = category.descriptions.get(i); 
     }
     else {
@@ -334,7 +344,7 @@ void drawRightNames() {
     }
     
     float textHeight    = textAscent() + textDescent();
-    float radius        = adjustedRadius-textHeight/2;
+    float radius        = adjustedRadius;
     float txtStartAngle = (startTheta+delta*0.5) - (getTextLength(rightText)/radius)*0.5;
     float arclength     = 0; // We must keep track of our position along the curve
   
