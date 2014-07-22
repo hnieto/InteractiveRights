@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="trueOrFalse.css">
+    <script src="../../processing.min.js"></script>
+    <script type="text/javascript">
+
+				function pauseDraw() {
+          //we assign our processing sketch to the variable processingInstance
+          var processingInstance = Processing.getInstanceById('sketch');
+
+					processingInstance.noLoop();	
+				}
+
+        function restartDraw() {
+          //we assign our processing sketch to the variable processingInstance
+          var processingInstance = Processing.getInstanceById('sketch');
+
+          processingInstance.loop();  
+        }
+
+    </script>
+</head>
+
+<body>
+	<canvas id="sketch" data-processing-sources="../TrueOrFalse.pde ../Ball.pde"></canvas>
+</body>
+</html>
