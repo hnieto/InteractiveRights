@@ -63,7 +63,7 @@ void setup() {
 
   
   // font stuff
-  fontSize                   = lerp(0,20, sketchWidth/(3840*0.49)); // 0.49 is percentage of canvas relative to browser window width
+  fontSize                   = lerp(0,20, sketchWidth/(3840*0.5)); // 0.5 is percentage of canvas relative to browser window width
   defaultFont                = createFont("../data/RefrigeratorDeluxeLight.ttf", fontSize);
   monoSpacedFont             = createFont("../data/MonoSpaced.ttf", fontSize); 
   monoSpacedBold             = createFont("../data/MonoSpacedBold.ttf", fontSize);
@@ -791,7 +791,7 @@ function setCanvasSize(){
   var browserWidth    = window.innerWidth;
   var browserHeight   = window.innerHeight;
   sketchWidth         = browserWidth;
-  sketchHeight        = browserHeight * 0.95;
+  sketchHeight        = browserHeight * 0.99;
   
   document.getElementById('buttonContainer').setAttribute("style","width:"+(sketchWidth/5)+"px");
 }
