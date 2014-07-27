@@ -94,7 +94,8 @@ void setup() {
   }
   
   // javascript function to create HTML buttdons using the category titles as labels
-  generateHTMLbuttons(categoryList.size()+1);
+  generateButtonTreeLinks(categoryList.size()+1, "#ffffff");
+  generateButtonTree(categoryList.size()+1);
 }
 
 /*********************************************/
@@ -727,73 +728,188 @@ void mouseDragged(){
 /*********************************************/
 /*       PDE/JAVASCRIPT COMMUNICATION        */
 /*********************************************/
-function generateHTMLbuttons(listSize){    
-  var browserWidth    = window.innerWidth;
-  var buttonDivHeight = document.getElementById('buttonContainer').clientHeight;
+function generateButtonTreeLinks(listSize, borderColor){
+  var buttonIframe = window.parent.document.getElementById('controlsDiv1');
+  var buttonDiv = buttonIframe.contentWindow.document.getElementById('buttonDiv');
+  var rootTable = document.createElement('TABLE');
+  rootTable.style.width = "40%";
+  var childTableCellHeight = 100/((listSize-1)*2); // as percentage
+  rootTable.style.height = 100 - childTableCellHeight*2 + "%"; 
+  rootTable.style.position = "absolute";
+  rootTable.style.top = childTableCellHeight + "%"; 
+  rootTable.style.left = "10%";
+  rootTable.style.borderRight = "1px solid " + borderColor;
   
-  // create "All Categories" button
-  var button = document.createElement('div');
-  var text   = document.createTextNode("All Rights");
+  var rootTableBody = document.createElement('TBODY');
+  rootTable.appendChild(rootTableBody); 
   
-  button.setAttribute("id", "categoryButton" + (listSize-1));
-  button.setAttribute("class", "button");
-  button.setAttribute('onclick', 'changeCircumplex("'+(listSize-1)+'")');
-  button.style.width = "100%";
-    
-    // BUG: for loop throws error "Cannot read property 'charAt' of undefined"
-    // loop through categoryList to create a colored square for each category
-//  for (i=0, i<listSize-1; i++) {  
-    var colorBox =  document.createElement('div');
-    colorBox.style.width = (browserWidth * 0.015) + "px";
-    colorBox.style.height = (buttonDivHeight * 0.25) + "px";
-    colorBox.style.backgroundColor = "#" + hex(categoryList.get(0).colour, 6);
-    colorBox.style.display = "inline-block";
-    colorBox.style.marginLeft = (browserWidth * 0.01) + "px"
-    colorBox.style.marginRight = (browserWidth * 0.01) + "px"
-    button.appendChild(colorBox);
-//  }
- 
-  button.appendChild(text);
-  document.getElementById('parent').appendChild(button); 
-
-  // create other buttons. one for each category
-  for (j=0; j<listSize-1; j++) {
-    var button = document.createElement('div');
-    var colorBox = document.createElement('div');
-    var text   = document.createTextNode(categoryList.get(j).name);
-    //var buttonSpacing = 0.25; // in percent
-    
-    button.setAttribute("id", "categoryButton" + j);
-    button.setAttribute("class", "button");
-    button.setAttribute('onclick', 'changeCircumplex("'+j+'")');
-    button.style.width = "80%";
-    //button.style.width = (100/(listSize-1))-buttonSpacing + "%";
-    //if(j != 0) { button.style.marginLeft = (buttonSpacing + buttonSpacing/(listSize-2)) + "%"; }
-    
-    colorBox.style.width = (browserWidth * 0.015) + "px";
-    colorBox.style.height = (buttonDivHeight * 0.25) + "px";
-    colorBox.style.backgroundColor = "#" + hex(categoryList.get(j).colour, 6);
-    colorBox.style.display = "inline-block";
-    colorBox.style.marginLeft = (browserWidth * 0.01) + "px"
-    colorBox.style.marginRight = (browserWidth * 0.01) + "px"
-    button.appendChild(colorBox);
-    button.appendChild(text);
-    
-    document.getElementById('children').appendChild(button); 
+  for (var i=0; i<6; i++){
+     var tr = document.createElement('TR');
+     rootTableBody.appendChild(tr);
+     var td = document.createElement('TD');
+     if(i==2) { td.style.borderBottom = "1px solid " + borderColor; }
+     tr.appendChild(td);
   }
+  buttonDiv.appendChild(rootTable);  
   
+  var childrenTable = document.createElement('TABLE');
+  childrenTable.style.width = "35%";
+  childrenTable.style.height = "100%";
+  childrenTable.style.position = "absolute";
+  childrenTable.style.top = "0%";
+  childrenTable.style.left = "50%";
+  childrenTable.style.border = "none";
+  
+  var childrenTableBody = document.createElement('TBODY');
+  childrenTable.appendChild(childrenTableBody);
+    
+  for (var i=0; i<(listSize-1)*2; i++){
+     var tr = document.createElement('TR');
+     childrenTableBody.appendChild(tr);
+     var td = document.createElement('TD');
+     if((i&1) == 0) { td.style.borderBottom = "1px solid " + borderColor; }
+     tr.appendChild(td);
+  }
+  buttonDiv.appendChild(childrenTable);    
+}
+
+function generateButtonTree(listSize){      
+  var buttonIframe = window.parent.document.getElementById('controlsDiv1');
+  var buttonDiv = buttonIframe.contentWindow.document.getElementById('buttonDiv');
+  
+  // center root button within left div using table
+  var rootTable = document.createElement('TABLE');
+  rootTable.style.width = "35%";
+  rootTable.style.height = "100%";
+  rootTable.style.position = "absolute";
+  rootTable.style.top = "0%";
+  rootTable.style.left = "5%";
+  rootTable.style.border = "none";
+  
+  var rootTableBody = document.createElement('TBODY');
+  rootTable.appendChild(rootTableBody); 
+  
+  for (var i=0; i<3; i++){
+     var tr = document.createElement('TR');
+     rootTableBody.appendChild(tr);
+     var td = document.createElement('TD');
+     td.style.height = "33.33%";
+     
+     if(i == 1) {
+       var rootButton = document.createElement('div');
+       rootButton.appendChild(document.createTextNode("All Categories"));
+       rootButton.setAttribute("id", "categoryButton" + (listSize-1));
+       rootButton.setAttribute("class", "button");
+       rootButton.setAttribute('onclick', 'window.parent.document.getElementById("visDiv1").contentWindow.changeCircumplex("'+(listSize-1)+'")');
+       rootButton.style.width = "100%";
+       rootButton.style.height = "100%";
+       rootButton.style.position = "relative";
+       td.appendChild(rootButton);
+       
+       // create circle svgs to represent categories and add them to rootButton
+       for(var j=0; j<listSize-1; j++){
+         // calculate svg size (in pixels) based off of button dimensions
+         var rootButtonHeight = (buttonIframe.clientHeight)/3; // in px
+         var rootButtonWidth  = ((buttonIframe.clientWidth) * 0.35);
+         var iconWidth  = (rootButtonHeight * 0.75 * 0.33);
+         var iconHeight = (rootButtonHeight * 0.75 * 0.33);
+         var iconRadius = iconWidth * 0.4;
+              
+         // create svg to hold category icon
+         var categorySVG = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+         categorySVG.setAttribute("height", iconHeight);
+         categorySVG.setAttribute("width", iconWidth);
+         categorySVG.setAttribute("display", "block");
+         categorySVG.style.position = "absolute";
+         categorySVG.style.top = rootButtonHeight*0.25 + iconHeight*j;
+         categorySVG.style.left = (rootButtonWidth-iconWidth)/2 + "px";
+         
+         // add circle elelment to svg
+         var categoryCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+         categoryCircle.setAttribute("cx",iconWidth/2);
+         categoryCircle.setAttribute("cy",iconHeight/2);
+         categoryCircle.setAttribute("r", iconRadius);
+         categoryCircle.setAttribute("stroke", "#000000");
+         categoryCircle.setAttribute("stroke-width", "1");
+         categoryCircle.setAttribute("fill", "#" + hex(categoryList.get(j).colour, 6));
+         categorySVG.appendChild(categoryCircle);
+    
+         // add icon to button
+         rootButton.appendChild(categorySVG);
+       }
+     }
+     tr.appendChild(td);
+  }
+  buttonDiv.appendChild(rootTable);   
+  
+  // create table to hold category buttons
+  var childrenTable = document.createElement('TABLE');
+  childrenTable.style.width = "35%";
+  childrenTable.style.height = "100%";
+  childrenTable.style.position = "absolute";
+  childrenTable.style.top = "0%";
+  childrenTable.style.left = "60%";
+  childrenTable.style.border = "none";
+  
+  var childrenTableBody = document.createElement('TBODY');
+  childrenTable.appendChild(childrenTableBody);
+    
+  // generate a button for each category in the csv file
+  for (var i=0; i<listSize-1; i++){
+     var tr = document.createElement('TR');
+     childrenTableBody.appendChild(tr);
+     var td = document.createElement('TD');
+     td.style.height = 100/(listSize-1) + "%";
+     
+     var childButton = document.createElement('div');
+     childButton.appendChild(document.createTextNode(categoryList.get(i).name));
+     childButton.setAttribute("id", "categoryButton" + (listSize-1));
+     childButton.setAttribute("class", "button");
+     childButton.setAttribute('onclick', 'window.parent.document.getElementById("visDiv1").contentWindow.changeCircumplex("'+i+'")');
+     childButton.style.width = "100%";
+     childButton.style.height = "50%";
+     childButton.style.position = "relative";
+     
+     // calculate svg size (in pixels) based off of button dimensions
+     var childButtonHeight = ((buttonIframe.clientHeight)/(listSize-1))*0.5; // in px
+     var childButtonWidth  = ((buttonIframe.clientWidth) * 0.35);
+     var iconWidth  = Math.min(childButtonHeight * 0.5, childButtonWidth * 0.5);
+     var iconHeight = Math.min(childButtonHeight * 0.5, childButtonWidth * 0.5);
+     var iconRadius = iconWidth * 0.4;
+          
+     // create svg to hold category icon
+     var categorySVG = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+     categorySVG.setAttribute("height", iconHeight);
+     categorySVG.setAttribute("width", iconWidth);
+     categorySVG.setAttribute("display", "block");
+     categorySVG.style.position = "absolute";
+     categorySVG.style.top = "50%";
+     categorySVG.style.left = (childButtonWidth-iconWidth)/2 + "px";
+     
+     // add circle elelment to svg
+     var categoryCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+     categoryCircle.setAttribute("cx",iconWidth/2);
+     categoryCircle.setAttribute("cy",iconHeight/2);
+     categoryCircle.setAttribute("r", iconRadius);
+     categoryCircle.setAttribute("stroke", "#000000");
+     categoryCircle.setAttribute("stroke-width", "1");
+     categoryCircle.setAttribute("fill", "#" + hex(categoryList.get(i).colour, 6));
+     categorySVG.appendChild(categoryCircle);
+
+     // add icon to button
+     childButton.appendChild(categorySVG);
+     td.appendChild(childButton);
+     tr.appendChild(td);
+  }
+  buttonDiv.appendChild(childrenTable);    
 }
   
   
 function setCanvasSize(){
-
-  var buttonDivHeight = document.getElementById('buttonContainer').clientHeight;
   var browserWidth    = window.innerWidth;
   var browserHeight   = window.innerHeight;
   sketchWidth         = browserWidth;
-  sketchHeight        = browserHeight * 0.99;
-  
-  document.getElementById('buttonContainer').setAttribute("style","width:"+(sketchWidth/5)+"px");
+  sketchHeight        = browserHeight * 0.99;  
 }
 
 

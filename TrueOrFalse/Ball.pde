@@ -17,6 +17,8 @@ class Ball {
   String newRightText;
   String originalRight;
   String randomizer;
+  String randomRightDescription;
+
 
   // Constructor
   //  Ball(int x, int y, int w, int h, color c, float sx, float sy, int id, ArrayList<Ball> others) {
@@ -67,7 +69,7 @@ class Ball {
 
     //A push and pop matrix is used to make sure that only the ball text is centered and not in the corner
     pushMatrix();
-    rectMode(CENTER);//centers the position of the text
+    rectMode(CENTER);//positions the text box in the center
     fill(this.c);
     ellipse( this.x, this.y, this.w, this.h);
     textSize(fontSize);
@@ -76,9 +78,15 @@ class Ball {
     //    text(this.xSpeed + " " + this.ySpeed, this.x - radius, this.y + 0.5*radius );
     textLeading(lineSpacing);
 
+    //aligning the text in the ball vertically by resizing the height of the text box 
+    float descriptionWidth= textWidth(newRightText);// the size of the width of the description
+    float scalar= 1.25;
+    float textHeight= (textAscent() + textDescent())*scalar;// height of the text 
+    float squareResize =textHeight*(int(descriptionWidth/(radius*1.5))+1)+textHeight*2;// spacing that will be used to allign the text vertically on the ball
+    //println(descriptionWidth);
     //fill(255, 0, 0);
-    //rect(this.x, this.y, radius*1.5, radius*1.5);
-    text(newRightText, this.x-radius*0.75, this.y-radius/2, radius*1.5, radius*1.5);
+    //rect(this.x-radius*0.75, this.y-(radius/2)-spacing, radius*1.5, radius*1.5);
+    text(newRightText, this.x-radius*0.75, this.y-(radius/2), radius*1.5, squareResize);
     popMatrix();
   }
 
@@ -210,19 +218,19 @@ class Ball {
       //detects if any part of the ball is in either the true or false platform, and will remove the transparency.
       if (y+radius > uPB && selected==true) {
         if (x>0 && x<width/2) {
-          trueTrans=255; 
-          falseTrans=255/2;
+          trueTrans=noTrans; 
+          falseTrans=platformTrans;
         } else if (x>width/2 && x<width) {
-          falseTrans=255; 
-          trueTrans=255/2;
+          falseTrans=noTrans; 
+          trueTrans=platformTrans;
         }
       } else {
-        trueTrans=255/2;
-        falseTrans=255/2;
+        trueTrans=platformTrans;
+        falseTrans=platformTrans;
       } 
       if (y+radius > uPB && selected == false) {
-        trueTrans=255/2;
-        falseTrans=255/2;
+        trueTrans=platformTrans;
+        falseTrans=platformTrans;
       }
 
       //Prevent the ball from leaving the screen from all directions when dragged 
