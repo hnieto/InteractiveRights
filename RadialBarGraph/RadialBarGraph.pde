@@ -44,11 +44,10 @@ void setup() {
   categoryColors[1]          = #00A871;
   categoryColors[0]          = #80304A; // inner
   background_color           = color(0, 0, 0);        // black
-  letter_color               = color(255, 255, 255);      // white 
-  wedgeBorder_color          = color(255, 255, 255); // black 
+  letter_color               = color(255, 255, 255);  // white 
+  wedgeBorder_color          = color(255, 255, 255);  // black 
                              
   // circumplex              
-  currentCircumplex          = 0;
   numberOfRights             = 0;
   circumplexRotationAngle    = 0.0; 
   mouseStartAngle            = 0.0;
@@ -61,7 +60,6 @@ void setup() {
   size(sketchWidth, sketchHeight);
   paddingTop                 = sketchHeight * 0.01; 
 
-  
   // font stuff
   fontSize                   = lerp(0,20, sketchWidth/(3840*0.5)); // 0.5 is percentage of canvas relative to browser window width
   defaultFont                = createFont("../data/RefrigeratorDeluxeLight.ttf", fontSize);
@@ -73,9 +71,7 @@ void setup() {
   
   // time controls
   shortestDistanceFromCenter = min(width, height)/2;
-  //textFont(defaultFont*1.5); // account for extra large font for US
   circumplexRadius           = shortestDistanceFromCenter-(textAscent() + textDescent())-paddingTop; // account for letter height and add some extra padding
-  //textFont(defaultFont); 
   controllerRadius           = shortestDistanceFromCenter/3;
   timecontroller             = new TimeController(controllerRadius, yearRange);
   timecontroller.init();
@@ -96,6 +92,9 @@ void setup() {
   // javascript function to create HTML buttdons using the category titles as labels
   generateButtonTreeLinks(categoryList.size()+1, "#ffffff");
   generateButtonTree(categoryList.size()+1);
+  
+  // set "All Rights" view as default
+  currentCircumplex          = categoryList.size();
 }
 
 /*********************************************/
@@ -806,22 +805,23 @@ function generateButtonTree(listSize){
        rootButton.style.position = "relative";
        td.appendChild(rootButton);
        
+       // calculate svg size (in pixels) based off of button dimensions
+       var rootButtonHeight = (buttonIframe.clientHeight)/3; // in px
+       var rootButtonWidth  = ((buttonIframe.clientWidth) * 0.35);
+       var iconWidth  = min(rootButtonWidth*0.9, rootButtonHeight*0.5);
+       var iconHeight = min(rootButtonWidth*0.9, rootButtonHeight*0.5);
+       var iconRadius = iconWidth * 0.45;
+       var scaler = iconRadius/listSize;
+       
        // create circle svgs to represent categories and add them to rootButton
-       for(var j=0; j<listSize-1; j++){
-         // calculate svg size (in pixels) based off of button dimensions
-         var rootButtonHeight = (buttonIframe.clientHeight)/3; // in px
-         var rootButtonWidth  = ((buttonIframe.clientWidth) * 0.35);
-         var iconWidth  = (rootButtonHeight * 0.75 * 0.33);
-         var iconHeight = (rootButtonHeight * 0.75 * 0.33);
-         var iconRadius = iconWidth * 0.4;
-              
+       for(var j=listSize-2; j>=0; j--){
          // create svg to hold category icon
          var categorySVG = document.createElementNS("http://www.w3.org/2000/svg", "svg");
          categorySVG.setAttribute("height", iconHeight);
          categorySVG.setAttribute("width", iconWidth);
          categorySVG.setAttribute("display", "block");
          categorySVG.style.position = "absolute";
-         categorySVG.style.top = rootButtonHeight*0.25 + iconHeight*j;
+         categorySVG.style.top = (rootButtonHeight*0.25)+(rootButtonHeight*0.75-iconHeight)/2 + "px";
          categorySVG.style.left = (rootButtonWidth-iconWidth)/2 + "px";
          
          // add circle elelment to svg
@@ -836,6 +836,9 @@ function generateButtonTree(listSize){
     
          // add icon to button
          rootButton.appendChild(categorySVG);
+         
+         // shrink next circle to creat concentric icon
+         iconRadius -= scaler;
        }
      }
      tr.appendChild(td);
@@ -873,8 +876,8 @@ function generateButtonTree(listSize){
      // calculate svg size (in pixels) based off of button dimensions
      var childButtonHeight = ((buttonIframe.clientHeight)/(listSize-1))*0.5; // in px
      var childButtonWidth  = ((buttonIframe.clientWidth) * 0.35);
-     var iconWidth  = Math.min(childButtonHeight * 0.5, childButtonWidth * 0.5);
-     var iconHeight = Math.min(childButtonHeight * 0.5, childButtonWidth * 0.5);
+     var iconWidth  = min(childButtonHeight * 0.5, childButtonWidth * 0.5);
+     var iconHeight = min(childButtonHeight * 0.5, childButtonWidth * 0.5);
      var iconRadius = iconWidth * 0.4;
           
      // create svg to hold category icon
