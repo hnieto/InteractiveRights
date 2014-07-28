@@ -17,7 +17,7 @@ int[]                    yearRange      = { 1850, 2012 };
 int                      currentCircumplex, numberOfRights;
 float                    controllerRadius, circumplexRadius, shortestDistanceFromCenter, paddingTop;
 float                    circumplexRotationAngle, mouseStartAngle;
-float                    highlightRadius, highlightThickness, highlightedRightIndex;
+float                    highlightRadius, highlightThickness, highlightedRightIndex, highlightedCategoryIndex;
 int                      largestCategoryLength;
                          
 PFont                    defaultFont, monoSpacedFont, monoSpacedBold, digitalFont;
@@ -54,6 +54,7 @@ void setup() {
   highlightRadius            = 0.0;
   highlightThickness         = 0.0;
   highlightedRightIndex      = -1;
+  highlightedCategoryIndex   = -1;
   
   // javascript function to set sketch size according to the width of the browser
   setCanvasSize();
@@ -434,7 +435,10 @@ void drawCategoryNames() {
       
       // Display the character
       pushStyle();
-      fill(letter_color, 150);
+      
+      if(i == highlightedCategoryIndex) fill(255, 255, 0, 150);
+      else fill(letter_color, 150);
+
       text(currentChar, 0, 0);
       popStyle();
       
@@ -670,9 +674,10 @@ void mousePressed(){
     
       float categoryThickness = rightThickness*categoryList.get(i).rights.size();
       if (sqrt(sq(disX) + sq(disY)) > r-categoryThickness && sqrt(sq(disX) + sq(disY)) < r) {
-        highlightRing      = true;
-        highlightRadius    = r;
-        highlightThickness = categoryThickness;
+        highlightRing            = true;
+        highlightRadius          = r;
+        highlightThickness       = categoryThickness;
+        highlightedCategoryIndex = i;
       } 
       r -= categoryThickness;
     }
@@ -703,6 +708,7 @@ void mouseReleased(){
   timecontroller.timelineActive = false;
   highlightRing                 = false;
   highlightedRightIndex         = -1;
+  highlightedCategoryIndex      = -1;
 }
 
 
