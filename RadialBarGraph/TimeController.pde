@@ -167,7 +167,7 @@ class TimeController {
     }
     
     if(timelineActive){
-      tickX = mouseX-width/2;
+      tickX = cursorX-width/2;
       if(tickX < timelineX-timelineW/2) { tickX = timelineX-timelineW/2; }
       if(tickX > timelineW/2)           { tickX = timelineW/2;           }
       year  = (int)map(tickX, timelineX-timelineW/2, timelineW/2, years[0], years[1]);
@@ -177,8 +177,8 @@ class TimeController {
   
   void playButtonClicked(float xOffset, float yOffset){
       
-    float disX = playButtonX + xOffset - mouseX;
-    float disY = playButtonY + yOffset - mouseY;
+    float disX = playButtonX + xOffset - cursorX;
+    float disY = playButtonY + yOffset - cursorY;
     
     if (sqrt(sq(disX) + sq(disY)) < buttonW) {
         
@@ -194,8 +194,8 @@ class TimeController {
   
   void ffButtonClicked(float xOffset, float yOffset){
       
-    if(mouseX >= ffButtonX+xOffset-buttonW/2 && mouseX <= ffButtonX+xOffset+buttonW/2 && 
-       mouseY >= ffButtonY+yOffset-buttonH/2 && mouseY <= ffButtonY+yOffset+buttonH/2){
+    if(cursorX >= ffButtonX+xOffset-buttonW/2 && cursorX <= ffButtonX+xOffset+buttonW/2 && 
+       cursorY >= ffButtonY+yOffset-buttonH/2 && cursorY <= ffButtonY+yOffset+buttonH/2){
         
       fastforward    = true; 
       play           = false;
@@ -207,8 +207,8 @@ class TimeController {
   
   void rewindButtonClicked(float xOffset, float yOffset){
       
-    if(mouseX >= rewindButtonX+xOffset-buttonW/2 && mouseX <= rewindButtonX+xOffset+buttonW/2 && 
-       mouseY >= rewindButtonY+yOffset-buttonH/2 && mouseY <= rewindButtonY+yOffset+buttonH/2){
+    if(cursorX >= rewindButtonX+xOffset-buttonW/2 && cursorX <= rewindButtonX+xOffset+buttonW/2 && 
+       cursorY >= rewindButtonY+yOffset-buttonH/2 && cursorY <= rewindButtonY+yOffset+buttonH/2){
         
       rewind         = true; 
       play           = false;
@@ -220,7 +220,7 @@ class TimeController {
   
   void timelineTickClicked(float xOffset, float yOffset){
       
-    float mouseDist = dist(tickX+xOffset, tickY+yOffset, mouseX, mouseY);
+    float mouseDist = dist(tickX+xOffset, tickY+yOffset, cursorX, cursorY);
 
     if(mouseDist < tickR){
       timelineActive = true;

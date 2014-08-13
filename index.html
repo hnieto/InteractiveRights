@@ -2,7 +2,6 @@
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="main.css">
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
     <script type="text/javascript">
       
       // hide all iframes except the one selected via carousel
@@ -13,6 +12,7 @@
 	      for(i = 1; i <= numberOfFrames; i++) {
 	        if(i == frameIndex) { 
  	          document.getElementById("visDiv" + i).style.visibility = "visible"; 
+            document.getElementById("visDiv" + i).style.zIndex = "9999";
             document.getElementById("controlsDiv" + i).style.visibility = "visible";
             document.getElementById("descriptionDiv" + i).style.visibility = "visible";
 	          document.getElementById("visDiv" + i).contentWindow.restartDraw();
@@ -22,6 +22,7 @@
           
           else { 
 	         document.getElementById("visDiv" + i).style.visibility = "hidden"; 
+           document.getElementById("visDiv" + i).style.zIndex = i;
            document.getElementById("controlsDiv" + i).style.visibility = "hidden"; 
            document.getElementById("descriptionDiv" + i).style.visibility = "hidden"; 
 	         document.getElementById("visDiv" + i).contentWindow.pauseDraw();
@@ -55,10 +56,10 @@
     </div>
 
     <div id="center">
-      <iframe id="visDiv1" src="RadialBarGraph/web/radialBarGraph.html" width="100%" height="100%" style="visibility:visible;" seamless></iframe>
-      <iframe id="visDiv2" src="Bubbles/web/bubbles.html" 	            width="100%" height="100%" style="visibility:hidden;"  seamless></iframe>
-      <iframe id="visDiv3" src="TrueOrFalse/web/trueOrFalse.html"       width="100%" height="100%" style="visibility:hidden;"  seamless></iframe>
-      <iframe id="visDiv4" src="Trivia/web/trivia.html"                 width="100%" height="100%" style="visibility:hidden;"  seamless></iframe> 
+      <iframe id="visDiv1" src="RadialBarGraph/web/radialBarGraph.html" width="100%" height="100%" style="visibility:visible; z-index:9999;" seamless></iframe>
+      <iframe id="visDiv2" src="Bubbles/web/bubbles.html" 	            width="100%" height="100%" style="visibility:hidden;"                seamless></iframe>
+      <iframe id="visDiv3" src="TrueOrFalse/web/trueOrFalse.html"       width="100%" height="100%" style="visibility:hidden;"                seamless></iframe>
+      <iframe id="visDiv4" src="Trivia/web/trivia.html"                 width="100%" height="100%" style="visibility:hidden;"                seamless></iframe> 
     </div>
 
     <div id="right">
