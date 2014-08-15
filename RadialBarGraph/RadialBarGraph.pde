@@ -32,6 +32,7 @@ float                    sketchWidth, sketchHeight;
 
 boolean                  stackRights    = true;
 boolean                  highlightRing  = false;
+boolean                  dragMode       = false;
 
 /*********************************************/
 /*            Initialization                 */
@@ -690,6 +691,7 @@ void cursorDragged() {
     // get the angle from the center to the mouse position
     float mouseEndAngle = atan2(cursorY - height/2, cursorX - width/2);
     float angleOffset   = mouseEndAngle - mouseStartAngle;
+    if(angleOffset > 0.003) dragMode = true;
 
     circumplexRotationAngle += angleOffset;
     mouseStartAngle          = mouseEndAngle;
@@ -703,7 +705,7 @@ void cursorUp() {
   timecontroller.rewindButtonClicked(width/2, height/2);
 
   // if in "All Rights" circumplex, check for category selection via mouse click
-  if (currentCircumplex == categoryList.size()) {
+  if (currentCircumplex == categoryList.size() && !dragMode) {
 
     float rightThickness    = (circumplexRadius-controllerRadius)/numberOfRights;
     float r                 = circumplexRadius;
@@ -721,6 +723,7 @@ void cursorUp() {
     }
   }
   
+  dragMode                      = false;
   timecontroller.timelineActive = false;
   highlightRing                 = false;
   highlightedRightIndex         = -1;
