@@ -2,11 +2,43 @@
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="main.css">
+    <meta name="viewport" content="width=device-width,user-scalable=no">
     <script type="text/javascript">
+
+      // hide all iframes except the one selected via carousel
+      // stop draw loop if sketch is hidden
+      // prevent mouse event from executing after touch is detected    
+      function changeVisWithTouch(e, frameIndex) {
+        e.preventDefault();
+        e.stopPropagation();
+        var numberOfFrames = document.getElementById("center").getElementsByTagName("iframe").length;
+
+        for(i = 1; i <= numberOfFrames; i++) {
+          if(i == frameIndex) { 
+            document.getElementById("visDiv" + i).style.visibility = "visible"; 
+            document.getElementById("visDiv" + i).style.zIndex = "9999";
+            document.getElementById("controlsDiv" + i).style.visibility = "visible";
+            document.getElementById("descriptionDiv" + i).style.visibility = "visible";
+            document.getElementById("visDiv" + i).contentWindow.restartDraw();
+            document.getElementById("visDivIcon" + i +"a").src = "images/visDivIcon" + i + "_y.png";
+            document.getElementById("visDivIcon" + i +"b").src = "images/visDivIcon" + i + "_y.png";
+          }
+          
+          else { 
+           document.getElementById("visDiv" + i).style.visibility = "hidden"; 
+           document.getElementById("visDiv" + i).style.zIndex = i;
+           document.getElementById("controlsDiv" + i).style.visibility = "hidden"; 
+           document.getElementById("descriptionDiv" + i).style.visibility = "hidden"; 
+           document.getElementById("visDiv" + i).contentWindow.pauseDraw();
+           document.getElementById("visDivIcon" + i + "a").src = "images/visDivIcon" + i + "_w.png";
+           document.getElementById("visDivIcon" + i + "b").src = "images/visDivIcon" + i + "_w.png";
+          } 
+        }
+      }   
       
       // hide all iframes except the one selected via carousel
       // stop draw loop if sketch is hidden
-      function changeVis(frameIndex) {
+      function changeVisWithMouse(frameIndex) {
         var numberOfFrames = document.getElementById("center").getElementsByTagName("iframe").length;
 
 	      for(i = 1; i <= numberOfFrames; i++) {
@@ -41,10 +73,10 @@
 			  <span>Interactive Rights</span>
       </div>
       <div id="nav-bar-top">
-        <a href="#"><img src="images/visDivIcon1_y.png" id="visDivIcon1a" onclick="changeVis(1)" /></a>
-        <a href="#"><img src="images/visDivIcon2_w.png" id="visDivIcon2a" onclick="changeVis(2)" /></a>
-        <a href="#"><img src="images/visDivIcon3_w.png" id="visDivIcon3a" onclick="changeVis(3)" /></a>
-        <a href="#"><img src="images/visDivIcon4_w.png" id="visDivIcon4a" onclick="changeVis(4)" /></a> 	
+        <a href="#"><img src="images/visDivIcon1_y.png" id="visDivIcon1a" ontouchstart="changeVisWithTouch(event,1)" onclick="changeVisWithMouse(1)" /></a>
+        <a href="#"><img src="images/visDivIcon2_w.png" id="visDivIcon2a" ontouchstart="changeVisWithTouch(event,2)" onclick="changeVisWithMouse(2)" /></a>
+        <a href="#"><img src="images/visDivIcon3_w.png" id="visDivIcon3a" ontouchstart="changeVisWithTouch(event,3)" onclick="changeVisWithMouse(3)" /></a>
+        <a href="#"><img src="images/visDivIcon4_w.png" id="visDivIcon4a" ontouchstart="changeVisWithTouch(event,4)" onclick="changeVisWithMouse(4)" /></a> 	
       </div>
 		</div>
 		
@@ -71,10 +103,10 @@
 
 		<div id="footer">
       <div id="nav-bar-bottom">
-        <a href="#"><img src="images/visDivIcon1_y.png" id="visDivIcon1b" onclick="changeVis(1)" /></a>
-        <a href="#"><img src="images/visDivIcon2_w.png" id="visDivIcon2b" onclick="changeVis(2)" /></a>
-        <a href="#"><img src="images/visDivIcon3_w.png" id="visDivIcon3b" onclick="changeVis(3)" /></a>
-        <a href="#"><img src="images/visDivIcon4_w.png" id="visDivIcon4b" onclick="changeVis(4)" /></a>  
+        <a href="#"><img src="images/visDivIcon1_y.png" id="visDivIcon1b" ontouchstart="changeVisWithTouch(event,1)" onclick="changeVisWithMouse(1)" /></a>
+        <a href="#"><img src="images/visDivIcon2_w.png" id="visDivIcon2b" ontouchstart="changeVisWithTouch(event,2)" onclick="changeVisWithMouse(2)" /></a>
+        <a href="#"><img src="images/visDivIcon3_w.png" id="visDivIcon3b" ontouchstart="changeVisWithTouch(event,3)" onclick="changeVisWithMouse(3)" /></a>
+        <a href="#"><img src="images/visDivIcon4_w.png" id="visDivIcon4b" ontouchstart="changeVisWithTouch(event,4)" onclick="changeVisWithMouse(4)" /></a>  
       </div>
       <div id="ut-branding">
         <span>The University of Texas at Austin</span>
