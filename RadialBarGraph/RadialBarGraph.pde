@@ -259,6 +259,7 @@ void drawCategoryBorders() {
   float angle = delta/2;
 
   for (int i=0; i<numberOfSlices; i++) {
+  //for (int i=0; i<1; i++) {
     line(0, 0, circumplexRadius*cos(angle), circumplexRadius*sin(angle));
     angle += delta;
   } 
@@ -285,7 +286,7 @@ void drawCountryNames() {
     if (name.equals("United States")) textSize(fontSize*1.5);
     else textSize(fontSize);
 
-    float outerRadius   = adjustedRadius + thickness/2;
+    float outerRadius   = adjustedRadius + thickness;
     float txtStartAngle = (startTheta+delta*0.5) - (getTextLength(name)/outerRadius)*0.5;
     float arclength     = 0; // We must keep track of our position along the curve
 
