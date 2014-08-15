@@ -237,38 +237,37 @@ void drawRightsBorders(Category category) {
 void drawCategoryBorders() {
 
   int borderThickness = 1;
-  int numberOfRings   = categoryList.size();
+  int numberOfRings   = numberOfRights;
   int numberOfSlices  = countryList.size();
 
   pushStyle();
   noFill();
   stroke(20);
   strokeWeight(borderThickness);
-
+  
   // create rings
-  float individualRightThickness = (circumplexRadius-controllerRadius)/numberOfRights;
-  float growingRadius            = controllerRadius;
+  float thickness       = (circumplexRadius-controllerRadius)/numberOfRings;
+  float shrinkingRadius = circumplexRadius;
 
-  for (int i=0; i<numberOfRings; i++) {
-
-    Category category = categoryList.get(i);
-    ellipse(0, 0, growingRadius*2, growingRadius*2);
-    growingRadius += individualRightThickness*category.rights.size();
+  for (int i=0; i<=numberOfRings; i++) {
+    ellipse(0, 0, shrinkingRadius*2, shrinkingRadius*2);
+    shrinkingRadius -= thickness;
   }
-  ellipse(0, 0, growingRadius*2, growingRadius*2);
-
+  
   // create slices
   float delta = TWO_PI/numberOfSlices;
   float angle = delta/2;
 
   for (int i=0; i<numberOfSlices; i++) {
-    line(0, 0);
-    line(circumplexRadius*cos(angle), circumplexRadius*sin(angle));
+    line(0, 0, circumplexRadius*cos(angle), circumplexRadius*sin(angle));
     angle += delta;
   } 
-
+  
+  // hide grid behind time controller
+  shrinkingRadius += thickness;
   fill(0);
-  ellipse(0, 0, controllerRadius*2, controllerRadius*2);
+  ellipse(0, 0, shrinkingRadius*2, shrinkingRadius*2);
+  
   popStyle();
 }
 
