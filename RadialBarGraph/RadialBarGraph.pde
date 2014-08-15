@@ -705,12 +705,13 @@ void cursorUp() {
   // if in "All Rights" circumplex, check for category selection via mouse click
   if (currentCircumplex == categoryList.size()) {
 
-    float categoryThickness = (circumplexRadius-controllerRadius)/categoryList.size();
+    float rightThickness    = (circumplexRadius-controllerRadius)/numberOfRights;
     float r                 = circumplexRadius;
     float x                 = width/2;
     float y                 = height/2;
 
     for (int i=categoryList.size()-1; i>=0; i--) {
+      float categoryThickness = rightThickness*categoryList.get(i).rights.size();
       float disX = x - cursorX;
       float disY = y - cursorY;
       if (sqrt(sq(disX) + sq(disY)) > r-categoryThickness && sqrt(sq(disX) + sq(disY)) < r) {
