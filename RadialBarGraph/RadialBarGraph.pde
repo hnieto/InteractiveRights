@@ -117,12 +117,10 @@ void draw() {
   if (currentCircumplex == categoryList.size()) {
     drawCategoryCircumplex();
     highlightUS();
-    drawCategoryBorders();
   } 
   else {
     drawRightsCircumplex(categoryList.get(currentCircumplex));
     highlightUS();
-    drawRightsBorders(categoryList.get(currentCircumplex));
   }
   drawCountryNames();
   popMatrix();
@@ -164,7 +162,7 @@ void drawCategoryCircumplex() {
   float adjustedRadius = circumplexRadius-thickness/2; // wedge thickens up/down from current radius, we have to adjust for that
 
   for (int i=countryList.size()-1; i>=0; i--) {
-    countryList.get(i).drawCategories(timecontroller.year, theta, theta+delta, delta, adjustedRadius, thickness, stackRights);
+    countryList.get(i).drawCategories(timecontroller.year, theta+0.01, theta+delta-0.01, delta, adjustedRadius, thickness, stackRights);
     theta += delta;
   }
 }
@@ -178,7 +176,7 @@ void drawRightsCircumplex(Category category) {
   float adjustedRadius = circumplexRadius-thickness/2; // wedge thickens up/down from current radius, we have to adjust for that
 
   for (int i=countryList.size()-1; i>=0; i--) {
-    countryList.get(i).drawRights(category, timecontroller.year, theta, theta+delta, delta, adjustedRadius, thickness);
+    countryList.get(i).drawRights(category, timecontroller.year, theta+0.01, theta+delta-0.01, delta, adjustedRadius, thickness);
     theta += delta;
   }
 }
@@ -192,84 +190,9 @@ void highlightUS() {
   float theta = -delta/2;
 
   pushStyle();
+  noStroke();
   fill(200, 100);
   arc(0, 0, circumplexRadius*2, circumplexRadius*2, theta, theta+delta);
-  popStyle();
-}
-
-
-void drawRightsBorders(Category category) {
-
-  int borderThickness = 1;
-  int numberOfRings   = category.rights.size();
-  int numberOfSlices  = countryList.size();
-
-  pushStyle();
-  noFill();
-  stroke(20);
-  strokeWeight(borderThickness);
-
-  // create rings
-  float thickness       = (circumplexRadius-controllerRadius)/numberOfRings;
-  float shrinkingRadius = circumplexRadius;
-
-  for (int i=0; i<=numberOfRings; i++) {
-    ellipse(0, 0, shrinkingRadius*2, shrinkingRadius*2);
-    shrinkingRadius -= thickness;
-  }
-
-  // create slices
-  float delta = TWO_PI/numberOfSlices;
-  float angle = delta/2;
-
-  for (int i=0; i<numberOfSlices; i++) {
-    line(0, 0);
-    line(circumplexRadius*cos(angle), circumplexRadius*sin(angle));
-    angle += delta;
-  } 
-
-  shrinkingRadius += thickness;
-  fill(0);
-  ellipse(0, 0, shrinkingRadius*2, shrinkingRadius*2);
-  popStyle();
-}
-
-
-void drawCategoryBorders() {
-
-  int borderThickness = 1;
-  int numberOfRings   = numberOfRights;
-  int numberOfSlices  = countryList.size();
-
-  pushStyle();
-  noFill();
-  stroke(20);
-  strokeWeight(borderThickness);
-  
-  // create rings
-  float thickness       = (circumplexRadius-controllerRadius)/numberOfRings;
-  float shrinkingRadius = circumplexRadius;
-
-  for (int i=0; i<=numberOfRings; i++) {
-    ellipse(0, 0, shrinkingRadius*2, shrinkingRadius*2);
-    shrinkingRadius -= thickness;
-  }
-  
-  // create slices
-  float delta = TWO_PI/numberOfSlices;
-  float angle = delta/2;
-
-  for (int i=0; i<numberOfSlices; i++) {
-  //for (int i=0; i<1; i++) {
-    line(0, 0, circumplexRadius*cos(angle), circumplexRadius*sin(angle));
-    angle += delta;
-  } 
-  
-  // hide grid behind time controller
-  shrinkingRadius += thickness;
-  fill(0);
-  ellipse(0, 0, shrinkingRadius*2, shrinkingRadius*2);
-  
   popStyle();
 }
 
@@ -338,7 +261,7 @@ void drawRightNames() {
   float    delta            = TWO_PI/countryList.size(); 
   float    startTheta       = -delta/2; // shift by half the width of the US slice so as to center it
   float    thickness        = (circumplexRadius-controllerRadius)/category.rights.size();
-  float    adjustedRadius   = circumplexRadius-thickness;
+  float    adjustedRadius   = circumplexRadius-thickness*0.95;
   float    adjustedFontSize = fontSize*15/category.rights.size(); // font size must be inversely proportional to the number of rings 
   String   rightText;
 

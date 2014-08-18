@@ -49,18 +49,29 @@ class Country {
         break;
       }
     }
-
     
     float currentRadius = radius;
     // compare every right in the Category object passed in with the rights listed for that Year for this Country
     for (int i=category.rights.size()-1; i>=0; i--) {
       String right = category.rights.get(i);
+      
+       // border
+      strokeCap(SQUARE);
+//      strokeWeight(thickness);
+//      stroke(255);
+//      arc(0, 0, currentRadius*2, currentRadius*2, startTheta, endTheta);
+      
       if (yearIndex != -1 && years.get(yearIndex).rights.contains(right)) {
-        strokeCap(SQUARE);
-        strokeWeight(thickness);
+        strokeWeight(thickness*0.9); // if using grid then use => strokeWeight(thickness)
         stroke(category.rightsColors[i]);
         arc(0, 0, currentRadius*2, currentRadius*2, startTheta, endTheta);
-      }
+      } 
+      
+//      else {
+//        strokeWeight(thickness);
+//        stroke(background_color);
+//        arc(0, 0, currentRadius*2, currentRadius*2, startTheta, endTheta);        
+//      }
      
       strokeWeight(1);
       noFill();
@@ -93,7 +104,7 @@ class Country {
           String right = category.rights.get(j);
           if (yearIndex != -1 && years.get(yearIndex).rights.contains(right)) {
             strokeCap(SQUARE);
-            strokeWeight(thickness);
+            strokeWeight(thickness*0.9);
             stroke(category.colour);
             arc(0, 0, stackRadius*2, stackRadius*2, startTheta, endTheta);
             stackRadius += thickness;
@@ -107,7 +118,7 @@ class Country {
           String right = category.rights.get(j);
           if (yearIndex != -1 && years.get(yearIndex).rights.contains(right)) {
             strokeCap(SQUARE);
-            strokeWeight(thickness);
+            strokeWeight(thickness*0.9);
             stroke(category.colour);
             arc(0, 0, currentRadius*2, currentRadius*2, startTheta, endTheta);
           }
