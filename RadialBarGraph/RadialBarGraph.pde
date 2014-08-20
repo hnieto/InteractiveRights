@@ -191,7 +191,7 @@ void highlightUS() {
 
   pushStyle();
   noStroke();
-  fill(200, 100);
+  fill(200, 50);
   arc(0, 0, circumplexRadius*2, circumplexRadius*2, theta, theta+delta);
   popStyle();
 }
@@ -614,7 +614,7 @@ void cursorDragged() {
     // get the angle from the center to the mouse position
     float mouseEndAngle = atan2(cursorY - height/2, cursorX - width/2);
     float angleOffset   = mouseEndAngle - mouseStartAngle;
-    if(angleOffset > 0.003) dragMode = true;
+    if(abs(angleOffset) > 0.003) dragMode = true;
 
     circumplexRotationAngle += angleOffset;
     mouseStartAngle          = mouseEndAngle;

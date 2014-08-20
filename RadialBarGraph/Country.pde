@@ -1,8 +1,8 @@
 class Country {
     
   String          name;
-  ArrayList<Year> years        = new ArrayList<Year>();
-  color           border_color = color(5);
+  ArrayList<Year> years           = new ArrayList<Year>();
+  color           emptyWedgeColor = color(15);
 
   
   Country(String name) {
@@ -55,23 +55,19 @@ class Country {
     for (int i=category.rights.size()-1; i>=0; i--) {
       String right = category.rights.get(i);
       
-       // border
-      strokeCap(SQUARE);
-//      strokeWeight(thickness);
-//      stroke(255);
-//      arc(0, 0, currentRadius*2, currentRadius*2, startTheta, endTheta);
-      
+      strokeCap(SQUARE);     
       if (yearIndex != -1 && years.get(yearIndex).rights.contains(right)) {
         strokeWeight(thickness*0.9); // if using grid then use => strokeWeight(thickness)
         stroke(category.rightsColors[i]);
         arc(0, 0, currentRadius*2, currentRadius*2, startTheta, endTheta);
       } 
-      
-//      else {
-//        strokeWeight(thickness);
-//        stroke(background_color);
-//        arc(0, 0, currentRadius*2, currentRadius*2, startTheta, endTheta);        
-//      }
+     
+      // fill in empty space with dark wedge
+      else {
+        strokeWeight(thickness*0.9);
+        stroke(emptyWedgeColor);
+        arc(0, 0, currentRadius*2, currentRadius*2, startTheta, endTheta);        
+      }
      
       strokeWeight(1);
       noFill();
@@ -97,18 +93,26 @@ class Country {
       Category category = categoryList.get(i);
       float categoryThickness = thickness*category.rights.size();
       float stackRadius = currentRadius+thickness-categoryThickness;
+      strokeCap(SQUARE);
       
       // compare every right in the Category object passed in with the rights listed for that Year for this Country
       if(stack){
         for (int j=category.rights.size()-1; j>=0; j--) {
           String right = category.rights.get(j);
           if (yearIndex != -1 && years.get(yearIndex).rights.contains(right)) {
-            strokeCap(SQUARE);
             strokeWeight(thickness*0.9);
             stroke(category.colour);
             arc(0, 0, stackRadius*2, stackRadius*2, startTheta, endTheta);
             stackRadius += thickness;
           }
+          
+          // fill in empty space with dark wedge
+//          else {
+//            strokeWeight(thickness*0.9);
+//            stroke(emptyWedgeColor);
+//            arc(0, 0, stackRadius*2, stackRadius*2, startTheta, endTheta);
+//            stackRadius += thickness;            
+//          }
           currentRadius -= thickness;
         }
       } 
@@ -117,10 +121,16 @@ class Country {
         for (int j=category.rights.size()-1; j>=0; j--) {
           String right = category.rights.get(j);
           if (yearIndex != -1 && years.get(yearIndex).rights.contains(right)) {
-            strokeCap(SQUARE);
             strokeWeight(thickness*0.9);
             stroke(category.colour);
             arc(0, 0, currentRadius*2, currentRadius*2, startTheta, endTheta);
+          }
+          
+          // fill in empty space with dark wedge
+          else {
+            strokeWeight(thickness*0.9);
+            stroke(emptyWedgeColor);
+            arc(0, 0, currentRadius*2, currentRadius*2, startTheta, endTheta);            
           }
           currentRadius -= thickness;
         }        
