@@ -96,25 +96,29 @@ class Country {
       strokeCap(SQUARE);
       
       // compare every right in the Category object passed in with the rights listed for that Year for this Country
-      if(stack){
+      if(stack){        
+        
+        int numberOfActiveRights = 0;
         for (int j=category.rights.size()-1; j>=0; j--) {
           String right = category.rights.get(j);
           if (yearIndex != -1 && years.get(yearIndex).rights.contains(right)) {
+            numberOfActiveRights++;
             strokeWeight(thickness*0.9);
             stroke(category.colour);
             arc(0, 0, stackRadius*2, stackRadius*2, startTheta, endTheta);
             stackRadius += thickness;
           }
-          
-          // fill in empty space with dark wedge
-//          else {
-//            strokeWeight(thickness*0.9);
-//            stroke(emptyWedgeColor);
-//            arc(0, 0, stackRadius*2, stackRadius*2, startTheta, endTheta);
-//            stackRadius += thickness;            
-//          }
-          currentRadius -= thickness;
         }
+        
+        // fill in empty space with dark wedge
+        for (int k=0; k<(category.rights.size()-numberOfActiveRights); k++){
+          strokeWeight(thickness*0.9);
+          stroke(emptyWedgeColor);
+          arc(0, 0, stackRadius*2, stackRadius*2, startTheta, endTheta);
+          stackRadius += thickness;        
+        }
+        
+        currentRadius -= categoryThickness;
       } 
       
       else {

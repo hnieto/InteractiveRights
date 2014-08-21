@@ -706,10 +706,12 @@ void touchStart(TouchEvent touchEvent) {
  
  
 void touchMove(TouchEvent touchEvent) {
-  cursorX     = touchEvent.touches[0].offsetX;
-  cursorY     = touchEvent.touches[0].offsetY;
+  if(touchEvent.changedTouches[0].identifier == cursorID) {
+    cursorX     = touchEvent.touches[0].offsetX;
+    cursorY     = touchEvent.touches[0].offsetY;
 
-  cursorDragged(); 
+    cursorDragged(); 
+  }
 }
 
 
