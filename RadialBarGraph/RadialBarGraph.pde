@@ -11,7 +11,6 @@ HashMap<String, Country> countryMap     = new HashMap<String, Country>();
 ArrayList<Country>       countryList    = new ArrayList<Country>();
 ArrayList<Category>      categoryList   = new ArrayList<Category>();
 ArrayList<String>        rightsColumns  = new ArrayList<String>();
-HashMap<Integer,Cursor>  cursors        = new HashMap<Integer,Cursor>();
 
 TimeController           timecontroller;
 int[]                    yearRange      = { 1850, 2012 };
@@ -27,12 +26,13 @@ int                      fontSize;
 color[]                  categoryColors = new color[7];
 color                    background_color, letter_color, wedgeBorder_color;
 
-float                    cursorX, cursorY; // generic variable to hold either touch or mouse location
+float                    cursorX, cursorY, cursorR, cursorID; // generic variable to hold either touch or mouse location
 float                    sketchWidth, sketchHeight;
 
 boolean                  stackRights    = true;
 boolean                  highlightRing  = false;
 boolean                  dragMode       = false;
+boolean                  cursorActive   = false;
 
 /*********************************************/
 /*            Initialization                 */
@@ -144,10 +144,12 @@ void draw() {
   timecontroller.update();
   popMatrix();
   
-  Iterator i = cursors.values().iterator();
-  while(i.hasNext()){
-    Cursor cursor = (Cursor) i.next();
-    cursor.draw();
+  if(cursorActive){
+    pushStyle();
+    noStroke();
+    fill(color(255, 75));
+    ellipse(cursorX, cursorY, cursorR*2, cursorR*2);
+    popStyle(); 
   }
 }
 
@@ -662,8 +664,11 @@ void keyPressed() {
 }
 
 void mousePressed() { 
-  cursorX = mouseX;
-  cursorY = mouseY;
+  cursorActive = true;
+  cursorX      = mouseX;
+  cursorY      = mouseY;
+  cursorR      = min(width,height) * 0.02;
+  
   cursorDown();
 }
 
@@ -675,8 +680,9 @@ void mouseDragged() {
 
 
 void mouseReleased() {
-  cursorX = mouseX;
-  cursorY = mouseY;
+  cursorX      = mouseX;
+  cursorY      = mouseY;
+  cursorActive = false;
   cursorUp();
 }
 
@@ -686,61 +692,36 @@ void mouseReleased() {
 /*********************************************/
 void touchStart(TouchEvent touchEvent) {
   touchEvent.preventDefault();
-
-  for (int i = 0; i < touchEvent.touches.length; i++) {
-    int x      = touchEvent.touches[i].offsetX;
-    int y      = touchEvent.touches[i].offsetY;
-    float r    = min(width,height) * 0.02;
-    Integer id = (Integer)touchEvent.touches[i].identifier;
-
-    if(cursors.get(id) == null) {
-      cursors.put(id, new Cursor(id,x,y,r));
-    }
-    
-    if(id == 0) {
-       cursorX = x;
-       cursorY = y;
-       cursorDown();   
-    }
+  
+  if(!cursorActive) {
+    cursorActive = true;
+    cursorID     = touchEvent.touches[0].identifier;
+    cursorX      = touchEvent.touches[0].offsetX;
+    cursorY      = touchEvent.touches[0].offsetY;
+    cursorR      = min(width,height) * 0.02;
+  
+    cursorDown();  
   }
 }
  
  
 void touchMove(TouchEvent touchEvent) {
-  for (int i = 0; i < touchEvent.touches.length; i++) {
-    int x      = touchEvent.touches[i].offsetX;
-    int y      = touchEvent.touches[i].offsetY;
-    Integer id = (Integer)touchEvent.touches[i].identifier;
+  cursorX     = touchEvent.touches[0].offsetX;
+  cursorY     = touchEvent.touches[0].offsetY;
 
-    if(cursors.get(id) != null) {
-      Cursor cursor = (Cursor) cursors.get(id);
-      cursor.x          = x;
-      cursor.y          = y;
-      
-      if(id == 0) {
-        cursorX = x;
-        cursorY = y;
-        cursorDragged(); 
-      }
-    }
-  }
+  cursorDragged(); 
 }
 
 
 void touchEnd(TouchEvent touchEvent) {
   for (int i = 0; i < touchEvent.changedTouches.length; i++) {
-    int x      = touchEvent.changedTouches[i].offsetX;
-    int y      = touchEvent.changedTouches[i].offsetY;
-    Integer id = (Integer)touchEvent.changedTouches[i].identifier;
-
-    if(cursors.get(id) != null) {
-      if(id == 0) {
-        cursorX = x;
-        cursorY = y;
-        cursorUp();
-      }
-      
-      cursors.remove(id);
+    if(touchEvent.changedTouches[i].identifier == cursorID) {
+      cursorX      = touchEvent.changedTouches[i].offsetX;
+      cursorY      = touchEvent.changedTouches[i].offsetY;
+      cursorActive = false;
+  
+      cursorUp();
+      break;
     }
   }
 }
