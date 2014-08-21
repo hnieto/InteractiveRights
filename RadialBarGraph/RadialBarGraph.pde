@@ -700,6 +700,7 @@ void touchStart(TouchEvent touchEvent) {
     cursorY      = touchEvent.touches[0].offsetY;
     cursorR      = min(width,height) * 0.02;
   
+    removeTouchListener();
     cursorDown();  
   }
 }
@@ -722,6 +723,7 @@ void touchEnd(TouchEvent touchEvent) {
       cursorY      = touchEvent.changedTouches[i].offsetY;
       cursorActive = false;
   
+      addTouchListener();
       cursorUp();
       break;
     }
@@ -922,6 +924,14 @@ function setCanvasSize() {
   var browserHeight   = window.innerHeight;
   sketchWidth         = browserWidth;
   sketchHeight        = browserHeight * 0.99;
+}
+
+function removeTouchListener() {
+  document.body.removeEventListener('touchstart', touchStart); 
+}
+
+function addTouchListener() {
+  document.body.addEventListener('touchstart', touchStart); 
 }
 
 
