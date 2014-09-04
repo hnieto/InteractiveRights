@@ -26,7 +26,7 @@ int                      fontSize;
 color[]                  categoryColors = new color[7];
 color                    background_color, letter_color, wedgeBorder_color;
 
-float                    cursorX, cursorY, cursorR, cursorID; // generic variable to hold either touch or mouse location
+float                    cursorX, cursorY, cursorR; // generic variable to hold either touch or mouse location
 float                    sketchWidth, sketchHeight;
 
 boolean                  stackRights    = true;
@@ -616,7 +616,7 @@ void cursorDragged() {
     // get the angle from the center to the mouse position
     float mouseEndAngle = atan2(cursorY - height/2, cursorX - width/2);
     float angleOffset   = mouseEndAngle - mouseStartAngle;
-    if(abs(angleOffset) > 0.003) dragMode = true;
+    if(abs(angleOffset) > 0.006) dragMode = true;
 
     circumplexRotationAngle += angleOffset;
     mouseStartAngle          = mouseEndAngle;
@@ -684,50 +684,6 @@ void mouseReleased() {
   cursorY      = mouseY;
   cursorActive = false;
   cursorUp();
-}
-
-
-/*********************************************/
-/*          MULTI-TOUCH SUPPORT              */
-/*********************************************/
-void touchStart(TouchEvent touchEvent) {
-  touchEvent.preventDefault();
-  
-  if(!cursorActive) {
-    cursorActive = true;
-    cursorID     = touchEvent.touches[0].identifier;
-    cursorX      = touchEvent.touches[0].offsetX;
-    cursorY      = touchEvent.touches[0].offsetY;
-    cursorR      = min(width,height) * 0.02;
-  
-    removeTouchListener();
-    cursorDown();  
-  }
-}
- 
- 
-void touchMove(TouchEvent touchEvent) {
-  if(touchEvent.changedTouches[0].identifier == cursorID) {
-    cursorX     = touchEvent.touches[0].offsetX;
-    cursorY     = touchEvent.touches[0].offsetY;
-
-    cursorDragged(); 
-  }
-}
-
-
-void touchEnd(TouchEvent touchEvent) {
-  for (int i = 0; i < touchEvent.changedTouches.length; i++) {
-    if(touchEvent.changedTouches[i].identifier == cursorID) {
-      cursorX      = touchEvent.changedTouches[i].offsetX;
-      cursorY      = touchEvent.changedTouches[i].offsetY;
-      cursorActive = false;
-  
-      addTouchListener();
-      cursorUp();
-      break;
-    }
-  }
 }
 
 
@@ -924,14 +880,6 @@ function setCanvasSize() {
   var browserHeight   = window.innerHeight;
   sketchWidth         = browserWidth;
   sketchHeight        = browserHeight * 0.99;
-}
-
-function removeTouchListener() {
-  document.body.removeEventListener('touchstart', touchStart); 
-}
-
-function addTouchListener() {
-  document.body.addEventListener('touchstart', touchStart); 
 }
 
 
