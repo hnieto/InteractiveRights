@@ -74,7 +74,6 @@ class TimeController {
       
     pushStyle();
     pushMatrix();
-    rotate(PI/2);
     
     // Seperate controller from vis with ellipse
     fill(40, 10, 10);

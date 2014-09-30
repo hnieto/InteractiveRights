@@ -29,10 +29,13 @@ color                    background_color, letter_color, wedgeBorder_color;
 float                    cursorX, cursorY, cursorR; // generic variable to hold either touch or mouse location
 float                    sketchWidth, sketchHeight;
 
-boolean                  stackRights    = true;
-boolean                  highlightRing  = false;
-boolean                  dragMode       = false;
-boolean                  cursorActive   = false;
+//boolean                  stackRights          = true;
+boolean                  dragMode             = false;
+
+boolean                  highlightRing        = false;
+boolean                  highlightTimerActive = false;
+int                      highlightStartTime;
+
 
 /*********************************************/
 /*            Initialization                 */
@@ -61,7 +64,7 @@ void setup() {
 
   // javascript function to set sketch size according to the width of the browser
   setCanvasSize();
-  size(sketchWidth, sketchHeight);
+  size(sketchWidth, sketchHeight, P2D);
   paddingTop                 = sketchHeight * 0.01; 
 
   // font stuff
@@ -81,9 +84,10 @@ void setup() {
   timecontroller.init();
 
   // parsing
-  parseCategories("../data/us_categorization_061814.csv");
+  //parseCategories("../data/us_categorization_061814.csv");
+  parseCategories("../data/substantive_categorization_060214.csv");
   parseRights("../data/dj_rights_060214.csv");
-  findCountriesInRange(yearRange[0], yearRange[1]);  
+  findCountriesInRange(yearRange[0], yearRange[1]);
 
   // determine number of rights in largest category
   // used to calculate font size for right description 
@@ -99,6 +103,8 @@ void setup() {
 
   // set "All Rights" view as default
   currentCircumplex          = categoryList.size();
+    
+  smooth();
 }
 
 /*********************************************/
@@ -110,18 +116,11 @@ void draw() {
 
   pushMatrix();
   translate(width/2, (height)/2);
-  rotate(-HALF_PI);
 
   pushMatrix();
   rotate(circumplexRotationAngle);
-  if (currentCircumplex == categoryList.size()) {
-    drawCategoryCircumplex();
-    highlightUS();
-  } 
-  else {
-    drawRightsCircumplex(categoryList.get(currentCircumplex));
-    highlightUS();
-  }
+  if (currentCircumplex == categoryList.size()) { drawCategoryCircumplex(); } 
+  else { drawRightsCircumplex(categoryList.get(currentCircumplex)); }
   drawCountryNames();
   popMatrix();
 
@@ -144,13 +143,14 @@ void draw() {
   timecontroller.update();
   popMatrix();
   
-  if(cursorActive){
-    pushStyle();
-    noStroke();
-    fill(color(255, 75));
-    ellipse(cursorX, cursorY, cursorR*2, cursorR*2);
-    popStyle(); 
+  if (highlightTimerActive && millis()-highlightStartTime>10000) {
+    highlightTimerActive     = false;
+    highlightRing            = false;
+    highlightedRightIndex    = -1;
+    highlightedCategoryIndex = -1;
   }
+  
+  //println(frameRate);
 }
 
 /*********************************************/
@@ -159,12 +159,12 @@ void draw() {
 void drawCategoryCircumplex() {
 
   float delta          = TWO_PI/countryList.size(); 
-  float theta          = delta/2; // shift by half the width of the US slice so as to center it
-  float thickness      = (circumplexRadius-controllerRadius)/numberOfRights;
-  float adjustedRadius = circumplexRadius-thickness/2; // wedge thickens up/down from current radius, we have to adjust for that
+  float theta          = 0.0; // shift by half the width of the US slice so as to center it
+  float rightThickness      = (circumplexRadius-controllerRadius)/numberOfRights;
+  float adjustedRadius = controllerRadius; 
 
-  for (int i=countryList.size()-1; i>=0; i--) {
-    countryList.get(i).drawCategories(timecontroller.year, theta+0.01, theta+delta-0.01, delta, adjustedRadius, thickness, stackRights);
+  for (int i=0; i<countryList.size(); i++) {
+    countryList.get(i).drawCategories(timecontroller.year, theta+0.01, theta+delta-0.01, delta, adjustedRadius, rightThickness);
     theta += delta;
   }
 }
@@ -173,11 +173,11 @@ void drawCategoryCircumplex() {
 void drawRightsCircumplex(Category category) {
 
   float delta          = TWO_PI/countryList.size(); // +2 to account for US taking up 3 slices
-  float theta          = delta/2; // shift by half the width of the US slice so as to center it
+  float theta          = 0.0; // shift by half the width of the US slice so as to center it
   float thickness      = (circumplexRadius-controllerRadius)/category.rights.size();
   float adjustedRadius = circumplexRadius-thickness/2; // wedge thickens up/down from current radius, we have to adjust for that
 
-  for (int i=countryList.size()-1; i>=0; i--) {
+  for (int i=0; i<countryList.size(); i++) {
     countryList.get(i).drawRights(category, timecontroller.year, theta+0.01, theta+delta-0.01, delta, adjustedRadius, thickness);
     theta += delta;
   }
@@ -186,32 +186,18 @@ void drawRightsCircumplex(Category category) {
 /*********************************************/
 /*              OVERLAYS                     */
 /*********************************************/
-void highlightUS() {
-
-  float delta = TWO_PI/countryList.size();
-  float theta = -delta/2;
-
-  pushStyle();
-  noStroke();
-  fill(200, 50);
-  arc(0, 0, circumplexRadius*2, circumplexRadius*2, theta, theta+delta);
-  popStyle();
-}
-
 
 void drawCountryNames() {   
 
+  textSize(fontSize);
   float delta           = TWO_PI/countryList.size(); 
-  float startTheta      = delta/2; // shift by half the width of the US slice so as to center it
+  float startTheta      = 0.0; // shift by half the width of the US slice so as to center it
   float thickness       = (circumplexRadius-controllerRadius)/numberOfRights;
   float adjustedRadius  = circumplexRadius-thickness/2; // wedge thickens up/down from current radius, we have to adjust for that
 
-  for (int i=countryList.size()-1; i>=0; i--) {
+  for (int i=0; i<countryList.size(); i++) {
 
     String name = countryList.get(i).name;
-    if (name.equals("United States")) textSize(fontSize*1.5);
-    else textSize(fontSize);
-
     float outerRadius   = adjustedRadius + thickness;
     float txtStartAngle = (startTheta+delta*0.5) - (getTextLength(name)/outerRadius)*0.5;
     float arclength     = 0; // We must keep track of our position along the curve
@@ -261,7 +247,7 @@ void drawRightNames() {
 
   Category category         = categoryList.get(currentCircumplex);
   float    delta            = TWO_PI/countryList.size(); 
-  float    startTheta       = -delta/2; // shift by half the width of the US slice so as to center it
+  float    startTheta       = -HALF_PI - delta/2; 
   float    thickness        = (circumplexRadius-controllerRadius)/category.rights.size();
   float    adjustedRadius   = circumplexRadius-thickness*0.95;
   float    adjustedFontSize = fontSize*15/category.rights.size(); // font size must be inversely proportional to the number of rings 
@@ -331,7 +317,7 @@ void drawCategoryNames() {
 
   textSize(fontSize*4);
   float delta               = TWO_PI/countryList.size(); 
-  float startTheta          = -delta/2; // shift by half the width of the US slice so as to center it
+  float startTheta          = -HALF_PI - delta/2; // shift by half the width of the US slice so as to center it
   float rightThickness      = (circumplexRadius-controllerRadius)/numberOfRights;
   float categoryOuterRadius = circumplexRadius;
   float textHeight          = textAscent() + textDescent();
@@ -406,6 +392,7 @@ int getTextLength(String txt) {
 /*                PARSE CSVs                 */
 /*********************************************/
 void parseCategories(String csv) {
+  int startTime = millis();
 
   String[] lines          = loadStrings(csv);
   String[] categoryTitles = split(lines[0].replaceAll("\"", ""), ',');
@@ -438,10 +425,13 @@ void parseCategories(String csv) {
       category.addRightColor(j, category.colour);
     }
   }
+  
+  println("Parse Categories - Elapsed Time: " + (millis()-startTime)/1000);
 }
 
 
 void parseRights(String csv) {
+  int startTime = millis();
 
   // reads CSV header column and returns only the Right strings
   String[] lines   = loadStrings(csv);
@@ -521,6 +511,8 @@ void parseRights(String csv) {
       if (naCounter != rightsColumns.size()) value.addYear(year);
     }
   }
+  
+   println("Parse Rights - Elapsed Time: " + (millis()-startTime)/1000);
 }
 
 
@@ -541,14 +533,7 @@ void findCountriesInRange(int startYear, int endYear) {
   for (Map.Entry me : countryMap.entrySet()) {
     Country countryObject = (Country)me.getValue();
     if (countryObject.checkConstitutionExistence(startYear, endYear)) {
-      // check for US and move it to start of list 
-      if (countryObject.name.equals("United States") && countryList.size()>0) {
-        // swap objects in list
-        Country temp = countryList.get(0);
-        countryList.add(0, countryObject);
-        countryList.add(temp);
-      } 
-      else countryList.add(countryObject);
+      countryList.add(countryObject);
     }
   }
 }
@@ -642,29 +627,32 @@ void cursorUp() {
       float disX = x - cursorX;
       float disY = y - cursorY;
       if (sqrt(sq(disX) + sq(disY)) > r-categoryThickness && sqrt(sq(disX) + sq(disY)) < r) {
+        highlightRing = false; // no need to keep ring highlighted if changing to different circumplex
         currentCircumplex = i;
       } 
       r -= categoryThickness;
     }
   }
   
+  if (highlightRing) {
+    highlightStartTime   = millis();
+    highlightTimerActive = true;
+  }
+  
   dragMode                      = false;
   timecontroller.timelineActive = false;
-  highlightRing                 = false;
-  highlightedRightIndex         = -1;
-  highlightedCategoryIndex      = -1;
 }
 
 
 /*********************************************/
 /*       MOUSE/KEYBOARD INTERACTION          */
 /*********************************************/
-void keyPressed() {
-  if (key == 's') stackRights = !stackRights;
-}
+//void keyPressed() {
+//  if (key == 's') stackRights = !stackRights;
+//}
 
 void mousePressed() { 
-  cursorActive = true;
+//  cursorActive = true;
   cursorX      = mouseX;
   cursorY      = mouseY;
   cursorR      = min(width,height) * 0.02;
@@ -682,7 +670,7 @@ void mouseDragged() {
 void mouseReleased() {
   cursorX      = mouseX;
   cursorY      = mouseY;
-  cursorActive = false;
+//  cursorActive = false;
   cursorUp();
 }
 
@@ -838,13 +826,14 @@ function generateButtonTree(listSize) {
     childButton.setAttribute('onclick', 'window.parent.document.getElementById("visDiv1").contentWindow.changeCircumplex("'+i+'")');
     childButton.style.width = "100%";
     childButton.style.height = "50%";
+    childButton.style.fontSize = "100%";
     childButton.style.position = "relative";
 
     // calculate svg size (in pixels) based off of button dimensions
     var childButtonHeight = ((buttonIframe.clientHeight)/(listSize-1))*0.5; // in px
     var childButtonWidth  = ((buttonIframe.clientWidth) * 0.35);
-    var iconWidth  = min(childButtonHeight * 0.5, childButtonWidth * 0.5);
-    var iconHeight = min(childButtonHeight * 0.5, childButtonWidth * 0.5);
+    var iconWidth  = min(childButtonHeight * 0.8, childButtonWidth * 0.8);
+    var iconHeight = min(childButtonHeight * 0.8, childButtonWidth * 0.8);
     var iconRadius = iconWidth * 0.4;
 
     // create svg to hold category icon
@@ -853,7 +842,7 @@ function generateButtonTree(listSize) {
     categorySVG.setAttribute("width", iconWidth);
     categorySVG.setAttribute("display", "block");
     categorySVG.style.position = "absolute";
-    categorySVG.style.top = "50%";
+    categorySVG.style.top = "20%";
     categorySVG.style.left = (childButtonWidth-iconWidth)/2 + "px";
 
     // add circle elelment to svg
@@ -884,6 +873,7 @@ function setCanvasSize() {
 
 
 void setCircumplexFromJS(int circumplexID) {
+  highlightStartTime = 0; // forces timer that highlights ring to expire
   currentCircumplex = circumplexID;
 }
 
