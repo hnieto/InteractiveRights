@@ -86,7 +86,7 @@ void setup() {
   // parsing
   //parseCategories("../data/us_categorization_061814.csv");
   parseCategories("../data/substantive_categorization_060214.csv");
-  parseRights("../data/dj_rights_060214.csv");
+  parseRights("../data/dj_rights_simple.csv");
   findCountriesInRange(yearRange[0], yearRange[1]);
 
   // determine number of rights in largest category
@@ -104,7 +104,6 @@ void setup() {
   // set "All Rights" view as default
   currentCircumplex          = categoryList.size();
     
-  smooth();
 }
 
 /*********************************************/
@@ -116,11 +115,23 @@ void draw() {
 
   pushMatrix();
   translate(width/2, (height)/2);
+  
+  // draw grey circle behind slices
+  fill(color(30));
+  noStroke();
+  ellipse(0, 0, circumplexRadius*2, circumplexRadius*2);
 
   pushMatrix();
   rotate(circumplexRotationAngle);
-  if (currentCircumplex == categoryList.size()) { drawCategoryCircumplex(); } 
-  else { drawRightsCircumplex(categoryList.get(currentCircumplex)); }
+  if (currentCircumplex == categoryList.size()) { 
+    drawCategoryCircumplex(); 
+    drawCategoryBorders(); 
+  
+  } 
+  else { 
+    drawRightsCircumplex(categoryList.get(currentCircumplex)); 
+    drawRightBorders(); 
+  }
   drawCountryNames();
   popMatrix();
 
@@ -135,7 +146,6 @@ void draw() {
     stroke(200, 50);
     strokeWeight(highlightThickness);
     ellipse(0, 0, (highlightRadius-highlightThickness/2)*2, (highlightRadius-highlightThickness/2)*2);
-    strokeWeight(1);
     popStyle();
   }
 
@@ -149,8 +159,7 @@ void draw() {
     highlightedRightIndex    = -1;
     highlightedCategoryIndex = -1;
   }
-  
-  //println(frameRate);
+   
 }
 
 /*********************************************/
@@ -158,13 +167,12 @@ void draw() {
 /*********************************************/
 void drawCategoryCircumplex() {
 
-  float delta          = TWO_PI/countryList.size(); 
-  float theta          = 0.0; // shift by half the width of the US slice so as to center it
-  float rightThickness      = (circumplexRadius-controllerRadius)/numberOfRights;
-  float adjustedRadius = controllerRadius; 
+  float delta          = TWO_PI/countryList.size();
+  float theta          = 0.0; 
+  float rightThickness = (circumplexRadius-controllerRadius)/numberOfRights;
 
   for (int i=0; i<countryList.size(); i++) {
-    countryList.get(i).drawCategories(timecontroller.year, theta+0.01, theta+delta-0.01, delta, adjustedRadius, rightThickness);
+    countryList.get(i).drawCategories(timecontroller.year, theta+0.009, theta+delta, controllerRadius, rightThickness); // add 0.009 to compensate for arcs overflowing past borders
     theta += delta;
   }
 }
@@ -172,13 +180,12 @@ void drawCategoryCircumplex() {
 
 void drawRightsCircumplex(Category category) {
 
-  float delta          = TWO_PI/countryList.size(); // +2 to account for US taking up 3 slices
-  float theta          = 0.0; // shift by half the width of the US slice so as to center it
-  float thickness      = (circumplexRadius-controllerRadius)/category.rights.size();
-  float adjustedRadius = circumplexRadius-thickness/2; // wedge thickens up/down from current radius, we have to adjust for that
+  float delta          = TWO_PI/countryList.size(); 
+  float theta          = 0.0;
+  float rightThickness = (circumplexRadius-controllerRadius)/category.rights.size();
 
   for (int i=0; i<countryList.size(); i++) {
-    countryList.get(i).drawRights(category, timecontroller.year, theta+0.01, theta+delta-0.01, delta, adjustedRadius, thickness);
+    countryList.get(i).drawRights(category, timecontroller.year, theta+0.009, theta+delta, controllerRadius, rightThickness); // add 0.009 to compensate for arcs overflowing past borders
     theta += delta;
   }
 }
@@ -374,6 +381,70 @@ void drawCategoryNames() {
 }
 
 
+void drawCategoryBorders() {
+  float delta          = TWO_PI/countryList.size(); 
+  float theta          = 0.0; 
+  float rightThickness = (circumplexRadius-controllerRadius)/numberOfRights;
+  float adjustedRadius = controllerRadius; 
+
+  pushStyle();
+  noFill();
+  strokeWeight(4);
+  stroke(0);
+  
+  for (int i=0; i<categoryList.size(); i++) {
+    Category category = categoryList.get(i);
+    float categoryThickness = rightThickness*category.rights.size();
+    adjustedRadius += categoryThickness;
+    ellipse(0, 0, adjustedRadius*2, adjustedRadius*2);
+  }
+  
+  for (int i=0; i<countryList.size(); i++) {
+    line(0, 0, circumplexRadius*cos(theta), circumplexRadius*sin(theta));
+    line(0, 0, circumplexRadius*cos(theta+delta), circumplexRadius*sin(theta+delta));
+    theta += delta;
+  }
+  
+  popStyle();
+  
+  // draw black circle behind time controller to cover lines used for slice borders
+  fill(background_color);
+  noStroke();
+  ellipse(0, 0, controllerRadius*2, controllerRadius*2);
+}
+
+void drawRightBorders() {
+  Category category       = categoryList.get(currentCircumplex);
+  float    delta          = TWO_PI/countryList.size(); 
+  float    theta          = 0.0; 
+  float    rightThickness = (circumplexRadius-controllerRadius)/category.rights.size();
+  float    adjustedRadius = controllerRadius; 
+
+  pushStyle();
+  noFill();
+  strokeWeight(4);
+  stroke(0);
+  
+  for (int i=0; i<category.rights.size(); i++) {
+    adjustedRadius += rightThickness;
+    ellipse(0, 0, adjustedRadius*2, adjustedRadius*2);
+  }
+  
+  for (int i=0; i<countryList.size(); i++) {
+    line(0, 0, circumplexRadius*cos(theta), circumplexRadius*sin(theta));
+    line(0, 0, circumplexRadius*cos(theta+delta), circumplexRadius*sin(theta+delta));
+    theta += delta;
+  }
+  
+  popStyle();
+  
+  // draw black circle behind time controller to cover lines used for slice borders
+  fill(background_color);
+  noStroke();
+  ellipse(0, 0, controllerRadius*2, controllerRadius*2);
+}
+
+
 int getTextLength(String txt) {
 
   int totalLength = 0;
@@ -426,7 +497,7 @@ void parseCategories(String csv) {
     }
   }
   
-  println("Parse Categories - Elapsed Time: " + (millis()-startTime)/1000);
+//  println("Parse Categories - Elapsed Time: " + (millis()-startTime)/1000);
 }
 
 
@@ -436,26 +507,28 @@ void parseRights(String csv) {
   // reads CSV header column and returns only the Right strings
   String[] lines   = loadStrings(csv);
   String[] columns = split(lines[0].replaceAll("\"", ""), ',');
-  int countryColumnIndex, rightColumnIndex, yearColumnIndex;
+  int countryColumnIndex = 0;
+  int yearColumnIndex    = 1;
+  int rightColumnIndex   = 2;
+ 
+//  // find the index for the column titled "country"
+//  for (countryColumnIndex=0; countryColumnIndex<columns.length; countryColumnIndex++) {
+//    if (columns[countryColumnIndex].equals("country")) break;
+//  }
 
-  // find the index for the column titled "country"
-  for (countryColumnIndex=0; countryColumnIndex<columns.length; countryColumnIndex++) {
-    if (columns[countryColumnIndex].equals("country")) break;
-  }
+//  // find the index for the column titled "year"
+//  for (yearColumnIndex=0; yearColumnIndex<columns.length; yearColumnIndex++) {
+//    if (columns[yearColumnIndex].equals("year")) break;
+//  }
 
-  // find the index for the column titled "Human Dignity"
-  for (rightColumnIndex=0; rightColumnIndex<columns.length; rightColumnIndex++) {
-    if (columns[rightColumnIndex].equals("Human Dignity")) break;
-  }
+//  // find the index for the column titled "Human Dignity"
+//  for (rightColumnIndex=0; rightColumnIndex<columns.length; rightColumnIndex++) {
+//    if (columns[rightColumnIndex].equals("Human Dignity")) break;
+//  }
 
   // get all column headers that follow the column "Human Dignity"
   for (int i=rightColumnIndex; i<columns.length; i++) {
     rightsColumns.add(columns[i]);
-  }
-
-  // find the index for the column titled "year"
-  for (yearColumnIndex=0; yearColumnIndex<columns.length; yearColumnIndex++) {
-    if (columns[yearColumnIndex].equals("year")) break;
   }
 
   // parse dj_rights.csv and use rightsColumn array to filter results
@@ -512,7 +585,7 @@ void parseRights(String csv) {
     }
   }
   
-   println("Parse Rights - Elapsed Time: " + (millis()-startTime)/1000);
+//   println("Parse Rights - Elapsed Time: " + (millis()-startTime)/1000);
 }
 
 

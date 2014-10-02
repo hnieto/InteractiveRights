@@ -74,6 +74,7 @@ class TimeController {
       
     pushStyle();
     pushMatrix();
+    strokeWeight(1);
     
     // Seperate controller from vis with ellipse
     fill(40, 10, 10);
