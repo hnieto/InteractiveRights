@@ -7,13 +7,14 @@
 /* @pjs font='../data/RefrigeratorDeluxeLight.ttf, ../data/MonoSpaced.ttf, ../data/MonoSpacedBold.ttf, ../data/Digital.ttf'; */
 
 import java.util.Map;
-HashMap<String, Country> countryMap     = new HashMap<String, Country>();
-ArrayList<Country>       countryList    = new ArrayList<Country>();
-ArrayList<Category>      categoryList   = new ArrayList<Category>();
-ArrayList<String>        rightsColumns  = new ArrayList<String>();
+HashMap<String, Country> countryMap          = new HashMap<String, Country>();
+ArrayList<Country>       allCountries        = new ArrayList<Country>();
+ArrayList<Country>       visualizedCountries = new ArrayList<Country>();
+ArrayList<Category>      categoryList        = new ArrayList<Category>();
+ArrayList<String>        rightsColumns       = new ArrayList<String>();
 
 TimeController           timecontroller;
-int[]                    yearRange      = { 1850, 2012 };
+int[]                    yearRange = new int[2];
 int                      currentCircumplex, numberOfRights;
 float                    controllerRadius, circumplexRadius, shortestDistanceFromCenter, paddingTop;
 float                    circumplexRotationAngle, mouseStartAngle;
@@ -29,13 +30,8 @@ color                    background_color, letter_color, wedgeBorder_color;
 float                    cursorX, cursorY, cursorR; // generic variable to hold either touch or mouse location
 float                    sketchWidth, sketchHeight;
 
-//boolean                  stackRights          = true;
 boolean                  dragMode             = false;
-
 boolean                  highlightRing        = false;
-boolean                  highlightTimerActive = false;
-int                      highlightStartTime;
-
 
 /*********************************************/
 /*            Initialization                 */
@@ -68,7 +64,7 @@ void setup() {
   paddingTop                 = sketchHeight * 0.01; 
 
   // font stuff
-  fontSize                   = lerp(0, 20, sketchWidth/(3840*0.5)); // 0.5 is percentage of canvas relative to browser window width
+  fontSize                   = lerp(0, 20, sketchWidth/2596); // 2596 == 67% of 4K horizontal resolution
   defaultFont                = createFont("../data/RefrigeratorDeluxeLight.ttf", fontSize);
   monoSpacedFont             = createFont("../data/MonoSpaced.ttf", fontSize); 
   monoSpacedBold             = createFont("../data/MonoSpacedBold.ttf", fontSize);
@@ -76,6 +72,11 @@ void setup() {
   textAlign(CENTER);
   textFont(defaultFont);
 
+  // parsing
+  parseCategories("../data/substantive_categorization_110414.csv");
+  parseRights("../data/rights.csv");
+  parseSnippets("../data/snippets_110514.csv");
+  
   // time controls
   shortestDistanceFromCenter = min(width, height)/2;
   circumplexRadius           = shortestDistanceFromCenter-(textAscent() + textDescent())-paddingTop; // account for letter height and add some extra padding
@@ -83,27 +84,18 @@ void setup() {
   timecontroller             = new TimeController(controllerRadius, yearRange);
   timecontroller.init();
 
-  // parsing
-  //parseCategories("../data/us_categorization_061814.csv");
-  parseCategories("../data/substantive_categorization_060214.csv");
-  parseRights("../data/dj_rights_simple.csv");
-  findCountriesInRange(yearRange[0], yearRange[1]);
-
-  // determine number of rights in largest category
-  // used to calculate font size for right description 
-  largestCategoryLength = 0;
-  for (int i=0; i<categoryList.size(); i++) {
-    int categorySize = categoryList.get(i).rights.size();
-    if (categorySize > largestCategoryLength) largestCategoryLength = categorySize;
-  }
-
-  // javascript function to create HTML buttdons using the category titles as labels
-  generateButtonTreeLinks(categoryList.size()+1, "#ffffff");
-  generateButtonTree(categoryList.size()+1);
+  // javascript function to create HTML elements
+  generateButtonTreeLinks();
+  generateButtonTree();
+  generateAlphabetList();
+  generateCountryList();
+  generateDescription();
 
   // set "All Rights" view as default
   currentCircumplex          = categoryList.size();
-    
+ 
+  // let javascript know that this vis is ready to draw
+  readyToDraw();
 }
 
 /*********************************************/
@@ -114,10 +106,10 @@ void draw() {
   background(background_color);
 
   pushMatrix();
-  translate(width/2, (height)/2);
+  translate(width/2, height/2);
   
   // draw grey circle behind slices
-  fill(color(30));
+  fill(15);
   noStroke();
   ellipse(0, 0, circumplexRadius*2, circumplexRadius*2);
 
@@ -126,7 +118,6 @@ void draw() {
   if (currentCircumplex == categoryList.size()) { 
     drawCategoryCircumplex(); 
     drawCategoryBorders(); 
-  
   } 
   else { 
     drawRightsCircumplex(categoryList.get(currentCircumplex)); 
@@ -144,7 +135,7 @@ void draw() {
     pushStyle();
     noFill();
     stroke(200, 50);
-    strokeWeight(highlightThickness);
+    strokeWeight(highlightThickness-4); // subtract 4 to account for the thickness of the borders between wedges
     ellipse(0, 0, (highlightRadius-highlightThickness/2)*2, (highlightRadius-highlightThickness/2)*2);
     popStyle();
   }
@@ -152,27 +143,22 @@ void draw() {
   timecontroller.draw(); 
   timecontroller.update();
   popMatrix();
-  
-  if (highlightTimerActive && millis()-highlightStartTime>10000) {
-    highlightTimerActive     = false;
-    highlightRing            = false;
-    highlightedRightIndex    = -1;
-    highlightedCategoryIndex = -1;
-  }
    
 }
 
 /*********************************************/
 /*            RENDER CIRCUMPLEX              */
 /*********************************************/
-void drawCategoryCircumplex() {
 
-  float delta          = TWO_PI/countryList.size();
+void drawCategoryCircumplex() {
+  
+  float delta          = TWO_PI/visualizedCountries.size();  
   float theta          = 0.0; 
   float rightThickness = (circumplexRadius-controllerRadius)/numberOfRights;
 
-  for (int i=0; i<countryList.size(); i++) {
-    countryList.get(i).drawCategories(timecontroller.year, theta+0.009, theta+delta, controllerRadius, rightThickness); // add 0.009 to compensate for arcs overflowing past borders
+  for (int i=0; i<visualizedCountries.size(); i++) {
+    Country countryObject = visualizedCountries.get(i);
+    countryObject.drawCategories(timecontroller.year, theta+0.009, theta+delta, controllerRadius, rightThickness); // add 0.009 to compensate for arcs overflowing past borders
     theta += delta;
   }
 }
@@ -180,15 +166,17 @@ void drawCategoryCircumplex() {
 
 void drawRightsCircumplex(Category category) {
 
-  float delta          = TWO_PI/countryList.size(); 
+  float delta          = TWO_PI/visualizedCountries.size(); 
   float theta          = 0.0;
   float rightThickness = (circumplexRadius-controllerRadius)/category.rights.size();
 
-  for (int i=0; i<countryList.size(); i++) {
-    countryList.get(i).drawRights(category, timecontroller.year, theta+0.009, theta+delta, controllerRadius, rightThickness); // add 0.009 to compensate for arcs overflowing past borders
+  for (int i=0; i<visualizedCountries.size(); i++) {
+    Country countryObject = visualizedCountries.get(i);
+    countryObject.drawRights(category, timecontroller.year, theta+0.009, theta+delta, controllerRadius, rightThickness); // add 0.009 to compensate for arcs overflowing past borders
     theta += delta;
   }
 }
+
 
 /*********************************************/
 /*              OVERLAYS                     */
@@ -197,14 +185,14 @@ void drawRightsCircumplex(Category category) {
 void drawCountryNames() {   
 
   textSize(fontSize);
-  float delta           = TWO_PI/countryList.size(); 
-  float startTheta      = 0.0; // shift by half the width of the US slice so as to center it
+  float delta           = TWO_PI/visualizedCountries.size(); 
+  float startTheta      = 0.0;
   float thickness       = (circumplexRadius-controllerRadius)/numberOfRights;
   float adjustedRadius  = circumplexRadius-thickness/2; // wedge thickens up/down from current radius, we have to adjust for that
 
-  for (int i=0; i<countryList.size(); i++) {
-
-    String name = countryList.get(i).name;
+  for (int i=0; i<visualizedCountries.size(); i++) {
+    Country countryObject = visualizedCountries.get(i);
+    String name = countryObject.name + " " + "(" + countryObject.existence[0] + " - " + countryObject.existence[1] + ")";
     float outerRadius   = adjustedRadius + thickness;
     float txtStartAngle = (startTheta+delta*0.5) - (getTextLength(name)/outerRadius)*0.5;
     float arclength     = 0; // We must keep track of our position along the curve
@@ -247,20 +235,21 @@ void drawCountryNames() {
 
     startTheta += delta;
   }
+  
 }
 
 
 void drawRightNames() {
 
   Category category         = categoryList.get(currentCircumplex);
-  float    delta            = TWO_PI/countryList.size(); 
+  float    delta            = TWO_PI/visualizedCountries.size(); 
   float    startTheta       = -HALF_PI - delta/2; 
   float    thickness        = (circumplexRadius-controllerRadius)/category.rights.size();
-  float    adjustedRadius   = circumplexRadius-thickness*0.95;
+  float    innerRadius      = controllerRadius;
   float    adjustedFontSize = fontSize*15/category.rights.size(); // font size must be inversely proportional to the number of rings 
   String   rightText;
 
-  for (int i=category.rights.size()-1; i>=0; i--) {
+  for (int i=0; i<category.rights.size(); i++) {
 
     if (i == highlightedRightIndex) {
       float descriptionFontSize = fontSize*22/largestCategoryLength;
@@ -273,7 +262,7 @@ void drawRightNames() {
     }
 
     float textHeight    = textAscent() + textDescent();
-    float radius        = adjustedRadius;
+    float radius        = innerRadius + 2; //add 2 to account for the width of the borders between wedges
     float txtStartAngle = (startTheta+delta*0.5) - (getTextLength(rightText)/radius)*0.5;
     float arclength     = 0; // We must keep track of our position along the curve
 
@@ -315,27 +304,26 @@ void drawRightNames() {
       arclength += currentCharWidth/2;
     }
 
-    adjustedRadius -= thickness;
+    innerRadius += thickness;
   }
 }
 
 
 void drawCategoryNames() {
 
-  textSize(fontSize*4);
-  float delta               = TWO_PI/countryList.size(); 
-  float startTheta          = -HALF_PI - delta/2; // shift by half the width of the US slice so as to center it
-  float rightThickness      = (circumplexRadius-controllerRadius)/numberOfRights;
-  float categoryOuterRadius = circumplexRadius;
-  float textHeight          = textAscent() + textDescent();
+  textSize(fontSize*3);
+  float delta                = TWO_PI/visualizedCountries.size(); 
+  float startTheta           = -HALF_PI - delta/2; 
+  float rightThickness       = (circumplexRadius-controllerRadius)/numberOfRights;
+  float categoryInnerRadius  = controllerRadius + 2; //add 2 to account for the width of the borders between wedges
+  float textHeight           = textAscent() + textDescent();
 
-  for (int i=categoryList.size()-1; i>=0; i--) {
+  for (int i=0; i<categoryList.size(); i++) {
 
     String categoryText         = categoryList.get(i).name;
-    float categoryThickness     = rightThickness*categoryList.get(i).rights.size();
-    float categoryInnerRadius   = categoryOuterRadius-categoryThickness;
-    float txtStartAngle         = (startTheta+delta*0.5) - (getTextLength(categoryText)/categoryInnerRadius)*0.5;
-    float arclength             = 0; // We must keep track of our position along the curve
+    float  categoryThickness    = rightThickness*categoryList.get(i).rights.size();
+    float  txtStartAngle        = (startTheta+delta*0.5) - (getTextLength(categoryText)/categoryInnerRadius)*0.5;
+    float  arclength            = 0; // We must keep track of our position along the curve
 
     for (int j=0; j<categoryText.length(); j++) {
 
@@ -376,30 +364,30 @@ void drawCategoryNames() {
       arclength += currentCharWidth/2;
     }
 
-    categoryOuterRadius -= categoryThickness;
+    categoryInnerRadius += categoryThickness;
   }
 }
 
 
 void drawCategoryBorders() {
-  float delta          = TWO_PI/countryList.size(); 
+  float delta          = TWO_PI/visualizedCountries.size(); 
   float theta          = 0.0; 
   float rightThickness = (circumplexRadius-controllerRadius)/numberOfRights;
   float adjustedRadius = controllerRadius; 
 
   pushStyle();
   noFill();
-  strokeWeight(4);
-  stroke(0);
+  strokeWeight(5);
+  stroke(4);
   
   for (int i=0; i<categoryList.size(); i++) {
     Category category = categoryList.get(i);
     float categoryThickness = rightThickness*category.rights.size();
-    adjustedRadius += categoryThickness;
     ellipse(0, 0, adjustedRadius*2, adjustedRadius*2);
+    adjustedRadius += categoryThickness;
   }
   
-  for (int i=0; i<countryList.size(); i++) {
+  for (int i=0; i<visualizedCountries.size(); i++) {
     line(0, 0, circumplexRadius*cos(theta), circumplexRadius*sin(theta));
     line(0, 0, circumplexRadius*cos(theta+delta), circumplexRadius*sin(theta+delta));
     theta += delta;
@@ -413,24 +401,25 @@ void drawCategoryBorders() {
   ellipse(0, 0, controllerRadius*2, controllerRadius*2);
 }
 
+
 void drawRightBorders() {
   Category category       = categoryList.get(currentCircumplex);
-  float    delta          = TWO_PI/countryList.size(); 
+  float    delta          = TWO_PI/visualizedCountries.size(); 
   float    theta          = 0.0; 
   float    rightThickness = (circumplexRadius-controllerRadius)/category.rights.size();
   float    adjustedRadius = controllerRadius; 
 
   pushStyle();
   noFill();
-  strokeWeight(4);
-  stroke(0);
+  strokeWeight(5);
+  stroke(4);
   
   for (int i=0; i<category.rights.size(); i++) {
-    adjustedRadius += rightThickness;
     ellipse(0, 0, adjustedRadius*2, adjustedRadius*2);
+    adjustedRadius += rightThickness;
   }
   
-  for (int i=0; i<countryList.size(); i++) {
+  for (int i=0; i<visualizedCountries.size(); i++) {
     line(0, 0, circumplexRadius*cos(theta), circumplexRadius*sin(theta));
     line(0, 0, circumplexRadius*cos(theta+delta), circumplexRadius*sin(theta+delta));
     theta += delta;
@@ -464,9 +453,10 @@ int getTextLength(String txt) {
 /*********************************************/
 void parseCategories(String csv) {
   int startTime = millis();
-
+  
+  largestCategoryLength   = 0;
   String[] lines          = loadStrings(csv);
-  String[] categoryTitles = split(lines[0].replaceAll("\"", ""), ',');
+  String[] categoryTitles = split(lines[0], '|');
 
   for (int i=0; i<categoryTitles.length; i++) {
 
@@ -475,8 +465,7 @@ void parseCategories(String csv) {
 
     // add all rights to newly created Category object
     for (int j=1; j<lines.length; j++) {
-
-      String[] row       = split(lines[j], ',');
+      String[] row       = split(lines[j], '|');
       String[] rightInfo = split(row[i], " : ");
 
       if (rightInfo[0].length() != 0) {
@@ -484,17 +473,15 @@ void parseCategories(String csv) {
         String description = rightInfo[1];
         if (right.length() != 0) {
           category.addRight(right);
-          category.addRightDescription(description.replaceAll(";", ",")); // csv must use ';' instead of ',' in sentence because ',' are reserved for delimeter. replaceAll function swaps them back to ',' to render
+          category.addRightDescription(description); 
           numberOfRights++;
         }
       }
     }
 
-    category.initColorArray(category.rights.size());
-
-    for (int j=0; j<category.rights.size(); j++) {
-      category.addRightColor(j, category.colour);
-    }
+    // determine number of rights in largest category, used to calculate font size for right description 
+    if (category.rights.size() > largestCategoryLength) largestCategoryLength = category.rights.size();
+    
   }
   
 //  println("Parse Categories - Elapsed Time: " + (millis()-startTime)/1000);
@@ -505,47 +492,52 @@ void parseRights(String csv) {
   int startTime = millis();
 
   // reads CSV header column and returns only the Right strings
-  String[] lines   = loadStrings(csv);
-  String[] columns = split(lines[0].replaceAll("\"", ""), ',');
-  int countryColumnIndex = 0;
-  int yearColumnIndex    = 1;
-  int rightColumnIndex   = 2;
- 
-//  // find the index for the column titled "country"
-//  for (countryColumnIndex=0; countryColumnIndex<columns.length; countryColumnIndex++) {
-//    if (columns[countryColumnIndex].equals("country")) break;
-//  }
-
-//  // find the index for the column titled "year"
-//  for (yearColumnIndex=0; yearColumnIndex<columns.length; yearColumnIndex++) {
-//    if (columns[yearColumnIndex].equals("year")) break;
-//  }
-
-//  // find the index for the column titled "Human Dignity"
-//  for (rightColumnIndex=0; rightColumnIndex<columns.length; rightColumnIndex++) {
-//    if (columns[rightColumnIndex].equals("Human Dignity")) break;
-//  }
+  String[] rows    = loadStrings(csv);
+  String[] columns = split(rows[0].replaceAll("\"", ""), ',');
+  int countryColumnIndex       = 0;
+  int yearColumnIndex          = 1;
+  int endYearColumnIndex       = 2;
+  int visualizeColumnIndex     = 3;
+  int adoptedRightsColumnIndex = 4;
+  int rightColumnIndex         = 5;
+  
+  // used to find optimal time range
+  int earliestStartYear = 2012;
+  int latestEndYear   = 2012;
 
   // get all column headers that follow the column "Human Dignity"
   for (int i=rightColumnIndex; i<columns.length; i++) {
     rightsColumns.add(columns[i]);
   }
 
-  // parse dj_rights.csv and use rightsColumn array to filter results
-  for (int i=2; i<lines.length; i++) {
-    String[] row     = split(lines[i], ',');
-    String   keyword = row[countryColumnIndex]; // get string in column titled "country"
-    Country  value   = countryMap.get(keyword);
+  // parse rights.csv and use rightsColumn array to filter results
+  for (int i=1; i<rows.length; i++) {
+    String[] row                = split(rows[i], ',');
+    boolean  visualize          = (row[visualizeColumnIndex].equals("yes")) ? true : false;
+    int      numOfAdoptedRights = int(row[adoptedRightsColumnIndex]);
+    int      currentYear        = int(row[yearColumnIndex]);
+    int      endYear            = int(row[endYearColumnIndex]);
+           
+    String   countryName      = row[countryColumnIndex]; // get string in column titled "country"
+    Country  countryObject = countryMap.get(countryName);
 
     // first time this country was read in table
-    if (value == null) {  
-      value = new Country(keyword);
-      countryMap.put(keyword, value);
+    if (countryObject == null) {  
+      String[] yearsOfExistence = { row[yearColumnIndex], row[endYearColumnIndex] };
+      countryObject           = new Country(countryName, yearsOfExistence, visualize);
+      countryMap.put(countryName, countryObject);
+      allCountries.add(countryObject);
+      if (visualize) {
+        if (currentYear < earliestStartYear) earliestStartYear = currentYear; 
+        if (endYear < latestEndYear)         latestEndYear     = endYear;
+        visualizedCountries.add(countryObject);
+      }
+    }
+      
+    // find all rights available for this country on this year
+    Year year      = new Year(currentYear);
 
-      // find all rights available for this country on this year
-      Year year      = new Year(int(row[yearColumnIndex]));
-      int  naCounter = 0;
-
+    if(numOfAdoptedRights > 0) { // skip years that have no rights
       for (int j=0, rightIterator=rightColumnIndex; j<rightsColumns.size(); j++, rightIterator++) {
 
         String right             = rightsColumns.get(j);
@@ -554,38 +546,41 @@ void parseRights(String csv) {
         if (rightAvailability.equals("1. yes") || rightAvailability.equals("2. full")) {
           year.addRight(right);
           year.addCateogry(findCategoryForRight(right));
-        } 
-
-        if (rightAvailability.equals("NA")) naCounter++;
+        }     
       }
-
-      if (naCounter != rightsColumns.size()) value.addYear(year);
-    } 
-
-    // country already exists in hashmap, just add another Year object to it
-    else {
-      // find all rights available for this country on this year
-      Year year      = new Year(int(row[yearColumnIndex]));
-      int  naCounter = 0;
-
-      for (int j=0, rightIterator=rightColumnIndex; j<rightsColumns.size(); j++, rightIterator++) {
-
-        String right             = rightsColumns.get(j);
-        String rightAvailability = row[rightIterator];
-
-        if (rightAvailability.equals("1. yes")  || rightAvailability.equals("2. full")) {
-          year.addRight(right);
-          year.addCateogry(findCategoryForRight(right));
-        }
-
-        if (rightAvailability.equals("NA")) naCounter++;
-      }
-
-      if (naCounter != rightsColumns.size()) value.addYear(year);
-    }
+      
+      countryObject.addYear(year);
+    }            
   }
   
-//   println("Parse Rights - Elapsed Time: " + (millis()-startTime)/1000);
+  yearRange[0] = earliestStartYear;
+  yearRange[1] = latestEndYear;
+  
+//  println("Parse Rights - Elapsed Time: " + (millis()-startTime)/1000);
+}
+
+
+void parseSnippets(String csv) {
+  int startTime = millis();
+  
+  String[] rows           = loadStrings(csv);
+
+  for (int i=1; i<rows.length; i++) {
+    String constitution   = split(rows[i], '|')[3];
+    String right          = split(rows[i], '|')[1];
+    String snippetText    = split(rows[i], '|')[4];
+    String countryName    = split(constitution, '_')[0];
+    
+    Country countryObject = countryMap.get(countryName);
+    if (countryObject != null) {
+      String snippet = countryObject.snippets.get(right);
+      if (snippet == null) {
+         countryObject.snippets.put(right, snippetText);
+      }
+    }      
+  }
+  
+//  println("Parse Categories - Elapsed Time: " + (millis()-startTime)/1000);
 }
 
 
@@ -600,18 +595,6 @@ Category findCategoryForRight(String rightToSearch) {
 }
 
 
-// searches for countries that have existed in the given time frame
-void findCountriesInRange(int startYear, int endYear) {
-
-  for (Map.Entry me : countryMap.entrySet()) {
-    Country countryObject = (Country)me.getValue();
-    if (countryObject.checkConstitutionExistence(startYear, endYear)) {
-      countryList.add(countryObject);
-    }
-  }
-}
-
-
 /*********************************************/
 /*        GENERIC INPUT FUNCTIONS            */
 /*********************************************/
@@ -622,7 +605,8 @@ void cursorDown() {
   // check if circumplex should be rotated
   if (sqrt(sq(disX) + sq(disY)) > controllerRadius && sqrt(sq(disX) + sq(disY)) < circumplexRadius) {
     // get the angle from the center to the mouse position
-    mouseStartAngle = atan2(cursorY - height/2, cursorX - width/2);
+    mouseStartAngle = atan2(cursorY - height/2, cursorX - width/2); // atan2 returns angle between PI and -PI    
+    mouseStartAngle = mouseStartAngle > 0 ? mouseStartAngle : (TWO_PI + mouseStartAngle); // map atan2 to radians between 0 and TWO_PI  
   }
 
   // highlight right ring when clicked wedge is selected via mouse press
@@ -672,12 +656,14 @@ void cursorDragged() {
   if (sqrt(sq(disX) + sq(disY)) > controllerRadius && sqrt(sq(disX) + sq(disY)) < circumplexRadius) {
 
     // get the angle from the center to the mouse position
-    float mouseEndAngle = atan2(cursorY - height/2, cursorX - width/2);
+    float mouseEndAngle = atan2(cursorY - height/2, cursorX - width/2); // atan2 returns angle between PI and -PI    
+    mouseEndAngle       = mouseEndAngle > 0 ? mouseEndAngle : (TWO_PI + mouseEndAngle); // map atan2 to radians between 0 and TWO_PI
     float angleOffset   = mouseEndAngle - mouseStartAngle;
     if(abs(angleOffset) > 0.006) dragMode = true;
 
     circumplexRotationAngle += angleOffset;
-    mouseStartAngle          = mouseEndAngle;
+    circumplexRotationAngle = (circumplexRotationAngle > TWO_PI) ? 0 : circumplexRotationAngle; // constrain circumplexRotationAngle below TWO_PI
+    mouseStartAngle         = mouseEndAngle;
   }  
 }
 
@@ -707,11 +693,6 @@ void cursorUp() {
     }
   }
   
-  if (highlightRing) {
-    highlightStartTime   = millis();
-    highlightTimerActive = true;
-  }
-  
   dragMode                      = false;
   timecontroller.timelineActive = false;
 }
@@ -720,12 +701,8 @@ void cursorUp() {
 /*********************************************/
 /*       MOUSE/KEYBOARD INTERACTION          */
 /*********************************************/
-//void keyPressed() {
-//  if (key == 's') stackRights = !stackRights;
-//}
 
 void mousePressed() { 
-//  cursorActive = true;
   cursorX      = mouseX;
   cursorY      = mouseY;
   cursorR      = min(width,height) * 0.02;
@@ -743,17 +720,27 @@ void mouseDragged() {
 void mouseReleased() {
   cursorX      = mouseX;
   cursorY      = mouseY;
-//  cursorActive = false;
   cursorUp();
 }
 
 
 /*********************************************/
-/*       PDE/JAVASCRIPT COMMUNICATION        */
+/*         PDE/JAVASCRIPT FUNCTIONS          */
 /*********************************************/
-function generateButtonTreeLinks(listSize, borderColor) {
-  var buttonIframe = window.parent.document.getElementById('controlsDiv1');
-  var buttonDiv = buttonIframe.contentWindow.document.getElementById('buttonDiv');
+
+function setCanvasSize() {
+  var browserWidth    = window.innerWidth;
+  var browserHeight   = window.innerHeight;
+  sketchWidth         = browserWidth * 0.665;
+  sketchHeight        = browserHeight;
+}
+
+
+function generateButtonTreeLinks() {
+  var listSize    = categoryList.size()+1;  
+  var buttonTree  = document.getElementById('controls');
+  var borderColor = "#ffffff";
+  
   var rootTable = document.createElement('TABLE');
   rootTable.style.width = "40%";
   var childTableCellHeight = 100/((listSize-1)*2); // as percentage
@@ -775,7 +762,7 @@ function generateButtonTreeLinks(listSize, borderColor) {
     }
     tr.appendChild(td);
   }
-  buttonDiv.appendChild(rootTable);  
+  buttonTree.appendChild(rootTable);  
 
   var childrenTable = document.createElement('TABLE');
   childrenTable.style.width = "35%";
@@ -797,12 +784,13 @@ function generateButtonTreeLinks(listSize, borderColor) {
     }
     tr.appendChild(td);
   }
-  buttonDiv.appendChild(childrenTable);
+  buttonTree.appendChild(childrenTable);
 }
 
-function generateButtonTree(listSize) {      
-  var buttonIframe = window.parent.document.getElementById('controlsDiv1');
-  var buttonDiv = buttonIframe.contentWindow.document.getElementById('buttonDiv');
+
+function generateButtonTree() {  
+  var listSize   = categoryList.size()+1;  
+  var buttonTree = document.getElementById('controls');
 
   // center root button within left div using table
   var rootTable = document.createElement('TABLE');
@@ -826,19 +814,20 @@ function generateButtonTree(listSize) {
       var rootButton = document.createElement('div');
       rootButton.appendChild(document.createTextNode("All Categories"));
       rootButton.setAttribute("id", "categoryButton" + (listSize-1));
-      rootButton.setAttribute("class", "button");
-      rootButton.setAttribute('onclick', 'window.parent.document.getElementById("visDiv1").contentWindow.changeCircumplex("'+(listSize-1)+'")');
+      rootButton.setAttribute("class", "leaf");
+      rootButton.setAttribute('onclick', 'changeCircumplex("'+(listSize-1)+'")');
       rootButton.style.width = "100%";
       rootButton.style.height = "100%";
+      rootButton.style.fontSize = "1.7vw";
       rootButton.style.position = "relative";
       td.appendChild(rootButton);
 
       // calculate svg size (in pixels) based off of button dimensions
-      var rootButtonHeight = (buttonIframe.clientHeight)/3; // in px
-      var rootButtonWidth  = ((buttonIframe.clientWidth) * 0.35);
+      var rootButtonHeight = (buttonTree.clientHeight)/3; // in px
+      var rootButtonWidth  = ((buttonTree.clientWidth) * 0.4);
       var iconWidth  = min(rootButtonWidth*0.9, rootButtonHeight*0.5);
       var iconHeight = min(rootButtonWidth*0.9, rootButtonHeight*0.5);
-      var iconRadius = iconWidth * 0.45;
+      var iconRadius = iconWidth * 0.5;
       var scaler = iconRadius/listSize;
 
       // create circle svgs to represent categories and add them to rootButton
@@ -850,7 +839,7 @@ function generateButtonTree(listSize) {
         categorySVG.setAttribute("display", "block");
         categorySVG.style.position = "absolute";
         categorySVG.style.top = (rootButtonHeight*0.25)+(rootButtonHeight*0.75-iconHeight)/2 + "px";
-        categorySVG.style.left = (rootButtonWidth-iconWidth)/2 + "px";
+        categorySVG.style.left = "0";
 
         // add circle elelment to svg
         var categoryCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
@@ -871,7 +860,7 @@ function generateButtonTree(listSize) {
     }
     tr.appendChild(td);
   }
-  buttonDiv.appendChild(rootTable);   
+  buttonTree.appendChild(rootTable);   
 
   // create table to hold category buttons
   var childrenTable = document.createElement('TABLE');
@@ -892,22 +881,27 @@ function generateButtonTree(listSize) {
     var td = document.createElement('TD');
     td.style.height = 100/(listSize-1) + "%";
 
-    var childButton = document.createElement('div');
-    childButton.appendChild(document.createTextNode(categoryList.get(i).name));
+    var textHolder  = document.createElement('p');
+    textHolder.appendChild(document.createTextNode(categoryList.get(i).name));
+    textHolder.style.width = "33%";
+    textHolder.style.margin = "0";
+
+    var childButton = document.createElement('div');    
+    childButton.appendChild(textHolder);
     childButton.setAttribute("id", "categoryButton" + (listSize-1));
-    childButton.setAttribute("class", "button");
-    childButton.setAttribute('onclick', 'window.parent.document.getElementById("visDiv1").contentWindow.changeCircumplex("'+i+'")');
+    childButton.setAttribute("class", "leaf");
+    childButton.setAttribute('onclick', 'changeCircumplex("'+i+'")');
     childButton.style.width = "100%";
     childButton.style.height = "50%";
-    childButton.style.fontSize = "100%";
     childButton.style.position = "relative";
+    var childButtonHeight = ((buttonTree.clientHeight)/(listSize-1))*0.5; // in px
+    var childButtonWidth  = ((buttonTree.clientWidth) * 0.35);
+    childButton.style.lineHeight = childButtonHeight*0.5 + "px";
 
     // calculate svg size (in pixels) based off of button dimensions
-    var childButtonHeight = ((buttonIframe.clientHeight)/(listSize-1))*0.5; // in px
-    var childButtonWidth  = ((buttonIframe.clientWidth) * 0.35);
-    var iconWidth  = min(childButtonHeight * 0.8, childButtonWidth * 0.8);
-    var iconHeight = min(childButtonHeight * 0.8, childButtonWidth * 0.8);
-    var iconRadius = iconWidth * 0.4;
+    var iconWidth  = min(childButtonHeight * 0.97, childButtonWidth * 0.97);
+    var iconHeight = min(childButtonHeight * 0.97, childButtonWidth * 0.97);
+    var iconRadius = iconWidth*0.45;  
 
     // create svg to hold category icon
     var categorySVG = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -915,8 +909,8 @@ function generateButtonTree(listSize) {
     categorySVG.setAttribute("width", iconWidth);
     categorySVG.setAttribute("display", "block");
     categorySVG.style.position = "absolute";
-    categorySVG.style.top = "20%";
-    categorySVG.style.left = (childButtonWidth-iconWidth)/2 + "px";
+    categorySVG.style.top = "0";  
+    categorySVG.style.right = "0";
 
     // add circle elelment to svg
     var categoryCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
@@ -933,20 +927,205 @@ function generateButtonTree(listSize) {
     td.appendChild(childButton);
     tr.appendChild(td);
   }
-  buttonDiv.appendChild(childrenTable);
+  buttonTree.appendChild(childrenTable);
 }
 
 
-function setCanvasSize() {
-  var browserWidth    = window.innerWidth;
-  var browserHeight   = window.innerHeight;
-  sketchWidth         = browserWidth;
-  sketchHeight        = browserHeight * 0.99;
+function generateAlphabetList() {
+  var lettersDiv = document.getElementById('letters');
+  
+  char prevLetter = '';
+  char currLetter;
+  
+  for (int i=0; i<allCountries.size(); i++) {
+    Country countryObject = allCountries.get(i);
+    
+    currLetter = countryObject.name.charAt(0);
+    if(prevLetter != currLetter) {
+       var letterButton  = document.createElement('a');
+       letterButton.appendChild(document.createTextNode(str(currLetter)));
+       letterButton.href = "#" + str(currLetter);
+       lettersDiv.appendChild(letterButton);
+       prevLetter = currLetter;
+    }
+  }
 }
 
+
+function generateCountryList () {
+  var list = document.getElementById('countryList'); 
+  list.innerHTML = "";
+  
+  char prevLetter = '';
+  char currLetter;
+  
+  for (int i=0; i<allCountries.size(); i++) {
+    Country countryObject = allCountries.get(i);
+    
+    // insert letter indicator 
+    currLetter = countryObject.name.charAt(0);
+    if(prevLetter != currLetter) {
+       var letterElement = document.createElement('li');
+       letterElement.style.backgroundColor = "rgba(18,18,18,0.8)";
+       letterElement.innerHTML = '<p id="' + str(currLetter) + '"> ' + str(currLetter) + '</p>';
+       list.appendChild(letterElement);
+       prevLetter = currLetter;
+    }
+    
+    // Create the list item:
+    var item     = document.createElement('li');
+    
+    // Create addition button
+    var plusBG   = document.createElement('div');
+    plusBG.id  = "plusBackground";
+    item.appendChild(plusBG);    
+    
+    var plusLink = document.createElement('a');
+    var plusSign = document.createTextNode('+');
+    plusLink.id  = "plus";
+    plusLink.appendChild(plusSign);
+    plusLink.href = "javascript:addCountry('" + countryObject.name + "');";
+    item.appendChild(plusLink);
+    
+    // Disable addition button if country is already in pie
+    if(countryObject.visualize) {
+      var plusBlocker = document.createElement('div');
+      plusBlocker.id  = "plusBlocker";
+      item.appendChild(plusBlocker);
+    }
+    
+    // Create deletion button
+    var minusBG   = document.createElement('div');
+    minusBG.id  = "minusBackground";
+    item.appendChild(minusBG);    
+    
+    var minusLink = document.createElement('a');
+    var minusSign = document.createTextNode('-');
+    minusLink.id  = "minus";
+    minusLink.appendChild(minusSign);
+    minusLink.href = "#";
+    minusLink.href = "javascript:removeCountry('" + countryObject.name + "');";
+    item.appendChild(minusLink);
+    
+    // Disable deletion button if country is NOT yet in pie
+    if(!countryObject.visualize) {
+      var minusBlocker = document.createElement('div');
+      minusBlocker.id  = "minusBlocker";
+      item.appendChild(minusBlocker);
+    }
+
+    // country name
+    var textElement = document.createElement('p');
+    var text    = document.createTextNode(countryObject.name);
+    textElement.appendChild(text);
+    item.appendChild(textElement);
+
+    // Add it to the list:
+    list.appendChild(item);
+  }
+}
+
+
+function generateDescription() {
+  String[] descriptionText = loadStrings("../web/description.html");
+  String   joinedText      = join(descriptionText, " ");
+  
+  var descriptionDiv = document.getElementById('description'); 
+  descriptionDiv.innerHTML = joinedText;
+}
+
+
+void snippetRemoved(String oldCountry, String newCountry){
+  // nothing to do if user is selecting different rights within the same country
+  if(!oldCountry.equals(newCountry)) {
+    Country lastSelected = countryMap.get(oldCountry);
+    lastSelected.snippetCreated = false;
+  }
+}
 
 void setCircumplexFromJS(int circumplexID) {
-  highlightStartTime = 0; // forces timer that highlights ring to expire
+  // turn highlighted ring off when switching circumplexes 
+  highlightRing            = false;
+  highlightedRightIndex    = -1;
+  highlightedCategoryIndex = -1;
+  
+  // delete existing snippet DIV 
+  if(document.getElementsByClassName("snippet show").length > 0) {
+    var existingSnippet            = document.getElementsByClassName("snippet show")[0];
+    var existingSnippetCountryName = existingSnippet.id.split(':')[0];
+    
+    Country countryWithSnippet = countryMap.get(existingSnippetCountryName);
+    countryWithSnippet.snippetCreated = false;
+    
+    document.body.removeChild(existingSnippet);
+  }
+  
+  // change circumplex
   currentCircumplex = circumplexID;
 }
 
+
+void insertNewCountry(String country) {
+  Country  countryObject = countryMap.get(country);
+  
+  if(!countryObject.visualize) {
+     countryObject.recentlyAdded = true; 
+     
+     // enable overlay to prevent mulitple country addtitions before animation completes
+     var countryListOverlay = document.getElementById('countryBoxOverlay');
+     countryListOverlay.style.display = "block";
+     
+     // update year range
+     if (countryObject.existence[0] < yearRange[0]) yearRange[0] = countryObject.existence[0]; 
+     if (countryObject.existence[1] > yearRange[1]) yearRange[1] = countryObject.existence[1];  
+   
+     visualizedCountries = insertAndSort(countryObject);  
+  }  
+}
+
+
+void deleteCountry(String country) {
+  Country  countryObject = countryMap.get(country);
+  
+  if(countryObject.visualize) {
+     countryObject.recentlyRemoved = true;
+     
+     // enable overlay to prevent mulitple country deletions before animation completes
+     var countryListOverlay = document.getElementById('countryBoxOverlay');
+     countryListOverlay.style.display = "block";
+     
+     // update year range after removing country 
+//     if (countryObject.existence[0] < yearRange[0]) yearRange[0] = countryObject.existence[0] ; 
+//     if (countryObject.existence[1] < yearRange[1]) yearRange[1] = countryObject.existence[1];
+  }
+  
+}
+
+
+ArrayList<Country> insertAndSort(Country newCountry){
+  String[] array = new String[visualizedCountries.size()+1]; // increase array length by 1 to accomdate new element passed to function
+  
+  // copy arraylist to array
+  for(int i=0; i<visualizedCountries.size(); i++){
+    array[i] = visualizedCountries.get(i).name;
+  }
+  array[array.length-1] = newCountry.name; // add newElement to end of array
+    
+  array = sort(array);
+  
+  // create copy of visualizedCountries list for sorting purposes
+  ArrayList<Country> unsortedList = visualizedCountries;
+  unsortedList.add(newCountry);
+  
+  ArrayList<Country> sortedList = new ArrayList<Country>();
+  for(int j=0; j<array.length; j++){
+    for(int k=0; k<unsortedList.size(); k++){
+      if(array[j].equals(unsortedList.get(k).name)) {
+         sortedList.add(unsortedList.get(k));
+         break;
+      }
+    }
+  }
+  
+  return sortedList;
+}

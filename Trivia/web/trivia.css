@@ -3,6 +3,9 @@ body {
     margin: 0px;
 }
 
+html {
+    overflow: hidden;
+}
 canvas {
     outline:    none; 
 /*		position:   fixed;

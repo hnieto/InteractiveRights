@@ -1,29 +1,17 @@
-@font-face {
-    font-family:           Refrigerator-Deluxe-Light;
-    src:                   url('../../refrigerator_deluxe_light.ttf');
-}   
-
-body {
-    font-family:           Refrigerator-Deluxe-Light;
+#controls {
+  position:              absolute;
+  height:                100vh;
+  width:                 16vw;
+  border-right:          .3vw solid #323232;
 }
 
-.button {
-    background:            #555555;
-    border-radius:         5px;
-    box-shadow:            rgba(0,0,0,1) 0 1px 0;
-    text-shadow:           rgba(0,0,0,.4) 0 1px 0;
-    display:               inline-block;
-    color:                 #ffffff;
-    font-size:             4.5vh;
-    text-decoration:       none;
-    text-align:            center;
+.leaf {
+  background:            #353535;
+  border-radius:         5px;
+  display:               inline-block;
+  color:                 #ffffff;
+  font-size:             0.5vw;
+  text-decoration:       none;
+  text-align:            center;
 }
 
-.button:hover {
-    background:            #969696;
-    color:                 #ebebeb;
-}
-
-.button:active {
-    background:            #646464;
-}

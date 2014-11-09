@@ -1,19 +1,71 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <link rel="stylesheet" type="text/css" href="controls.css">
     <link rel="stylesheet" type="text/css" href="radialBarGraph.css">
+    <link rel="stylesheet" type="text/css" href="description.css">
     <script src="../../processing-1.3.6.js"></script>
     <script type="text/javascript">
+        function showSnippet(x, y, snippetID, snippetText) {
+          pauseDraw();
+
+          // check if a snippet div already exists, if it does, delete it
+          if(document.getElementsByClassName("snippet show").length > 0) {
+            var existingSnippet   = document.getElementsByClassName("snippet show")[0];
+
+            setTimeout(function(){
+              existingSnippet.className  = 'snippet hide';
+            }, 1);
+
+            // wait for transition to end then delete old snippet div
+            existingSnippet.addEventListener("webkitTransitionEnd", function(e){
+              // transitionend fires for each property transitioned, in our case top and left.
+              // since we want to delete the snippetDiv at the end of one transition, 
+              // we need to make sure we only respond to one not all
+              if (e.propertyName == 'top') {
+                var existingSnippetCountryName = existingSnippet.id.split(':')[0];
+                var newSnippetCountryName      = snippetID.split(':')[0];
+
+                // we assign our processing sketch to the variable processingInstance
+                var processingInstance = Processing.getInstanceById('sketch');
+
+                // we call snippetRemoved inside our Processing sketch
+                processingInstance.snippetRemoved(existingSnippetCountryName, newSnippetCountryName);      
+
+                document.body.removeChild(existingSnippet);
+              }
+            }, false);
+
+          } 
+          
+          var newSnippet = document.createElement('div');
+          newSnippet.id  = snippetID;
+          newSnippet.innerHTML    = snippetText;
+          newSnippet.style.left   = document.getElementById('sketch').offsetLeft + x + "px";
+          newSnippet.style.top    = document.getElementById('sketch').offsetTop  + y + "px";
+          newSnippet.style.width  = "0";
+          newSnippet.style.height = "0";
+          newSnippet.style.visibility = "hidden"; 
+
+          document.body.appendChild(newSnippet);
+          newSnippet.addEventListener("webkitTransitionEnd", restartDraw, false);
+
+          setTimeout(function(){
+            newSnippet.className  = "snippet show";
+          }, 1);
+          
+        }
+
         function changeCircumplex(newCircumplexID) { 
-          //we assign our processing sketch to the variable processingInstance
+          // we assign our processing sketch to the variable processingInstance
           var processingInstance = Processing.getInstanceById('sketch');
-            
-          // we call setCircumplet() inside our Processing sketch
+
+          // we call setCircumplex inside our Processing sketch
           // and pass it the new circumplex id based on which button
           // was pressed    
           processingInstance.setCircumplexFromJS(newCircumplexID);
 				}
-
+  
 				function pauseDraw() {
           //we assign our processing sketch to the variable processingInstance
           var processingInstance = Processing.getInstanceById('sketch');
@@ -28,10 +80,59 @@
           processingInstance.loop();  
         }
 
+        function resize() {
+          pauseDraw();
+          var box          = document.getElementById("addCountryBox");
+          var currentClass = box.className;
+          if(currentClass == "box") box.className += " resize";
+          else box.className = "box";
+
+          var letters          = document.getElementById("letters");
+          var currentClass = letters.className;
+          if(currentClass == "box") letters.className += " resize";
+          else letters.className = "box";
+
+          box.addEventListener("webkitTransitionEnd", restartDraw, false);
+        }
+
+        function readyToDraw() {
+          parent.trackLoadedVisualizations(); 
+        }
+
+        function addCountry(country) {
+          //we assign our processing sketch to the variable processingInstance
+          var processingInstance = Processing.getInstanceById('sketch');
+          
+          processingInstance.insertNewCountry(country); 
+        }
+
+
+        function removeCountry(country) {
+          //we assign our processing sketch to the variable processingInstance
+          var processingInstance = Processing.getInstanceById('sketch');
+          
+          processingInstance.deleteCountry(country); 
+        }
+
     </script>
 </head>
-
 <body>
-	<canvas id="sketch" data-processing-sources="../RadialBarGraph.pde ../Country.pde ../Category.pde ../Year.pde ../TimeController.pde"></canvas>
-</body>
+
+  <div id="controls"></div>
+
+  <canvas id="sketch" data-processing-sources="../RadialBarGraph.pde ../Country.pde ../Category.pde ../Year.pde ../TimeController.pde"></canvas>
+
+  <div class="button"  id="addCountryButton" align="center" onclick="resize()">Edit Country List</div>
+  
+  <div class="box" id="letters"></div>
+
+  <div class="box" id="addCountryBox">
+    <ul id="countryList"></ul>
+  </div> 
+ 
+  <div class="box resize" id="countryBoxOverlay"></div>
+ 
+  <div id="description"></div>
+
+</body> 
 </html>

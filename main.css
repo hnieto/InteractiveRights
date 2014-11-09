@@ -35,66 +35,49 @@ iframe {
     position:                absolute;
     left:                    0;
     top:                     0;
-    width:                   24.5vw;
+    width:                   16vw;
     text-align:              center;
-    margin:                  0.8% 0;
+    line-height:             9.5vh;
 }        
 
-#title span {
+#title a {
+    text-decoration:         none;
     color:                   #ffffff;
-    font-size:               6vh;
+    font-size:               4vh;
 }
 
 #nav-bar-top {
     position:                absolute;
-    left:                    24.8vw;
-    width:                   50vw;
+    left:                    16.3vw;
+    width:                   66vw;
     height:                  100%;
 }
 
 #nav-bar-top img {
     height:                  100%;
-    margin:                 0 6.3%;
+    margin:                  0 8%;
 }
 
 #nav-bar-bottom {
     position:                absolute;
-    left:                    24.8vw;
-    width:                   50vw;
+    left:                    16.3vw;
+    width:                   66vw;
     height:                  100%;
 }
 
 #nav-bar-bottom img {
     height:                  100%;
-    margin:                  0 9.8%;
+    margin:                  0 9.7%;
 }
 
-#left {                
+#center {                     
     position:                 absolute; 
     left:                     0.2vw; 
     top:                      10.5vh; 
-    width:                    24.5vw; 
-    height:                   84.5vh; 
-    background-color:         #000000; 
-}                             
-                              
-#center {                     
-    position:                 absolute; 
-    left:                     25vw; 
-    top:                      10.5vh; 
-    width:                    50vw; 
+    width:                    99.6vw; 
     height:                   84.5vh; 
     background-color:         #000000;
 }
-
-#right {
-    position:                 absolute; 
-    left:                     75.3vw; 
-    top:                      10.5vh; 
-    width:                    24.5vw; 
-    height:                   84.5vh; 
-    background-color:         #000000;
-}                 
 
 #footer {
    position:                  absolute;
@@ -107,15 +90,15 @@ iframe {
 
 #ut-branding {
     position:                absolute;
-    left:                    75.3vw;  
-    width:                   24.5vw;
+    right:                   0;
+    width:                   16vw;
     text-align:              center;
-    margin:                  0.26% 0;
+    line-height:             4vh;
 }    
 
 #ut-branding span {
     color:                   #ffffff;
-    font-size:               2.5vh;
+    font-size:               2vh;
 }
 
 .button {
@@ -138,3 +121,42 @@ iframe {
 .button:active {
     background:            #646464;
 }
+
+#overlay {
+    position:              absolute;
+    height:                84.5vh;
+    left:                  0;
+    top:                   10.5vh;
+    right:                 0;
+    background:            #000;
+    z-index:               1000;
+}
+
+#loading {
+    position:             absolute;
+    left:                 50%;
+    top:                  50%;
+    width:                30vw;
+    height:               30vh;
+    margin:               -15vh 0 0 -15vw; /* shift top-left corner of div by 1/2 the width and height to center */
+    background-color:     rgba(89, 115, 116, 0.6);
+
+    font-size:            7vh;
+    text-align:           center;
+    vertical-align:       middle;
+    line-height:          15vh;  /* divide height by number of lines in text message */
+    color:                white;
+    z-index:              1001;
+}
+
+#navigationCover {
+    position:              absolute;
+    height:                100vh;
+    left:                  0;  
+    top:                   -10.5vh;  
+    bottom:                0;  
+    right:                 0;  
+    background:            #000;
+    opacity:               0.6;
+}
+

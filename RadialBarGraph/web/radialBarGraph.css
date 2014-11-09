@@ -1,8 +1,191 @@
+@font-face {
+    font-family:           Refrigerator-Deluxe-Light;
+    src:                   url('../../refrigerator_deluxe_light.ttf');
+}    
+
 body {
+    font-family:           Refrigerator-Deluxe-Light;
     background-color:      #000000;
     margin:                0px;
 }
 
 canvas {
-    outline:    none; 
+    outline:               none; 
+    position:              absolute;
+    left:                  16.3vw;
+}
+
+.snippet {
+    position:              absolute;
+    padding:               0.5vh 0.5vw;
+    border-radius:         3px;
+    background:            rgba(114, 150, 144, 0.3);
+    color:                 white;
+    text-align:            center;
+    overflow:              auto;
+    -webkit-transition:    all 1s ease-in-out;
+    transition:            all 1s ease-in-out;
+}
+
+.hide {
+    visibility:            hidden;
+    width:                 0;
+    height:                0;
+}
+
+.show {
+    visibility:            visible !important;
+    left:                  17vw !important;
+    top:                   2vh !important;
+    width:                 20vh !important;
+    height:                20vh !important;
+}
+
+.button {
+    -moz-border-radius:    3px; 
+    -webkit-border-radius: 3px; 
+    font-family:           Refrigerator-Deluxe-Light;
+    font-size:             1vw;
+    color:                 white; 
+    width:                 9.2vw;
+    height:                5vh;
+    line-height:           5vh;
+    background:            rgba(59, 245, 242, 0.17);
+    z-index:               1;
+    position:              absolute;
+}
+
+#addCountryButton {
+    top:                   0.5vh;
+    right:                 17.5vw;
+}
+
+.box {
+    -moz-border-radius:    3px; 
+    -webkit-border-radius: 3px; 
+    width:                 7vw;
+    height:                0vh;
+    background:            rgba(59, 245, 242, 0.17);
+    color:                 white;
+    z-index:               1;
+    position:              absolute;
+    overflow:              auto;
+    font-family:           Refrigerator-Deluxe-Light;
+    
+    -webkit-transition:    0.5s;
+    transition:            0.5s;
+}
+
+.resize {
+    height:                52.7vh;
+}
+
+#letters {
+    top:                   6.2vh;
+    right:                 25.2vw;
+    width:                 1.5vw;
+}
+
+#letters a {
+  font-size:               0.7vw;
+  text-decoration:         none;
+  display:                 inline-block;
+  color:                   white;
+  text-align:              center;
+  background-color:        rgba(106, 113, 106, 0.4);
+  border-radius:           1px;
+  width:                   1.5vw;
+  margin-bottom:           0.5vh;
+}
+
+#addCountryBox {
+    top:                   6.2vh;
+    right:                 17.5vw;
+}
+
+#countryBoxOverlay {
+    top:                   6.2vh;
+    right:                 17.5vw;
+    background:            rgba(119, 119, 119, 0.31); 
+    display:               none;
+}
+
+#addCountryBox ul {
+  list-style-type:        none;
+  margin:                 0;
+  padding:                0;
+}
+ 
+#addCountryBox li {
+  border-bottom:           0.25vh solid rgba(39, 37, 37, .5);
+  height:                  3vh;
+  line-height:             3vh;
+  text-align:              center;
+}
+ 
+#addCountryBox li:last-child {
+  border:                  none;
+}
+ 
+#addCountryBox li a { 
+  font-size:               1vw;
+  width:                   1.1vw;
+  text-decoration:         none;
+  display:                 inline;
+  text-align:              center;
+}
+
+#plus {
+  color:                   #00FF00;
+  float:                   left;
+}
+
+#plusBackground {
+  width:                   1.1vw;
+  height:                  3vh;
+  position:                absolute;
+  background-color:        rgba(106, 113, 106, 0.4);
+  border-radius:           3px;
+  z-index:                 -1;
+}
+
+#plusBlocker {
+  width:                   1.1vw;
+  height:                  3vh;
+  position:                absolute;
+  background-color:        rgba(18, 18, 18, 0.8);
+  border-radius:           3px;
+}
+
+#minus {
+  color:                   #FF0000;
+  float:                   right;
+}
+
+#minusBackground {
+  width:                   1.1vw;
+  height:                  3vh;
+  position:                absolute;
+  right:                   0px;
+  background-color:        rgba(106, 113, 106, 0.4);
+  border-radius:           3px;
+  z-index:                 -1;
+}
+
+#minusBlocker {
+  width:                   1.1vw;
+  height:                  3vh;
+  position:                absolute;
+  right:                   0px;
+  background-color:        rgba(18, 18, 18, 0.8);
+  border-radius:           3px;
+}
+
+#addCountryBox li p {
+  display:                 inline;
+  font-size:               0.35vw; 
+}
+
+::-webkit-scrollbar { 
+    display: none; 
 }
