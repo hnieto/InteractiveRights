@@ -3,7 +3,7 @@
 This project consists of a series of interactive [Processing](http://processing.org/) sketches wrapped in an HTML framework for the purpose of visualizing the evolution of constitutions around the world. The goal of the project is to allow groups of people in a museum environment to explore this large dataset using intuitive gestures on a [high resolution touch wall](https://www.tacc.utexas.edu/vislab/lasso). The [Processing JS](http://processingjs.org/) library was used to migrate the Java-based sketches into a format that can work within a browser. Some additional JavaScript was used for the communication between the sketches and other DOM objects.
 
 ### Raining Rights
-Right Popularity Visualiztion
+Right Popularity Visualization
 ![raining rights overlay](https://dl.dropboxusercontent.com/u/25652072/InteractiveRights/raining_rights1.png)
 ![raining rights](https://dl.dropboxusercontent.com/u/25652072/InteractiveRights/raining_rights2.png)
 
