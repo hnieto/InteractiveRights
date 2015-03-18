@@ -1,13 +1,148 @@
+@font-face {
+    font-family:      Refrigerator-Deluxe-Light;
+    src:              url('../../refrigerator_deluxe_light.ttf');
+}   
+
 body {
-    background-color: #000000;
-    margin: 0px;
+    font-family:           Refrigerator-Deluxe-Light;
+    background-color:      #000000;
+    margin:                0px;
+}
+
+#scoringHistory {
+    position:              absolute;
+    left:                  0;  
+    top:                   0;  
+    width:                 24vw;;
+    height:                100vh;
+    z-index:               1;  
+    border-right:          .3vw solid #323232;
+}
+
+#scoreTable {
+    width:                 98%;
+    margin:                1%; 
+    color:                 white;
+    border-collapse:       collapse;
+    table-layout:          fixed;
+}
+
+#col1 {
+    width:                 15vw;
+}
+
+#col2 {
+    width:                 4vw;
+}
+
+#col3 {
+    width:                 3vw;
+}
+
+#scoreTable th, td {
+    border:                1px solid rgba(160, 160, 160, 0.5);
+}
+
+#scoreTable td {
+    font-size:             1.2vw;
+    text-align:            center;
+}
+
+.paddedCell {
+    padding:               0 2%;
+}
+
+#attemptsTable {
+    border-collapse:       collapse;
+    width:                 100%;
+}
+
+#attemptsTitleCell {
+    padding:               0;
+    border:                none;
+}
+
+#attemptsTable .attemptCell {
+    border-right:          1px solid rgba(160, 160, 160, 0.5);
+    border-top:            1px solid rgba(160, 160, 160, 0.5);
+    border-left:           none;
+    border-bottom:         none;
+}
+
+#attemptCell3 {
+    border-right:          none !important;
 }
 
 html {
-    overflow: hidden;
+    overflow:              hidden;
 }
+
 canvas {
-    outline:    none; 
-/*		position:   fixed;
-    bottom:     0px; */
+    outline:               none; 
+    position:              absolute;
+    left:                  24.3vw; 
+}
+
+#overlay {
+    position:              absolute;
+    width:                 61.4vw;
+    height:                68vh;
+    left:                  24.3vw;
+    top:                   22vh;
+    z-index:               100;
+    background:            rgba(0, 0, 0, 0);
+    display:               none;
+}
+
+#opentour img {
+  width:                   3vw;
+  height:                  3vw;
+  border:                  0;
+  position:                absolute;
+  top:                     1.5vh;
+  left:                    25vw;
+}
+
+.fakeToolTip {
+    position:              absolute;
+    z-index:               -100;
+}
+
+#scoreToolTip {
+    left:                  31vw;  
+    top:                   2.5vh; 
+    width:                 5vw; 
+    height:                2vh;
+}
+
+#timerToolTip {
+    right:                 21.5vw; 
+    top:                   2.5vh; 
+    width:                 2vw; 
+    height:                2vh;
+}
+
+#arrowToolTip {
+    display:               none;
+}
+
+#boxToolTip1 {
+    left:                  39vw; 
+    bottom:                37vh; 
+    width:                 5vw; 
+    height:                2vh;
+}
+
+#boxToolTip2 {
+    left:                  52.5vw; 
+    bottom:                37vh; 
+    width:                 5vw; 
+    height:                2vh;
+}
+
+#boxToolTip3 {
+    left:                  66vw; 
+    bottom:                37vh; 
+    width:                 5vw; 
+    height:                2vh;
 }

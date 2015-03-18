@@ -5,7 +5,7 @@ class Year{
   // index i in both ArrayLists corresponds to the right<->category pair
   ArrayList<String>   rights     = new ArrayList<String>(); 
   ArrayList<Category> categories = new ArrayList<Category>();
-   
+  
   Year(int number){
     this.number = number; 
   }

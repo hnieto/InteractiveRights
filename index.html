@@ -5,58 +5,38 @@
     <link rel="stylesheet" type="text/css" href="main.css">
     <meta name="viewport" content="width=device-width,user-scalable=no">
     <script type="text/javascript">
+      var currentVis = 1;
 
       // hide all iframes except the one selected via carousel
       // stop draw loop if sketch is hidden
-      // prevent mouse event from executing after touch is detected    
-			/*
-      function changeVisWithTouch(e, frameIndex) {
-        e.preventDefault();
-        e.stopPropagation();
+      function changeVis(frameIndex) {
         var numberOfFrames = document.getElementById("center").getElementsByTagName("iframe").length;
 
-        for(i = 1; i <= numberOfFrames; i++) {
-          if(i == frameIndex) { 
-            document.getElementById("visDiv" + i).style.visibility = "visible"; 
-            document.getElementById("visDiv" + i).style.zIndex = "9999";
-            document.getElementById("visDiv" + i).contentWindow.restartDraw();
-            document.getElementById("visDivIcon" + i +"a").src = "images/visDivIcon" + i + "_y.png";
-            document.getElementById("visDivIcon" + i +"b").src = "images/visDivIcon" + i + "_y.png";
+        if(frameIndex != currentVis) {
+          for(i = 1; i <= numberOfFrames; i++) {
+	          if(i == frameIndex) { 
+ 	            document.getElementById("visDiv" + i).style.visibility = "visible"; 
+              document.getElementById("visDiv" + i).style.zIndex     = "100";
+
+              var isTutorialOff = document.getElementById("visDiv" + i).contentWindow.document.getElementsByClassName('chardinjs-overlay').length == 0 ? true : false;
+	            if(isTutorialOff) document.getElementById("visDiv" + i).contentWindow.launchTutorial(); 
+
+						  document.getElementById("visDivIcon" + i +"a").src = "images/visDivIcon" + i + "_y.png";
+              document.getElementById("visDivIcon" + i +"b").src = "images/visDivIcon" + i + "_y.png";
+
+              currentVis = i;
+	          }
+          
+            else { 
+	           document.getElementById("visDiv" + i).style.visibility           = "hidden"; 
+             document.getElementById("visDiv" + i).style.zIndex               = i;
+	           document.getElementById("visDiv" + i).contentWindow.pauseDraw();
+             document.getElementById("visDivIcon" + i + "a").src              = "images/visDivIcon" + i + "_w.png";
+             document.getElementById("visDivIcon" + i + "b").src              = "images/visDivIcon" + i + "_w.png";
+	          }	
           }
-          
-          else { 
-           document.getElementById("visDiv" + i).style.visibility = "hidden"; 
-           document.getElementById("visDiv" + i).style.zIndex = i;
-           document.getElementById("visDiv" + i).contentWindow.pauseDraw();
-           document.getElementById("visDivIcon" + i + "a").src = "images/visDivIcon" + i + "_w.png";
-           document.getElementById("visDivIcon" + i + "b").src = "images/visDivIcon" + i + "_w.png";
-          } 
         }
-      }*/  
-      
-      // hide all iframes except the one selected via carousel
-      // stop draw loop if sketch is hidden
-      function changeVisWithMouse(frameIndex) {
-        var numberOfFrames = document.getElementById("center").getElementsByTagName("iframe").length;
-
-	      for(i = 1; i <= numberOfFrames; i++) {
-	        if(i == frameIndex) { 
- 	          document.getElementById("visDiv" + i).style.visibility = "visible"; 
-            document.getElementById("visDiv" + i).style.zIndex = "9999";
-	          document.getElementById("visDiv" + i).contentWindow.restartDraw();
-						document.getElementById("visDivIcon" + i +"a").src = "images/visDivIcon" + i + "_y.png";
-            document.getElementById("visDivIcon" + i +"b").src = "images/visDivIcon" + i + "_y.png";
-	        }
-          
-          else { 
-	         document.getElementById("visDiv" + i).style.visibility = "hidden"; 
-           document.getElementById("visDiv" + i).style.zIndex = i;
-	         document.getElementById("visDiv" + i).contentWindow.pauseDraw();
-           document.getElementById("visDivIcon" + i + "a").src = "images/visDivIcon" + i + "_w.png";
-           document.getElementById("visDivIcon" + i + "b").src = "images/visDivIcon" + i + "_w.png";
-	        }	
-        }
-      }		
+      }
 
       var loadedVisualizations = 0;
       function trackLoadedVisualizations() {
@@ -64,7 +44,7 @@
         loadedVisualizations += 1;
        
         // hide overlay
-        if(loadedVisualizations == totalNumberOfVisualizations-1) {
+        if(loadedVisualizations == totalNumberOfVisualizations) {
           var overlayDIV = document.getElementById("overlay");
           overlayDIV.parentNode.removeChild(overlayDIV);
         }
@@ -75,7 +55,7 @@
 <body>
 
     <div id="overlay">
-      <div id="loading">Loading Visualizations.</br>Please wait.</div>
+      <div id="loading">Loading Visualizations</br>Please wait</div>
       <div id="navigationCover"></div>
     </div>
 
@@ -83,44 +63,50 @@
 			<div id="title">
 			  <a href="http://vislabweb.tacc.utexas.edu/InteractiveRights/index.html">Interactive Rights</a>
       </div>
-      <div id="nav-bar-top">
-        <!--
-        <a href="#"><img src="images/visDivIcon1_y.png" id="visDivIcon1a" ontouchstart="changeVisWithTouch(event,1)" onclick="changeVisWithMouse(1)" /></a>
-        <a href="#"><img src="images/visDivIcon2_w.png" id="visDivIcon2a" ontouchstart="changeVisWithTouch(event,2)" onclick="changeVisWithMouse(2)" /></a>
-        <a href="#"><img src="images/visDivIcon3_w.png" id="visDivIcon3a" ontouchstart="changeVisWithTouch(event,3)" onclick="changeVisWithMouse(3)" /></a>
-        <a href="#"><img src="images/visDivIcon4_w.png" id="visDivIcon4a" ontouchstart="changeVisWithTouch(event,4)" onclick="changeVisWithMouse(4)" /></a> 	
-        -->
-        <a href="#"><img src="images/visDivIcon1_y.png" id="visDivIcon1a" onclick="changeVisWithMouse(1)" /></a>
-        <a href="#"><img src="images/visDivIcon2_w.png" id="visDivIcon2a" onclick="changeVisWithMouse(2)" /></a>
-        <a href="#"><img src="images/visDivIcon3_w.png" id="visDivIcon3a" onclick="changeVisWithMouse(3)" /></a>
-        <a href="#"><img src="images/visDivIcon4_w.png" id="visDivIcon4a" onclick="changeVisWithMouse(4)" /></a>   
-      </div>
+      <table id="nav-bar-top">
+        <tr>
+          <td onmousedown="changeVis(1)" ontouchstart="changeVis(1)">
+            <span>1</span><a href="#"><img src="images/visDivIcon1_y.png" id="visDivIcon1a"/><p>Raining Rights</p></a>
+          </td>
+          <td onmousedown="changeVis(2)" ontouchstart="changeVis(2)">
+            <span>2</span><a href="#"><img src="images/visDivIcon2_w.png" id="visDivIcon2a"/><p>In/Out</p></a>
+          </td>
+          <td onmousedown="changeVis(3)" ontouchstart="changeVis(3)">
+            <span>3</span><a href="#"><img src="images/visDivIcon3_w.png" id="visDivIcon3a" /><p>Trivia</p></a>   
+          </td>
+          <td onmousedown="changeVis(4)" ontouchstart="changeVis(4)">
+            <span>4</span><a href="#"><img src="images/visDivIcon4_w.png" id="visDivIcon4a"/><p>Circle of Rights</p></a>
+          </td>
+      </table>
 		</div>
 	
     <div id="center">
-      <iframe id="visDiv1" src="RadialBarGraph/web/radialBarGraph.html" width="100%" height="100%" style="visibility:visible; z-index:100;"  seamless></iframe>
-      <iframe id="visDiv2" src="Bubbles/web/bubbles.html" 	            width="100%" height="100%" style="visibility:hidden;"                seamless></iframe>
-      <iframe id="visDiv3" src="TrueOrFalse/web/trueOrFalse.html"       width="100%" height="100%" style="visibility:hidden;"                seamless></iframe> 
-      <iframe id="visDiv4" src="Trivia/web/trivia.html"                 width="100%" height="100%" style="visibility:hidden;"                seamless></iframe>  
+      <iframe id="visDiv1" src="Bubbles/web/bubbles.html" 	            width="100%" height="100%" style="visibility:visible; z-index:100" seamless></iframe>
+      <iframe id="visDiv2" src="InOrOut/web/inOrOut.html"               width="100%" height="100%" style="visibility:hidden;"              seamless></iframe> 
+      <iframe id="visDiv3" src="Trivia/web/trivia.html"                 width="100%" height="100%" style="visibility:hidden;"              seamless></iframe>  
+      <iframe id="visDiv4" src="RadialBarGraph/web/radialBarGraph.html" width="100%" height="100%" style="visibility:hidden;"              seamless></iframe>
     </div>
 
 		<div id="footer">
-      <div id="nav-bar-bottom">
-        <!--
-        <a href="#"><img src="images/visDivIcon1_y.png" id="visDivIcon1b" ontouchstart="changeVisWithTouch(event,1)" onclick="changeVisWithMouse(1)" /></a>
-        <a href="#"><img src="images/visDivIcon2_w.png" id="visDivIcon2b" ontouchstart="changeVisWithTouch(event,2)" onclick="changeVisWithMouse(2)" /></a>
-        <a href="#"><img src="images/visDivIcon3_w.png" id="visDivIcon3b" ontouchstart="changeVisWithTouch(event,3)" onclick="changeVisWithMouse(3)" /></a>
-        <a href="#"><img src="images/visDivIcon4_w.png" id="visDivIcon4b" ontouchstart="changeVisWithTouch(event,4)" onclick="changeVisWithMouse(4)" /></a>  
-        -->
-        <a href="#"><img src="images/visDivIcon1_y.png" id="visDivIcon1b" onclick="changeVisWithMouse(1)" /></a>
-        <a href="#"><img src="images/visDivIcon2_w.png" id="visDivIcon2b" onclick="changeVisWithMouse(2)" /></a>
-        <a href="#"><img src="images/visDivIcon3_w.png" id="visDivIcon3b" onclick="changeVisWithMouse(3)" /></a>
-        <a href="#"><img src="images/visDivIcon4_w.png" id="visDivIcon4b" onclick="changeVisWithMouse(4)" /></a>  
-      </div>
+      <table id="nav-bar-bottom">
+        <tr>
+          <td onmousedown="changeVis(1)" ontouchstart="changeVis(1)">
+            <span>1</span><a href="#"><img src="images/visDivIcon1_y.png" id="visDivIcon1b"/><p>Raining Rights</p></a></a>
+          </td>
+          <td onmousedown="changeVis(2)" ontouchstart="changeVis(2)">
+            <span>2</span><a href="#"><img src="images/visDivIcon2_w.png" id="visDivIcon2b"/><p>In/Out</p></a>
+          </td>
+          <td onmousedown="changeVis(3)" ontouchstart="changeVis(3)">
+            <span>3</span><a href="#"><img src="images/visDivIcon3_w.png" id="visDivIcon3b"/><p>Trivia</p></a>  
+          </td>
+          <td onmousedown="changeVis(4)" ontouchstart="changeVis(4)">
+            <span>4</span><a href="#"><img src="images/visDivIcon4_w.png" id="visDivIcon4b"/><p>Circle of Rights</p></a>
+          </td>
+        </tr>
+      </table>
       <div id="ut-branding">
         <span>The University of Texas at Austin</span>
       </div> 
 		</div>
-
 </body>
 </html>

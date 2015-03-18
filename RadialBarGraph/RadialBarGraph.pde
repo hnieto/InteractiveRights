@@ -8,8 +8,9 @@
 
 import java.util.Map;
 HashMap<String, Country> countryMap          = new HashMap<String, Country>();
-ArrayList<Country>       allCountries        = new ArrayList<Country>();
+HashMap<String, ArrayList<Country>> groups   = new HashMap<String, ArrayList<Country>>();
 ArrayList<Country>       visualizedCountries = new ArrayList<Country>();
+ArrayList<Country>       allCountries        = new ArrayList<Country>();
 ArrayList<Category>      categoryList        = new ArrayList<Category>();
 ArrayList<String>        rightsColumns       = new ArrayList<String>();
 
@@ -17,9 +18,9 @@ TimeController           timecontroller;
 int[]                    yearRange = new int[2];
 int                      currentCircumplex, numberOfRights;
 float                    controllerRadius, circumplexRadius, shortestDistanceFromCenter, paddingTop;
-float                    circumplexRotationAngle, mouseStartAngle;
+float                    circumplexRotationAngle, mouseStartAngle, canvasAngle;
 float                    highlightRadius, highlightThickness, highlightedRightIndex, highlightedCategoryIndex;
-int                      largestCategoryLength;
+int                      borderThickness, largestCategoryLength;
 
 PFont                    defaultFont, monoSpacedFont, monoSpacedBold, digitalFont;
 int                      fontSize;
@@ -27,11 +28,15 @@ int                      fontSize;
 color[]                  categoryColors = new color[7];
 color                    background_color, letter_color, wedgeBorder_color;
 
-float                    cursorX, cursorY, cursorR; // generic variable to hold either touch or mouse location
+float                    cursorX, cursorY; // generic variable to hold either touch or mouse location
 float                    sketchWidth, sketchHeight;
 
-boolean                  dragMode             = false;
-boolean                  highlightRing        = false;
+boolean                  dragMode      = false;
+boolean                  highlightRing = false;
+boolean                  rotateVis     = false;
+boolean                  longTouch     = false;
+boolean                  onMobile      = false;
+float                    mouseAngle    = 0.0;
 
 /*********************************************/
 /*            Initialization                 */
@@ -39,12 +44,12 @@ boolean                  highlightRing        = false;
 void setup() {
   // colors
   categoryColors[6]          = #113C5D; // outer
-  categoryColors[5]          = #FEDC1C; 
-  categoryColors[4]          = #76A0D5; 
-  categoryColors[3]          = #D43266;
+  categoryColors[5]          = #76A0D5; 
+  categoryColors[4]          = #54A88D;      
+  categoryColors[3]          = #D43266;  
   categoryColors[2]          = #0065A0;
   categoryColors[1]          = #00A871;
-  categoryColors[0]          = #80304A; // inner
+  categoryColors[0]          = #80304A; // inner 
   background_color           = color(0, 0, 0);        // black
   letter_color               = color(255, 255, 255);  // white 
   wedgeBorder_color          = color(255, 255, 255);  // black 
@@ -52,30 +57,40 @@ void setup() {
   // circumplex              
   numberOfRights             = 0;
   circumplexRotationAngle    = 0.0; 
+  canvasAngle                = 0.0;
   mouseStartAngle            = 0.0;
   highlightRadius            = 0.0;
   highlightThickness         = 0.0;
   highlightedRightIndex      = -1;
   highlightedCategoryIndex   = -1;
+  borderThickness            = 1;
 
   // javascript function to set sketch size according to the width of the browser
   setCanvasSize();
   size(sketchWidth, sketchHeight, P2D);
-  paddingTop                 = sketchHeight * 0.01; 
+  paddingTop                 = sketchHeight * 0.05; 
 
   // font stuff
   fontSize                   = lerp(0, 20, sketchWidth/2596); // 2596 == 67% of 4K horizontal resolution
   defaultFont                = createFont("../data/RefrigeratorDeluxeLight.ttf", fontSize);
   monoSpacedFont             = createFont("../data/MonoSpaced.ttf", fontSize); 
   monoSpacedBold             = createFont("../data/MonoSpacedBold.ttf", fontSize);
-  digitalFont                = createFont("../data/Digital.ttf", fontSize*4);
+  digitalFont                = createFont("../data/Digital.ttf", fontSize*9);
   textAlign(CENTER);
   textFont(defaultFont);
 
   // parsing
-  parseCategories("../data/substantive_categorization_110414.csv");
-  parseRights("../data/rights.csv");
-  parseSnippets("../data/snippets_110514.csv");
+  if(onMobile) {
+    parseCategories("../data/reduced_categorization_02232015.csv");
+    parseRights("../data/rights_mobile.csv");
+  }
+  else {
+    //parseCategories("../data/alex_02232015_categorization.csv");
+    parseCategories("../data/substantive_categorization_021514.csv");
+    parseRights("../data/rights.csv");
+  }
+  parseGroups("../data/region_group.csv");
+  parseSnippets("../data/snippets_021514.csv");
   
   // time controls
   shortestDistanceFromCenter = min(width, height)/2;
@@ -85,8 +100,6 @@ void setup() {
   timecontroller.init();
 
   // javascript function to create HTML elements
-  generateButtonTreeLinks();
-  generateButtonTree();
   generateAlphabetList();
   generateCountryList();
   generateDescription();
@@ -96,52 +109,91 @@ void setup() {
  
   // let javascript know that this vis is ready to draw
   readyToDraw();
+  
+  // do not draw anything until vis is selected in html
+  noLoop(); 
 }
 
 /*********************************************/
 /*             MAIN DRAW LOOP                */
 /*********************************************/
-void draw() {
-
+void draw() {  
   background(background_color);
-
+  
   pushMatrix();
   translate(width/2, height/2);
   
-  // draw grey circle behind slices
-  fill(15);
-  noStroke();
-  ellipse(0, 0, circumplexRadius*2, circumplexRadius*2);
-
-  pushMatrix();
-  rotate(circumplexRotationAngle);
-  if (currentCircumplex == categoryList.size()) { 
-    drawCategoryCircumplex(); 
-    drawCategoryBorders(); 
-  } 
-  else { 
-    drawRightsCircumplex(categoryList.get(currentCircumplex)); 
-    drawRightBorders(); 
-  }
-  drawCountryNames();
-  popMatrix();
-
-  pushStyle();
-  if (currentCircumplex == categoryList.size()) drawCategoryNames();
-  else drawRightNames();
-  popStyle();
-
-  if (highlightRing) {
+  // render empty wheel. no countries, just rights
+  if(visualizedCountries.size() == 0) {
+    if (currentCircumplex == categoryList.size()) {
+      drawEmptyCategoryCircumplex();
+    }
+    
+    else {
+      drawEmptyRightsCircumplex(categoryList.get(currentCircumplex));
+      drawCategoryRing();
+    }
+  
     pushStyle();
-    noFill();
-    stroke(200, 50);
-    strokeWeight(highlightThickness-4); // subtract 4 to account for the thickness of the borders between wedges
-    ellipse(0, 0, (highlightRadius-highlightThickness/2)*2, (highlightRadius-highlightThickness/2)*2);
+    if(!rotateVis){
+      if (currentCircumplex == categoryList.size()) drawCategoryNames();
+      else drawRightNames();
+    }
     popStyle();
+    
+    pushMatrix();
+    rotate(-canvasAngle);
+    timecontroller.drawEmpty(); 
+    popMatrix();
   }
-
-  timecontroller.draw(); 
-  timecontroller.update();
+  
+  // render populated wheel
+  else {
+    // draw grey circle behind slices 
+    // used to show country existence
+    fill(15);
+    noStroke();
+    ellipse(0, 0, circumplexRadius*2, circumplexRadius*2);
+    
+    // draw circle behind controller with same color as background
+    // required to offset the grey circle drawn behind slices
+    fill(background_color);
+    noStroke();
+    ellipse(0, 0, controllerRadius*2, controllerRadius*2);  
+    
+    if (currentCircumplex == categoryList.size()) {
+      drawCategoryCircumplex();
+    }
+    
+    else { 
+      drawRightsCircumplex(categoryList.get(currentCircumplex));
+      drawCategoryRing();
+    } 
+    drawCountryNames();
+  
+    pushStyle();
+    if(!rotateVis){
+      if (currentCircumplex == categoryList.size()) drawCategoryNames();
+      else drawRightNames();
+    }
+    popStyle();
+  
+    if (highlightRing) {
+      pushStyle();
+      noFill();
+      stroke(200, 50);
+      strokeWeight(highlightThickness);
+      ellipse(0, 0, (highlightRadius-highlightThickness/2)*2, (highlightRadius-highlightThickness/2)*2);
+      popStyle();
+    }
+  
+    pushMatrix();
+    rotate(-canvasAngle);
+    timecontroller.draw(); 
+    timecontroller.update();
+    popMatrix(); 
+  }
+  
   popMatrix();
    
 }
@@ -149,6 +201,125 @@ void draw() {
 /*********************************************/
 /*            RENDER CIRCUMPLEX              */
 /*********************************************/
+
+void drawCategoryRing() {
+  float delta          = TWO_PI/(categoryList.size()+1);  // add slice for "All Categories" button
+  float angle          = 0.0; 
+  float ringThickness  = (controllerRadius-timecontroller.containerRadius) * 0.45;
+  float ringRadius     = controllerRadius*0.95 - ringThickness/2;
+  
+  // Ring Geometry
+  pushStyle();
+  for (int i=0; i<=categoryList.size(); i++) {
+    if(i == categoryList.size()) {
+      color categoryColor = #DBD62C;
+      strokeCap(SQUARE);
+      strokeWeight(ringThickness);
+      stroke(categoryColor, 100);
+      arc(0, 0, ringRadius*2, ringRadius*2, angle+0.1, angle+delta-0.1);  
+      angle += delta;
+    }
+    
+    else {                   
+      color categoryColor = categoryList.get(i).colour;
+      strokeCap(SQUARE);
+      strokeWeight(ringThickness);
+      stroke(categoryColor, 100);
+      arc(0, 0, ringRadius*2, ringRadius*2, angle, angle+delta);  
+      angle += delta;
+    }
+  }  
+  angle = 0.0; // reset for category label calculations
+  popStyle(); 
+  
+  // Category Labels
+  textSize(fontSize);
+  float textHeight    = textAscent() + textDescent();
+  float  labelRadius   = (ringRadius - ringThickness/2) + (ringThickness - textHeight)/2; //ringRadius - ringThickness/2;
+  for (int i=0; i<=categoryList.size(); i++) {
+    if(i == categoryList.size()) String label = "ALL CATEGORIES";
+    else                         String label = categoryList.get(i).name;
+
+    float  txtStartAngle = (angle+delta*0.5) - (getTextLength(label)/ringRadius)*0.5;
+    float  arclength     = 0.0; // We must keep track of our position along the curve
+    for (int k=0; k<label.length(); k++) {
+
+      // Instead of a constant width, we check the width of each character.
+      String currentChar      = label.substring(k, k+1);
+      float  currentCharWidth = textWidth(currentChar);
+
+      // Each box is centered so we move half the width
+      arclength += currentCharWidth/2;
+
+      // Angle in radians is the arclength divided by the radius
+      // Starting on the left side of the circle by adding PI
+      float theta = arclength / labelRadius;    
+
+      pushMatrix();
+
+      // position text starting from given angle
+      rotate(txtStartAngle);
+
+      // Polar to cartesian coordinate conversion
+      translate(labelRadius*cos(theta), labelRadius*sin(theta));
+
+      // Rotate the box
+      rotate(theta+PI/2); // rotation is offset by 90 degrees
+
+      // Display the character
+      pushStyle();
+
+      fill(letter_color, 150);
+
+      text(currentChar, 0, 0);
+      popStyle();
+
+      popMatrix();
+
+      // Move halfway again
+      arclength += currentCharWidth/2;
+    }
+    
+    angle += delta;        
+  } 
+}
+
+void drawEmptyCategoryCircumplex() {
+  
+  // styles
+  fill(background_color);
+  stroke(255, 100);
+  
+  // circle separating time controller and first category ring
+  ellipse(0,0,circumplexRadius*2, circumplexRadius*2);
+
+  float rightThickness = (circumplexRadius-controllerRadius)/numberOfRights;
+  float currentRadius    = circumplexRadius;
+  for (int i=categoryList.size()-1; i>=0; i--) {
+    Category category       = categoryList.get(i);
+    float categoryThickness = rightThickness*category.rights.size();
+    currentRadius           = currentRadius - categoryThickness;
+    ellipse(0, 0, currentRadius*2, currentRadius*2);
+  }
+}
+
+
+void drawEmptyRightsCircumplex(Category category) {
+
+  // styles
+  fill(background_color);
+  stroke(255, 100);
+  
+  // circle separating time controller and first category ring
+  ellipse(0,0,circumplexRadius*2, circumplexRadius*2);
+
+  float rightThickness = (circumplexRadius-controllerRadius)/category.rights.size();
+  float currentRadius  = circumplexRadius;
+  for (int i=0; i<category.rights.size(); i++) {
+    currentRadius      = currentRadius - rightThickness;
+    ellipse(0, 0, currentRadius*2, currentRadius*2);
+  }
+}
 
 void drawCategoryCircumplex() {
   
@@ -158,7 +329,7 @@ void drawCategoryCircumplex() {
 
   for (int i=0; i<visualizedCountries.size(); i++) {
     Country countryObject = visualizedCountries.get(i);
-    countryObject.drawCategories(timecontroller.year, theta+0.009, theta+delta, controllerRadius, rightThickness); // add 0.009 to compensate for arcs overflowing past borders
+    countryObject.drawCategories(timecontroller.year, theta, theta+delta, controllerRadius, rightThickness); 
     theta += delta;
   }
 }
@@ -172,7 +343,7 @@ void drawRightsCircumplex(Category category) {
 
   for (int i=0; i<visualizedCountries.size(); i++) {
     Country countryObject = visualizedCountries.get(i);
-    countryObject.drawRights(category, timecontroller.year, theta+0.009, theta+delta, controllerRadius, rightThickness); // add 0.009 to compensate for arcs overflowing past borders
+    countryObject.drawRights(category, timecontroller.year, theta, theta+delta, controllerRadius, rightThickness); 
     theta += delta;
   }
 }
@@ -183,54 +354,112 @@ void drawRightsCircumplex(Category category) {
 /*********************************************/
 
 void drawCountryNames() {   
-
-  textSize(fontSize);
-  float delta           = TWO_PI/visualizedCountries.size(); 
+  textSize(fontSize*2);
+  float delta           = (visualizedCountries.size() > 1) ? TWO_PI/visualizedCountries.size() : 3*PI; 
   float startTheta      = 0.0;
   float thickness       = (circumplexRadius-controllerRadius)/numberOfRights;
-  float adjustedRadius  = circumplexRadius-thickness/2; // wedge thickens up/down from current radius, we have to adjust for that
-
+  
   for (int i=0; i<visualizedCountries.size(); i++) {
     Country countryObject = visualizedCountries.get(i);
-    String name = countryObject.name + " " + "(" + countryObject.existence[0] + " - " + countryObject.existence[1] + ")";
-    float outerRadius   = adjustedRadius + thickness;
-    float txtStartAngle = (startTheta+delta*0.5) - (getTextLength(name)/outerRadius)*0.5;
-    float arclength     = 0; // We must keep track of our position along the curve
+    String[] name = {countryObject.name.toUpperCase(), countryObject.existence[0] + " - " + countryObject.existence[1]};
+    float outerRadius         = circumplexRadius + thickness*4;
+    float outerRadiusReversed = circumplexRadius + thickness*9;
 
-    for (int j=0; j<name.length(); j++) {
-
-      // Instead of a constant width, we check the width of each character.
-      String currentChar      = name.substring(j, j+1);
-      float  currentCharWidth = textWidth(currentChar);
-
-      // Each box is centered so we move half the width
-      arclength += currentCharWidth/2;
-
-      // Angle in radians is the arclength divided by the radius
-      // Starting on the left side of the circle by adding PI
-      float theta = arclength / outerRadius;    
-
-      pushMatrix();
-
-      // position text starting from given angle
-      rotate(txtStartAngle);
-
-      // Polar to cartesian coordinate conversion
-      translate(outerRadius*cos(theta), outerRadius*sin(theta));
-
-      // Rotate the box
-      rotate(theta+PI/2); // rotation is offset by 90 degrees
-
-      // Display the character
-      pushStyle();
-      fill(letter_color);
-      text(currentChar, 0, 0);
-      popStyle();
-
-      popMatrix();
-
-      // Move halfway again
-      arclength += currentCharWidth/2;
+    for (int j=0; j<name.length; j++) {
+      float txtStartAngle = (startTheta+delta*0.5) - (getTextLength(name[j])/outerRadius)*0.5;
+      float arclength     = 0; // We must keep track of our position along the curve
+      
+      // compensate for html canvas rotation
+      float adjustedTxtStartAngle = txtStartAngle;
+      if(canvasAngle > 0) adjustedTxtStartAngle = (adjustedTxtStartAngle+canvasAngle > TWO_PI) ? (adjustedTxtStartAngle+canvasAngle)-TWO_PI : adjustedTxtStartAngle+canvasAngle;
+      else                adjustedTxtStartAngle = (adjustedTxtStartAngle+canvasAngle < 0)      ? TWO_PI-(adjustedTxtStartAngle+canvasAngle) : adjustedTxtStartAngle+canvasAngle;
+    
+      // flip text if country is on lower hemisphere
+      if(adjustedTxtStartAngle > 0 && adjustedTxtStartAngle < PI) {
+        for (int k=name[j].length(); k>=0; k--) {
+    
+          // Instead of a constant width, we check the width of each character.
+          String currentChar      = name[j].substring(k, k+1);
+          float  currentCharWidth = textWidth(currentChar);
+    
+          // Each box is centered so we move half the width
+          arclength += currentCharWidth/2;
+    
+          // Angle in radians is the arclength divided by the radius
+          // Starting on the left side of the circle by adding PI
+          float theta = arclength / outerRadius;    
+    
+          pushMatrix();
+    
+          // position text starting from given angle
+          rotate(txtStartAngle);
+    
+          // Polar to cartesian coordinate conversion
+          translate(outerRadiusReversed*cos(theta), outerRadiusReversed*sin(theta));
+    
+          // Rotate the box
+          rotate(theta-PI/2);
+    
+          // Display the character
+          pushStyle();
+          if(j==0) textSize(fontSize*2);
+          else textSize(fontSize);
+          fill(letter_color);
+          text(currentChar, 0, 0);
+          popStyle();
+    
+          popMatrix();
+    
+          // Move halfway again
+          arclength += currentCharWidth/2;
+          
+        }   
+        // reduce radius to draw year under country name
+        outerRadiusReversed -= thickness*6;          
+      }
+      
+      else {
+        for (int k=0; k<name[j].length(); k++) {
+    
+          // Instead of a constant width, we check the width of each character.
+          String currentChar      = name[j].substring(k, k+1);
+          float  currentCharWidth = textWidth(currentChar);
+    
+          // Each box is centered so we move half the width
+          arclength += currentCharWidth/2;
+    
+          // Angle in radians is the arclength divided by the radius
+          // Starting on the left side of the circle by adding PI
+          float theta = arclength / outerRadius;    
+    
+          pushMatrix();
+    
+          // position text starting from given angle
+          rotate(txtStartAngle);
+    
+          // Polar to cartesian coordinate conversion
+          translate(outerRadius*cos(theta), outerRadius*sin(theta));
+    
+          // Rotate the box
+          rotate(theta+PI/2); // rotation is offset by 90 degrees
+    
+          // Display the character
+          pushStyle();
+          if(j==0) textSize(fontSize*2);
+          else textSize(fontSize);
+          fill(letter_color);
+          text(currentChar, 0, 0);
+          popStyle();
+    
+          popMatrix();
+    
+          // Move halfway again
+          arclength += currentCharWidth/2;
+          
+        }  
+        // reduce radius to draw year under country name
+        outerRadius -= thickness*3.5;        
+      }       
     }
 
     startTheta += delta;
@@ -239,83 +468,13 @@ void drawCountryNames() {
 }
 
 
-void drawRightNames() {
-
-  Category category         = categoryList.get(currentCircumplex);
-  float    delta            = TWO_PI/visualizedCountries.size(); 
-  float    startTheta       = -HALF_PI - delta/2; 
-  float    thickness        = (circumplexRadius-controllerRadius)/category.rights.size();
-  float    innerRadius      = controllerRadius;
-  float    adjustedFontSize = fontSize*15/category.rights.size(); // font size must be inversely proportional to the number of rings 
-  String   rightText;
-
-  for (int i=0; i<category.rights.size(); i++) {
-
-    if (i == highlightedRightIndex) {
-      float descriptionFontSize = fontSize*22/largestCategoryLength;
-      textFont(monoSpacedBold, descriptionFontSize);
-      rightText = category.descriptions.get(i);
-    }
-    else {
-      textFont(monoSpacedFont, adjustedFontSize);
-      rightText = category.rights.get(i);
-    }
-
-    float textHeight    = textAscent() + textDescent();
-    float radius        = innerRadius + 2; //add 2 to account for the width of the borders between wedges
-    float txtStartAngle = (startTheta+delta*0.5) - (getTextLength(rightText)/radius)*0.5;
-    float arclength     = 0; // We must keep track of our position along the curve
-
-    for (int j=0; j<rightText.length(); j++) {
-
-      // Instead of a constant width, we check the width of each character.
-      String currentChar      = rightText.substring(j, j+1);//text.charAt(j);
-      float  currentCharWidth = textWidth(currentChar);
-
-      // Each box is centered so we move half the width
-      arclength += currentCharWidth/2;
-
-      // Angle in radians is the arclength divided by the radius
-      // Starting on the left side of the circle by adding PI
-      float theta = arclength / radius;    
-
-      pushMatrix();
-      // position text starting from given angle
-      rotate(txtStartAngle);
-
-      // Polar to cartesian coordinate conversion
-      translate(radius*cos(theta), radius*sin(theta));
-
-      // Rotate the box
-      rotate(theta+PI/2); // rotation is offset by 90 degrees
-
-      // Display the character
-      pushStyle();
-
-      if (i == highlightedRightIndex) fill(255, 255, 0, 150);
-      else fill(letter_color, 150);
-
-      text(currentChar, 0, 0);
-      popStyle();
-
-      popMatrix();
-
-      // Move halfway again
-      arclength += currentCharWidth/2;
-    }
-
-    innerRadius += thickness;
-  }
-}
-
-
 void drawCategoryNames() {
 
   textSize(fontSize*3);
-  float delta                = TWO_PI/visualizedCountries.size(); 
-  float startTheta           = -HALF_PI - delta/2; 
+  float delta                = (visualizedCountries.size() > 0) ? TWO_PI/visualizedCountries.size() : TWO_PI; 
+  float startTheta           = -HALF_PI - delta/2 - canvasAngle; 
   float rightThickness       = (circumplexRadius-controllerRadius)/numberOfRights;
-  float categoryInnerRadius  = controllerRadius + 2; //add 2 to account for the width of the borders between wedges
+  float categoryInnerRadius  = controllerRadius + borderThickness; // compensate for border thickness
   float textHeight           = textAscent() + textDescent();
 
   for (int i=0; i<categoryList.size(); i++) {
@@ -369,68 +528,68 @@ void drawCategoryNames() {
 }
 
 
-void drawCategoryBorders() {
-  float delta          = TWO_PI/visualizedCountries.size(); 
-  float theta          = 0.0; 
-  float rightThickness = (circumplexRadius-controllerRadius)/numberOfRights;
-  float adjustedRadius = controllerRadius; 
+void drawRightNames() {
 
-  pushStyle();
-  noFill();
-  strokeWeight(5);
-  stroke(4);
-  
-  for (int i=0; i<categoryList.size(); i++) {
-    Category category = categoryList.get(i);
-    float categoryThickness = rightThickness*category.rights.size();
-    ellipse(0, 0, adjustedRadius*2, adjustedRadius*2);
-    adjustedRadius += categoryThickness;
-  }
-  
-  for (int i=0; i<visualizedCountries.size(); i++) {
-    line(0, 0, circumplexRadius*cos(theta), circumplexRadius*sin(theta));
-    line(0, 0, circumplexRadius*cos(theta+delta), circumplexRadius*sin(theta+delta));
-    theta += delta;
-  }
-  
-  popStyle();
-  
-  // draw black circle behind time controller to cover lines used for slice borders
-  fill(background_color);
-  noStroke();
-  ellipse(0, 0, controllerRadius*2, controllerRadius*2);
-}
+  Category category         = categoryList.get(currentCircumplex);
+  float    delta            = (visualizedCountries.size() > 0) ? TWO_PI/visualizedCountries.size() : TWO_PI; 
+  float    startTheta       = -HALF_PI - delta/2 - canvasAngle; 
+  float    thickness        = (circumplexRadius-controllerRadius)/category.rights.size();
+  float    innerRadius      = controllerRadius;
+  float    adjustedFontSize = fontSize*26/largestCategoryLength; 
+  String   rightText;
 
-
-void drawRightBorders() {
-  Category category       = categoryList.get(currentCircumplex);
-  float    delta          = TWO_PI/visualizedCountries.size(); 
-  float    theta          = 0.0; 
-  float    rightThickness = (circumplexRadius-controllerRadius)/category.rights.size();
-  float    adjustedRadius = controllerRadius; 
-
-  pushStyle();
-  noFill();
-  strokeWeight(5);
-  stroke(4);
-  
   for (int i=0; i<category.rights.size(); i++) {
-    ellipse(0, 0, adjustedRadius*2, adjustedRadius*2);
-    adjustedRadius += rightThickness;
+
+    textSize(adjustedFontSize);
+    if (i == highlightedRightIndex) rightText = category.descriptions.get(i);
+    else rightText = category.rights.get(i);
+    
+    float textHeight    = textAscent() + textDescent();
+    float radius        = innerRadius + (thickness - textHeight)/2;
+    float txtStartAngle = (startTheta+delta*0.5) - (getTextLength(rightText)/radius)*0.5;
+    float arclength     = 0; // We must keep track of our position along the curve
+
+    for (int j=0; j<rightText.length(); j++) {
+
+      // Instead of a constant width, we check the width of each character.
+      String currentChar      = rightText.substring(j, j+1);//text.charAt(j);
+      float  currentCharWidth = textWidth(currentChar);
+
+      // Each box is centered so we move half the width
+      arclength += currentCharWidth/2;
+
+      // Angle in radians is the arclength divided by the radius
+      // Starting on the left side of the circle by adding PI
+      float theta = arclength / radius;    
+
+      pushMatrix();
+      // position text starting from given angle
+      rotate(txtStartAngle);
+
+      // Polar to cartesian coordinate conversion
+      translate(radius*cos(theta), radius*sin(theta));
+
+      // Rotate the box
+      rotate(theta+PI/2); // rotation is offset by 90 degrees
+
+      // Display the character
+      pushStyle();
+
+      if (i == highlightedRightIndex) fill(255, 255, 0, 150);
+      else fill(letter_color, 150);
+
+      text(currentChar, 0, 0);
+      popStyle();
+
+      popMatrix();
+
+      // Move halfway again
+      if(onMobile) arclength += currentCharWidth/2;
+      else arclength += currentCharWidth;
+    }
+
+    innerRadius += thickness;
   }
-  
-  for (int i=0; i<visualizedCountries.size(); i++) {
-    line(0, 0, circumplexRadius*cos(theta), circumplexRadius*sin(theta));
-    line(0, 0, circumplexRadius*cos(theta+delta), circumplexRadius*sin(theta+delta));
-    theta += delta;
-  }
-  
-  popStyle();
-  
-  // draw black circle behind time controller to cover lines used for slice borders
-  fill(background_color);
-  noStroke();
-  ellipse(0, 0, controllerRadius*2, controllerRadius*2);
 }
 
 
@@ -451,6 +610,7 @@ int getTextLength(String txt) {
 /*********************************************/
 /*                PARSE CSVs                 */
 /*********************************************/
+
 void parseCategories(String csv) {
   int startTime = millis();
   
@@ -492,19 +652,14 @@ void parseRights(String csv) {
   int startTime = millis();
 
   // reads CSV header column and returns only the Right strings
-  String[] rows    = loadStrings(csv);
-  String[] columns = split(rows[0].replaceAll("\"", ""), ',');
+  String[] rows                = loadStrings(csv);
+  String[] columns             = split(rows[0].replaceAll("\"", ""), ',');
   int countryColumnIndex       = 0;
   int yearColumnIndex          = 1;
   int endYearColumnIndex       = 2;
-  int visualizeColumnIndex     = 3;
-  int adoptedRightsColumnIndex = 4;
-  int rightColumnIndex         = 5;
+  int adoptedRightsColumnIndex = 3;
+  int rightColumnIndex         = 4;
   
-  // used to find optimal time range
-  int earliestStartYear = 2012;
-  int latestEndYear   = 2012;
-
   // get all column headers that follow the column "Human Dignity"
   for (int i=rightColumnIndex; i<columns.length; i++) {
     rightsColumns.add(columns[i]);
@@ -513,35 +668,28 @@ void parseRights(String csv) {
   // parse rights.csv and use rightsColumn array to filter results
   for (int i=1; i<rows.length; i++) {
     String[] row                = split(rows[i], ',');
-    boolean  visualize          = (row[visualizeColumnIndex].equals("yes")) ? true : false;
     int      numOfAdoptedRights = int(row[adoptedRightsColumnIndex]);
     int      currentYear        = int(row[yearColumnIndex]);
-    int      endYear            = int(row[endYearColumnIndex]);
            
-    String   countryName      = row[countryColumnIndex]; // get string in column titled "country"
-    Country  countryObject = countryMap.get(countryName);
+    String   countryName        = row[countryColumnIndex]; // get string in column titled "country"
+    Country  countryObject      = countryMap.get(countryName);
 
     // first time this country was read in table
     if (countryObject == null) {  
       String[] yearsOfExistence = { row[yearColumnIndex], row[endYearColumnIndex] };
-      countryObject           = new Country(countryName, yearsOfExistence, visualize);
+      countryObject             = new Country(countryName, yearsOfExistence);
       countryMap.put(countryName, countryObject);
       allCountries.add(countryObject);
-      if (visualize) {
-        if (currentYear < earliestStartYear) earliestStartYear = currentYear; 
-        if (endYear < latestEndYear)         latestEndYear     = endYear;
-        visualizedCountries.add(countryObject);
-      }
     }
       
     // find all rights available for this country on this year
-    Year year      = new Year(currentYear);
+    Year year = new Year(currentYear);
 
     if(numOfAdoptedRights > 0) { // skip years that have no rights
-      for (int j=0, rightIterator=rightColumnIndex; j<rightsColumns.size(); j++, rightIterator++) {
+      for (int j=0, rightIterator = rightColumnIndex; j<rightsColumns.size(); j++, rightIterator++) {
 
-        String right             = rightsColumns.get(j);
-        String rightAvailability = row[rightIterator];
+        String right              = rightsColumns.get(j);
+        String rightAvailability  = row[rightIterator];
 
         if (rightAvailability.equals("1. yes") || rightAvailability.equals("2. full")) {
           year.addRight(right);
@@ -550,13 +698,41 @@ void parseRights(String csv) {
       }
       
       countryObject.addYear(year);
+      countryObject.addYear((Integer)currentYear, year);
     }            
   }
   
-  yearRange[0] = earliestStartYear;
-  yearRange[1] = latestEndYear;
-  
 //  println("Parse Rights - Elapsed Time: " + (millis()-startTime)/1000);
+}
+
+
+void parseGroups(String csv) {
+  // get the HTML table ready
+  // we'll populate it with the group names
+  var table = document.getElementById("groupTable");
+  ArrayList<String> groupNames = new ArrayList<String>();
+  
+  String rows[] = loadStrings(csv);
+  for (int i = 0 ; i < rows.length; i++) {
+    String cols = split(rows[i], ',');
+    String groupName = cols[0];
+    ArrayList<Country> groupEntries = new ArrayList<Country>();
+    for (int j = 1; j < cols.length; j++) {
+      Country countryObject = countryMap.get(cols[j]);
+      if (countryObject != null) groupEntries.add(countryObject);
+    }
+    groupNames.add(groupName);
+    groups.put(groupName, groupEntries);
+    
+    // add a new cell to the table for every group in the csv
+    var newRow      = table.insertRow(-1);
+    var newCell     = newRow.insertCell(-1);
+    newCell.innerHTML = groupName;    
+  }
+  
+  // set random group as default
+  String randGroup    = groupNames.get((int)random(groupNames.size()));
+  loadNewGroup(randGroup);
 }
 
 
@@ -569,9 +745,11 @@ void parseSnippets(String csv) {
     String constitution   = split(rows[i], '|')[3];
     String right          = split(rows[i], '|')[1];
     String snippetText    = split(rows[i], '|')[4];
-    String countryName    = split(constitution, '_')[0];
+    //String countryName    = split(constitution, '_')[0];
+    String[] detailedCountryName = split(constitution, '_');
+    String simpleCountryName = detailedCountryName[0]; //join(subset(detailedCountryName, 0, detailedCountryName.length-1), " ");
     
-    Country countryObject = countryMap.get(countryName);
+    Country countryObject = countryMap.get(simpleCountryName);
     if (countryObject != null) {
       String snippet = countryObject.snippets.get(right);
       if (snippet == null) {
@@ -596,79 +774,96 @@ Category findCategoryForRight(String rightToSearch) {
 
 
 /*********************************************/
-/*        GENERIC INPUT FUNCTIONS            */
+/*       MOUSE/KEYBOARD INTERACTION          */
 /*********************************************/
-void cursorDown() {
+
+void cursorDown(float x, float y){
+ 
+  cursorX    = x;
+  cursorY    = y;
+  
   float disX = width/2  - cursorX;
   float disY = height/2 - cursorY;
 
-  // check if circumplex should be rotated
-  if (sqrt(sq(disX) + sq(disY)) > controllerRadius && sqrt(sq(disX) + sq(disY)) < circumplexRadius) {
-    // get the angle from the center to the mouse position
-    mouseStartAngle = atan2(cursorY - height/2, cursorX - width/2); // atan2 returns angle between PI and -PI    
-    mouseStartAngle = mouseStartAngle > 0 ? mouseStartAngle : (TWO_PI + mouseStartAngle); // map atan2 to radians between 0 and TWO_PI  
-  }
-
-  // highlight right ring when clicked wedge is selected via mouse press
-  if (currentCircumplex == categoryList.size()) {
-
-    float rightThickness = (circumplexRadius-controllerRadius)/numberOfRights;
-    float r              = circumplexRadius;
-
-    for (int i=categoryList.size()-1; i>=0; i--) {
-
-      float categoryThickness = rightThickness*categoryList.get(i).rights.size();
-      if (sqrt(sq(disX) + sq(disY)) > r-categoryThickness && sqrt(sq(disX) + sq(disY)) < r) {
-        highlightRing            = true;
-        highlightRadius          = r;
-        highlightThickness       = categoryThickness;
-        highlightedCategoryIndex = i;
-      } 
-      r -= categoryThickness;
+  if(visualizedCountries.size() > 0) {
+    // highlight Category  
+    if (currentCircumplex == categoryList.size()) {
+  
+      float rightThickness = (circumplexRadius-controllerRadius)/numberOfRights;
+      float r              = circumplexRadius;
+  
+      for (int i=categoryList.size()-1; i>=0; i--) {
+  
+        float categoryThickness = rightThickness*categoryList.get(i).rights.size();
+        if (sqrt(sq(disX) + sq(disY)) > r-categoryThickness && sqrt(sq(disX) + sq(disY)) < r) {
+          highlightRing            = true;
+          highlightRadius          = r;
+          highlightThickness       = categoryThickness;
+          highlightedCategoryIndex = i;
+        } 
+        r -= categoryThickness;
+      }
+    } 
+    
+    // highlight Right  
+    else {
+      Category category       = categoryList.get(currentCircumplex);
+      float    rightThickness = (circumplexRadius-controllerRadius)/category.rights.size();
+      float    r              = circumplexRadius;
+  
+      for (int i=category.rights.size()-1; i>=0; i--) {
+  
+        if (sqrt(sq(disX) + sq(disY)) > r-rightThickness && sqrt(sq(disX) + sq(disY)) < r) {
+          highlightRing         = true;
+          highlightRadius       = r;
+          highlightThickness    = rightThickness;
+          highlightedRightIndex = i;
+        } 
+        r -= rightThickness;
+      }
     }
+  }
+  
+  // check for category change via radial menu
+  float _ringThickness          = (controllerRadius-timecontroller.containerRadius) * 0.45;
+
+  if (sqrt(sq(disX) + sq(disY)) <= controllerRadius*0.95 && sqrt(sq(disX) + sq(disY)) >= controllerRadius*0.95-_ringThickness) {
+    // turn highlighted ring off when switching circumplexes 
+    highlightRing            = false;
+    highlightedRightIndex    = -1;
+    highlightedCategoryIndex = -1;
+    
+    float delta          = TWO_PI/(categoryList.size()+1);  // add slice for "All Categories" button
+    float ringAngle      = 0.0; 
+
+    // determine which button on ring menu was selected
+    for (int i=0; i<=categoryList.size(); i++) {
+       if(mouseAngle > ringAngle && mouseAngle < ringAngle+delta) {
+         if(i == categoryList.size()) currentCircumplex = categoryList.size();
+         else currentCircumplex = i;
+         break;
+       }
+       ringAngle += delta;
+    }  
   } 
-  else {
-    Category category       = categoryList.get(currentCircumplex);
-    float    rightThickness = (circumplexRadius-controllerRadius)/category.rights.size();
-    float    r              = circumplexRadius;
-
-    for (int i=category.rights.size()-1; i>=0; i--) {
-
-      if (sqrt(sq(disX) + sq(disY)) > r-rightThickness && sqrt(sq(disX) + sq(disY)) < r) {
-        highlightRing         = true;
-        highlightRadius       = r;
-        highlightThickness    = rightThickness;
-        highlightedRightIndex = i;
-      } 
-      r -= rightThickness;
-    }
-  }
 
   timecontroller.timelineTickClicked(width/2, height/2);
 }
 
-
-void cursorDragged() {
-  // check if circumplex should be rotated
-  float disX = width/2  - cursorX;
-  float disY = height/2 - cursorY;
-
-  if (sqrt(sq(disX) + sq(disY)) > controllerRadius && sqrt(sq(disX) + sq(disY)) < circumplexRadius) {
-
-    // get the angle from the center to the mouse position
-    float mouseEndAngle = atan2(cursorY - height/2, cursorX - width/2); // atan2 returns angle between PI and -PI    
-    mouseEndAngle       = mouseEndAngle > 0 ? mouseEndAngle : (TWO_PI + mouseEndAngle); // map atan2 to radians between 0 and TWO_PI
-    float angleOffset   = mouseEndAngle - mouseStartAngle;
-    if(abs(angleOffset) > 0.006) dragMode = true;
-
-    circumplexRotationAngle += angleOffset;
-    circumplexRotationAngle = (circumplexRotationAngle > TWO_PI) ? 0 : circumplexRotationAngle; // constrain circumplexRotationAngle below TWO_PI
-    mouseStartAngle         = mouseEndAngle;
-  }  
+void cursorMove(float x, float y){
+  cursorX    = x;
+  cursorY    = y;
 }
 
 
-void cursorUp() {
+void cursorUp(float x, float y){
+
+  cursorX    = x;
+  cursorY    = y;
+
+  float disX = width/2 - cursorX;
+  float disY = height/2 - cursorY;
+
   timecontroller.playButtonClicked(width/2, height/2);
   timecontroller.ffButtonClicked(width/2, height/2);
   timecontroller.rewindButtonClicked(width/2, height/2);
@@ -678,13 +873,9 @@ void cursorUp() {
 
     float rightThickness    = (circumplexRadius-controllerRadius)/numberOfRights;
     float r                 = circumplexRadius;
-    float x                 = width/2;
-    float y                 = height/2;
 
     for (int i=categoryList.size()-1; i>=0; i--) {
       float categoryThickness = rightThickness*categoryList.get(i).rights.size();
-      float disX = x - cursorX;
-      float disY = y - cursorY;
       if (sqrt(sq(disX) + sq(disY)) > r-categoryThickness && sqrt(sq(disX) + sq(disY)) < r) {
         highlightRing = false; // no need to keep ring highlighted if changing to different circumplex
         currentCircumplex = i;
@@ -699,242 +890,25 @@ void cursorUp() {
 
 
 /*********************************************/
-/*       MOUSE/KEYBOARD INTERACTION          */
-/*********************************************/
-
-void mousePressed() { 
-  cursorX      = mouseX;
-  cursorY      = mouseY;
-  cursorR      = min(width,height) * 0.02;
-  
-  cursorDown();
-}
-
-void mouseDragged() {
-  cursorX = mouseX;
-  cursorY = mouseY;
-  cursorDragged();
-}
-
-
-void mouseReleased() {
-  cursorX      = mouseX;
-  cursorY      = mouseY;
-  cursorUp();
-}
-
-
-/*********************************************/
 /*         PDE/JAVASCRIPT FUNCTIONS          */
-/*********************************************/
+/*********************************************/  
 
 function setCanvasSize() {
-  var browserWidth    = window.innerWidth;
-  var browserHeight   = window.innerHeight;
-  sketchWidth         = browserWidth * 0.665;
-  sketchHeight        = browserHeight;
-}
-
-
-function generateButtonTreeLinks() {
-  var listSize    = categoryList.size()+1;  
-  var buttonTree  = document.getElementById('controls');
-  var borderColor = "#ffffff";
+  var browserWidth     = window.innerWidth;
+  var browserHeight    = window.innerHeight;
+  sketchWidth          = browserWidth * 0.5;
+  sketchHeight         = browserHeight;
   
-  var rootTable = document.createElement('TABLE');
-  rootTable.style.width = "40%";
-  var childTableCellHeight = 100/((listSize-1)*2); // as percentage
-  rootTable.style.height = 100 - childTableCellHeight*2 + "%"; 
-  rootTable.style.position = "absolute";
-  rootTable.style.top = childTableCellHeight + "%"; 
-  rootTable.style.left = "10%";
-  rootTable.style.borderRight = "1px solid " + borderColor;
-
-  var rootTableBody = document.createElement('TBODY');
-  rootTable.appendChild(rootTableBody); 
-
-  for (var i=0; i<6; i++) {
-    var tr = document.createElement('TR');
-    rootTableBody.appendChild(tr);
-    var td = document.createElement('TD');
-    if (i==2) { 
-      td.style.borderBottom = "1px solid " + borderColor;
-    }
-    tr.appendChild(td);
-  }
-  buttonTree.appendChild(rootTable);  
-
-  var childrenTable = document.createElement('TABLE');
-  childrenTable.style.width = "35%";
-  childrenTable.style.height = "100%";
-  childrenTable.style.position = "absolute";
-  childrenTable.style.top = "0%";
-  childrenTable.style.left = "50%";
-  childrenTable.style.border = "none";
-
-  var childrenTableBody = document.createElement('TBODY');
-  childrenTable.appendChild(childrenTableBody);
-
-  for (var i=0; i<(listSize-1)*2; i++) {
-    var tr = document.createElement('TR');
-    childrenTableBody.appendChild(tr);
-    var td = document.createElement('TD');
-    if ((i&1) == 0) { 
-      td.style.borderBottom = "1px solid " + borderColor;
-    }
-    tr.appendChild(td);
-  }
-  buttonTree.appendChild(childrenTable);
-}
-
-
-function generateButtonTree() {  
-  var listSize   = categoryList.size()+1;  
-  var buttonTree = document.getElementById('controls');
-
-  // center root button within left div using table
-  var rootTable = document.createElement('TABLE');
-  rootTable.style.width = "35%";
-  rootTable.style.height = "100%";
-  rootTable.style.position = "absolute";
-  rootTable.style.top = "0%";
-  rootTable.style.left = "5%";
-  rootTable.style.border = "none";
-
-  var rootTableBody = document.createElement('TBODY');
-  rootTable.appendChild(rootTableBody); 
-
-  for (var i=0; i<3; i++) {
-    var tr = document.createElement('TR');
-    rootTableBody.appendChild(tr);
-    var td = document.createElement('TD');
-    td.style.height = "33.33%";
-
-    if (i == 1) {
-      var rootButton = document.createElement('div');
-      rootButton.appendChild(document.createTextNode("All Categories"));
-      rootButton.setAttribute("id", "categoryButton" + (listSize-1));
-      rootButton.setAttribute("class", "leaf");
-      rootButton.setAttribute('onclick', 'changeCircumplex("'+(listSize-1)+'")');
-      rootButton.style.width = "100%";
-      rootButton.style.height = "100%";
-      rootButton.style.fontSize = "1.7vw";
-      rootButton.style.position = "relative";
-      td.appendChild(rootButton);
-
-      // calculate svg size (in pixels) based off of button dimensions
-      var rootButtonHeight = (buttonTree.clientHeight)/3; // in px
-      var rootButtonWidth  = ((buttonTree.clientWidth) * 0.4);
-      var iconWidth  = min(rootButtonWidth*0.9, rootButtonHeight*0.5);
-      var iconHeight = min(rootButtonWidth*0.9, rootButtonHeight*0.5);
-      var iconRadius = iconWidth * 0.5;
-      var scaler = iconRadius/listSize;
-
-      // create circle svgs to represent categories and add them to rootButton
-      for (var j=listSize-2; j>=0; j--) {
-        // create svg to hold category icon
-        var categorySVG = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        categorySVG.setAttribute("height", iconHeight);
-        categorySVG.setAttribute("width", iconWidth);
-        categorySVG.setAttribute("display", "block");
-        categorySVG.style.position = "absolute";
-        categorySVG.style.top = (rootButtonHeight*0.25)+(rootButtonHeight*0.75-iconHeight)/2 + "px";
-        categorySVG.style.left = "0";
-
-        // add circle elelment to svg
-        var categoryCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        categoryCircle.setAttribute("cx", iconWidth/2);
-        categoryCircle.setAttribute("cy", iconHeight/2);
-        categoryCircle.setAttribute("r", iconRadius);
-        categoryCircle.setAttribute("stroke", "#000000");
-        categoryCircle.setAttribute("stroke-width", "1");
-        categoryCircle.setAttribute("fill", "#" + hex(categoryList.get(j).colour, 6));
-        categorySVG.appendChild(categoryCircle);
-
-        // add icon to button
-        rootButton.appendChild(categorySVG);
-
-        // shrink next circle to creat concentric icon
-        iconRadius -= scaler;
-      }
-    }
-    tr.appendChild(td);
-  }
-  buttonTree.appendChild(rootTable);   
-
-  // create table to hold category buttons
-  var childrenTable = document.createElement('TABLE');
-  childrenTable.style.width = "35%";
-  childrenTable.style.height = "100%";
-  childrenTable.style.position = "absolute";
-  childrenTable.style.top = "0%";
-  childrenTable.style.left = "60%";
-  childrenTable.style.border = "none";
-
-  var childrenTableBody = document.createElement('TBODY');
-  childrenTable.appendChild(childrenTableBody);
-
-  // generate a button for each category in the csv file
-  for (var i=0; i<listSize-1; i++) {
-    var tr = document.createElement('TR');
-    childrenTableBody.appendChild(tr);
-    var td = document.createElement('TD');
-    td.style.height = 100/(listSize-1) + "%";
-
-    var textHolder  = document.createElement('p');
-    textHolder.appendChild(document.createTextNode(categoryList.get(i).name));
-    textHolder.style.width = "33%";
-    textHolder.style.margin = "0";
-
-    var childButton = document.createElement('div');    
-    childButton.appendChild(textHolder);
-    childButton.setAttribute("id", "categoryButton" + (listSize-1));
-    childButton.setAttribute("class", "leaf");
-    childButton.setAttribute('onclick', 'changeCircumplex("'+i+'")');
-    childButton.style.width = "100%";
-    childButton.style.height = "50%";
-    childButton.style.position = "relative";
-    var childButtonHeight = ((buttonTree.clientHeight)/(listSize-1))*0.5; // in px
-    var childButtonWidth  = ((buttonTree.clientWidth) * 0.35);
-    childButton.style.lineHeight = childButtonHeight*0.5 + "px";
-
-    // calculate svg size (in pixels) based off of button dimensions
-    var iconWidth  = min(childButtonHeight * 0.97, childButtonWidth * 0.97);
-    var iconHeight = min(childButtonHeight * 0.97, childButtonWidth * 0.97);
-    var iconRadius = iconWidth*0.45;  
-
-    // create svg to hold category icon
-    var categorySVG = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    categorySVG.setAttribute("height", iconHeight);
-    categorySVG.setAttribute("width", iconWidth);
-    categorySVG.setAttribute("display", "block");
-    categorySVG.style.position = "absolute";
-    categorySVG.style.top = "0";  
-    categorySVG.style.right = "0";
-
-    // add circle elelment to svg
-    var categoryCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    categoryCircle.setAttribute("cx", iconWidth/2);
-    categoryCircle.setAttribute("cy", iconHeight/2);
-    categoryCircle.setAttribute("r", iconRadius);
-    categoryCircle.setAttribute("stroke", "#000000");
-    categoryCircle.setAttribute("stroke-width", "1");
-    categoryCircle.setAttribute("fill", "#" + hex(categoryList.get(i).colour, 6));
-    categorySVG.appendChild(categoryCircle);
-
-    // add icon to button
-    childButton.appendChild(categorySVG);
-    td.appendChild(childButton);
-    tr.appendChild(td);
-  }
-  buttonTree.appendChild(childrenTable);
+  var fourK = 8294400;
+  if(screen.width*screen.height < fourK) onMobile = true; 
 }
 
 
 function generateAlphabetList() {
-  var lettersDiv = document.getElementById('letters');
+  var lettersDiv   = document.getElementById('letters');
   
-  char prevLetter = '';
+  int  letterCount = 0;
+  char prevLetter  = '';
   char currLetter;
   
   for (int i=0; i<allCountries.size(); i++) {
@@ -942,13 +916,27 @@ function generateAlphabetList() {
     
     currLetter = countryObject.name.charAt(0);
     if(prevLetter != currLetter) {
-       var letterButton  = document.createElement('a');
+       var letterButton  = document.createElement('div');
+       letterButton.className = "letter";
        letterButton.appendChild(document.createTextNode(str(currLetter)));
-       letterButton.href = "#" + str(currLetter);
        lettersDiv.appendChild(letterButton);
        prevLetter = currLetter;
+       letterCount++;
     }
-  }
+  } 
+ 
+  var letterHeight = (lettersDiv.offsetHeight-letterCount)/letterCount;
+  var allLetters = document.querySelectorAll(".letter");
+   
+  for (var i = 0; i < allLetters.length; i++) {
+      allLetters[i].style.height     = letterHeight + "px";
+      allLetters[i].style.lineHeight = letterHeight + "px";
+  } 
+}
+
+function goToLetter(id) {
+    console.log(id);
+    document.getElementById(id).scrollIntoView();
 }
 
 
@@ -966,52 +954,44 @@ function generateCountryList () {
     currLetter = countryObject.name.charAt(0);
     if(prevLetter != currLetter) {
        var letterElement = document.createElement('li');
+       letterElement.id = str(currLetter);
        letterElement.style.backgroundColor = "rgba(18,18,18,0.8)";
-       letterElement.innerHTML = '<p id="' + str(currLetter) + '"> ' + str(currLetter) + '</p>';
+       letterElement.innerHTML = '<p id="letterIndicator">' + str(currLetter) + '</p>'; //'<p id="' + str(currLetter) + '" name="' + str(currLetter) + '"> ' + str(currLetter) + '</p>';
        list.appendChild(letterElement);
        prevLetter = currLetter;
     }
     
-    // Create the list item:
-    var item     = document.createElement('li');
+    // Create the list item
+    var item     = document.createElement('li'); 
     
     // Create addition button
-    var plusBG   = document.createElement('div');
-    plusBG.id  = "plusBackground";
-    item.appendChild(plusBG);    
-    
-    var plusLink = document.createElement('a');
-    var plusSign = document.createTextNode('+');
-    plusLink.id  = "plus";
+    var plusLink        = document.createElement('a');
+    var plusSign        = document.createTextNode('+');
+    plusLink.className  = "plus";
     plusLink.appendChild(plusSign);
     plusLink.href = "javascript:addCountry('" + countryObject.name + "');";
     item.appendChild(plusLink);
     
     // Disable addition button if country is already in pie
     if(countryObject.visualize) {
-      var plusBlocker = document.createElement('div');
-      plusBlocker.id  = "plusBlocker";
-      item.appendChild(plusBlocker);
+        plusLink.style.background = "rgba(18, 18, 18, 0.4)";
+        plusLink.style.color      = "rgba(128, 128, 128, 0.61)";
+        plusLink.onclick          = null;
     }
     
     // Create deletion button
-    var minusBG   = document.createElement('div');
-    minusBG.id  = "minusBackground";
-    item.appendChild(minusBG);    
-    
-    var minusLink = document.createElement('a');
-    var minusSign = document.createTextNode('-');
-    minusLink.id  = "minus";
+    var minusLink        = document.createElement('a');
+    var minusSign        = document.createTextNode('-');
+    minusLink.className  = "minus";
     minusLink.appendChild(minusSign);
-    minusLink.href = "#";
     minusLink.href = "javascript:removeCountry('" + countryObject.name + "');";
     item.appendChild(minusLink);
     
     // Disable deletion button if country is NOT yet in pie
     if(!countryObject.visualize) {
-      var minusBlocker = document.createElement('div');
-      minusBlocker.id  = "minusBlocker";
-      item.appendChild(minusBlocker);
+        minusLink.style.background = "rgba(18, 18, 18, 0.4)";
+        minusLink.style.color      = "rgba(128, 128, 128, 0.61)";
+        minusLink.onclick          = null;
     }
 
     // country name
@@ -1035,33 +1015,54 @@ function generateDescription() {
 }
 
 
-void snippetRemoved(String oldCountry, String newCountry){
-  // nothing to do if user is selecting different rights within the same country
-  if(!oldCountry.equals(newCountry)) {
-    Country lastSelected = countryMap.get(oldCountry);
-    lastSelected.snippetCreated = false;
-  }
-}
-
 void setCircumplexFromJS(int circumplexID) {
   // turn highlighted ring off when switching circumplexes 
   highlightRing            = false;
   highlightedRightIndex    = -1;
   highlightedCategoryIndex = -1;
   
-  // delete existing snippet DIV 
-  if(document.getElementsByClassName("snippet show").length > 0) {
-    var existingSnippet            = document.getElementsByClassName("snippet show")[0];
-    var existingSnippetCountryName = existingSnippet.id.split(':')[0];
-    
-    Country countryWithSnippet = countryMap.get(existingSnippetCountryName);
-    countryWithSnippet.snippetCreated = false;
-    
-    document.body.removeChild(existingSnippet);
-  }
-  
   // change circumplex
   currentCircumplex = circumplexID;
+}
+
+
+void loadNewGroup(String newGroupName) {    
+  
+  // no need to do this on the first time around since visualizedCountries hasn't been initialized yet
+  if(visualizedCountries != null) {
+    // set 'visualize' variable in all country's in current group to 'false'
+    // this is needed to properly update the countryList DIV
+    for(int i=0; i<visualizedCountries.size(); i++) {
+       visualizedCountries.get(i).visualize = false;
+    }
+  }
+    
+  // update visualizedCountries w/ newly selected group
+  visualizedCountries = groups.get(newGroupName);
+  
+  // used to find optimal time range
+  int earliestStartYear = 2012;
+  int latestEndYear     = 2012;
+  
+  for(int j=0; j<visualizedCountries.size(); j++) {
+    Country countryObject = visualizedCountries.get(j);
+    
+    int yearCount = countryObject.years.size();
+    if(yearCount > 0) {
+      int firstYear = countryObject.years.get(0).number;
+      int lastYear  = countryObject.years.get(yearCount-1).number;
+     
+      if (firstYear < earliestStartYear) earliestStartYear = firstYear; 
+      if (lastYear  < latestEndYear)     latestEndYear     = lastYear;
+    }
+  
+    countryObject.visualize = true;
+  }
+  
+  yearRange[0] = earliestStartYear;
+  yearRange[1] = latestEndYear;
+  
+  generateCountryList();
 }
 
 
@@ -1070,10 +1071,22 @@ void insertNewCountry(String country) {
   
   if(!countryObject.visualize) {
      countryObject.recentlyAdded = true; 
+     countryObject.savedTime     = millis();
      
      // enable overlay to prevent mulitple country addtitions before animation completes
-     var countryListOverlay = document.getElementById('countryBoxOverlay');
-     countryListOverlay.style.display = "block";
+     document.getElementById('countryListOverlay').style.background = "rgba(18, 18, 18, 0.4)";
+     document.getElementById('countryListOverlay').style.zIndex     = "2";
+      
+     // disable "Clear All Countries" button
+     document.getElementById('clearAllCountries').style.background = "rgba(240, 169, 169, 0.24)";
+     document.getElementById('clearAllCountries').style.color      = "gray";
+     document.getElementById('clearAllCountries').removeEventListener("touchstart", clearWheelButtonHandler);
+     document.getElementById('clearAllCountries').removeEventListener("mousedown",  clearWheelButtonHandler);
+     
+     // hide "Tutorial" button
+     // if not, users may be tempted to click on it as add/remove animation is going on. 
+     // this could cause some strange behavior
+     document.getElementById('opentour').style.display = "none";
      
      // update year range
      if (countryObject.existence[0] < yearRange[0]) yearRange[0] = countryObject.existence[0]; 
@@ -1089,16 +1102,202 @@ void deleteCountry(String country) {
   
   if(countryObject.visualize) {
      countryObject.recentlyRemoved = true;
+     countryObject.savedTime     = millis();
      
      // enable overlay to prevent mulitple country deletions before animation completes
-     var countryListOverlay = document.getElementById('countryBoxOverlay');
-     countryListOverlay.style.display = "block";
+     document.getElementById('countryListOverlay').style.background = "rgba(18, 18, 18, 0.4)";
+     document.getElementById('countryListOverlay').style.zIndex     = "2";
+     
+     // disable "Clear All Countries" button
+     document.getElementById('clearAllCountries').style.background = "rgba(240, 169, 169, 0.24)";
+     document.getElementById('clearAllCountries').style.color      = "gray";
+     document.getElementById('clearAllCountries').removeEventListener("touchstart", clearWheelButtonHandler);
+     document.getElementById('clearAllCountries').removeEventListener("mousedown",  clearWheelButtonHandler);
+     
+     // hide "Tutorial" button
+     // if not, users may be tempted to click on it as add/remove animation is going on. 
+     // this could cause some strange behavior
+     document.getElementById('opentour').style.display = "none";
      
      // update year range after removing country 
-//     if (countryObject.existence[0] < yearRange[0]) yearRange[0] = countryObject.existence[0] ; 
+//     if (countryObject.existence[0] < yearRange[0]) yearRange[0] = countryObject.existence[0]; 
 //     if (countryObject.existence[1] < yearRange[1]) yearRange[1] = countryObject.existence[1];
-  }
+  }  
+}
+
+void clearCircumplex() {
+  // turn highlighted ring off when switching circumplexes 
+  highlightRing            = false;
+  highlightedRightIndex    = -1;
+  highlightedCategoryIndex = -1;
   
+  for (int i=0; i<visualizedCountries.size(); i++) {
+    Country countryObject = visualizedCountries.get(i);
+    deleteCountry(countryObject.name);
+  }  
+}
+
+void rotationOn(float angle) {
+  rotateVis   = true; 
+  dragMode    = true;
+  canvasAngle = angle;
+  // noLoop will be called in TimeController class
+  // we have to wait until the next draw loop for the time controller to be replaced by arrows  
+}
+
+void rotationOff(float angle) {
+  rotateVis   = false; 
+  if(angle == 0) dragMode = false;
+  canvasAngle = angle;  
+}
+
+void updateMouseAngle(float angle) {
+  mouseAngle = angle;
+}
+
+void longTouchTrue(){
+  longTouch = true; 
+  
+  float    delta           = TWO_PI/visualizedCountries.size();  
+  float    theta           = 0.0; 
+  int      currentYear     = timecontroller.year;
+  Category currentCategory = categoryList.get(currentCircumplex);
+
+  for (int i=0; i<visualizedCountries.size(); i++) {
+    Country countryObject = visualizedCountries.get(i);
+    
+    // if country was touched/clicked, then show the excerpt of its constitution that relates to the selected right (if available)
+    if(mouseAngle > theta && mouseAngle < theta+delta && highlightedRightIndex > -1 && longTouch) {
+      
+      snippetRightIndex     = highlightedRightIndex;
+      String selectedRight  = currentCategory.rights.get(snippetRightIndex);
+      String snippetText    = countryObject.snippets.get(selectedRight);
+              
+      String snippetTitle, snippet, snippetID, snippetColor;
+      
+      // country DID NOT exist during this current year. therefore, no consitution exists either
+      if(currentYear < int(countryObject.existence[0]) || currentYear > int(countryObject.existence[1])) {
+        snippetTitle = '<p id="countryName">' + countryObject.name + ' :&nbsp;' + '</p>' + 
+                       '<p id="rightName">' + selectedRight + '</p>';
+                       
+        snippet      = '<p class="warningTitle">Constitution Excerpt Unavailable</p><p class="warningDetail">' + countryObject.name + '<br>did NOT exist in ' + currentYear + '.</p>';            
+      }
+    
+      // country DID exists during this current year
+      else {
+        
+        // country has rights during this year
+        if(countryObject.yearMap.get((Integer)currentYear) != null) { 
+          
+           // country has selected right during this year
+           if (countryObject.yearMap.get((Integer)currentYear).rights.contains(selectedRight)) { 
+             
+             // unfortunately, we are missing the excerpt 
+             if(snippetText == null) {
+               snippetTitle = '<p id="countryName">' + countryObject.name + ' :&nbsp;' + '</p>' + 
+                             '<p id="rightName">' + selectedRight + '</p>';
+                             
+               snippet      = '<p class="warningTitle">Constitution Excerpt Unavailable</p><p class="warningDetail">This right is included in ' + countryObject.name + '&#96;s constitution. Unfortunately, our dataset is missing the excerpt.</p>';          
+             } 
+             
+             // excerpt found so show it!
+             else {
+               snippetTitle = '<p id="countryName">' + countryObject.name + ' :&nbsp;' + '</p>' + 
+                             '<p id="rightName">' + selectedRight + '</p>';
+                        
+               snippet      = snippetText;  
+             }         
+          }   
+    
+          // country does NOT have this right during the current year
+          else {
+            
+            // check if maybe the constitution introduced the right later
+            int yearIntroduced = -1;
+            for (Map.Entry entry : countryObject.yearMap.entrySet()) {
+              if(entry.getValue().rights.contains(selectedRight)) {
+                yearIntroduced = entry.getKey();
+                snippetTitle   = '<p id="countryName">' + countryObject.name + ' :&nbsp;' + '</p>' + 
+                                 '<p id="rightName">' + selectedRight + '</p>';
+                          
+                snippet        = '<p class="warningTitle">Constitution Excerpt Unavailable</p><p class="warningDetail">This right was not introduced until<br>' + yearIntroduced + '.</p>';  
+                break;                
+              }
+            }
+            
+            // nope. right was never introduced
+            if(yearIntroduced == -1) {
+              snippetTitle   = '<p id="countryName">' + countryObject.name + ' :&nbsp;' + '</p>' + 
+                               '<p id="rightName">' + selectedRight + '</p>';
+                        
+              snippet        = '<p class="warningTitle">Constitution Excerpt Unavailable</p><p class="warningDetail">This right was was never introduced into<br>' + countryObject.name + '&#96;s constitution.</p>';               
+            }
+          }      
+        } 
+        
+        // country has NO rights during this year
+        else {
+          snippetTitle = '<p id="countryName">' + countryObject.name + ' :&nbsp;' + '</p>' + 
+                         '<p id="rightName">' + selectedRight + '</p>';
+                         
+          snippet      = '<p class="warningTitle">Constitution Excerpt Unavailable</p><p class="warningDetail">' + countryObject.name + '<br>does NOT contain any rights during ' + currentYear + '.</p>';  
+        }
+
+      }
+      
+      snippetID    = countryObject.name + ":" + selectedRight;
+      showSnippet(cursorX, cursorY, red(currentCategory.colour), green(currentCategory.colour), blue(currentCategory.colour), snippetID, snippetTitle, snippet);
+      
+      longTouch = false;
+      break;
+    }
+  
+    theta += delta;
+  }
+}
+
+int getNumberOfCategories() {
+  return categoryList.size()+1;
+}
+
+String getCurrentCircumplex() {
+  if(currentCircumplex == categoryList.size()) return "Category Wheel"
+  else return "Rights Wheel";
+}
+
+
+String getMode() {
+  if(onMobile) return "Mobile";
+  else return "Lasso";
+}
+
+
+float getControllerRadius() {
+  return controllerRadius; 
+}
+
+
+float getCircumplexRadius() {
+  return circumplexRadius; 
+}
+
+
+String getCurrentCategoryColor() {
+  return hex(categoryList.get(currentCircumplex).colour, 6);
+}
+
+
+float getSketchWidth() {
+  return sketchWidth; 
+}
+
+
+float getSketchHeight() {
+  return sketchHeight; 
+}
+
+int getNumberOfVisualizedCountries() {
+  return visualizedCountries.size(); 
 }
 
 

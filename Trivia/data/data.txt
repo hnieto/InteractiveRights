@@ -1,27 +1,27 @@
-"Which amendment talked about the right to free speech, press, assembly, petition, and religion?",1
-"Which amendment was about the right to bear arms?",2
-"Which amendment prohibits the forced quartering of soldiers during peacetime?",3
-"Which amendment guards against unreasonable searches and seizures?",4
-"Which amendment gives the right to due process and no double jeopardy?",5
-"Which amendment gives the right to a fair and speedy trial?",6
-"Which amendment gives the right to a jury trial for criminal and civil cases?",7
-"Which amendment prohibits excessive bail and no unusual punishment?",8
-"Which amendment addresses our enumerated rights?",9
-"Which amendment states that federal powers are reserved for the states?",10
-"Which amendment gave US citizen the right to sued any state in 1795?",11
-"Which amendment changes in electoral college procedure?",12
-"Which amendment abolishes and prohibits slavery in 1865?",13
-"Which amendment is about citizenship due process equal protection?",14
-"Which amendment states that US cannot prevent a person from voting because of race or color 1870?",15
-"Which amendment gave congress the power to tax income?",16
-"Which amendment states to direct election of senators in 1913?",17
-"Which amendment prohibits liquor in 1919?",18
-"Which amendment gave women the right to vote in 1920?",19
-"Which amendment talks about the procedures for outgoing president and the new president coming in?",20
-"Which amendment repeal prohibition?",21
-"Which amendment place a limit on presidential terms?",22
-"Which amendment enable the District of Columbia receive electoral votes?",23
-"Which amendment prohibits federal and state governments from charging poll tax?",24
-"Which amendment was passed on 1967 and was about presidential succession and presidential disability?",25
-"Which amendment states that 18 years old gain the right to vote in 1971?",26
-"Which amendment states that any change in congressional salaries takes place after general election?",27
+"Freedom of religion, press, speech, assembly, and petition",1791,1
+"Right to bear arms",1791",2
+"Right to not have to quarter soldiers",1791,3
+"Right to be free from un-reasonable searches and seizures",1791,4
+"Right to grand jury indictment, no double jeopardy, freedom from self-incrimination",1791,5
+"Right to fair and speedy trial",1791,6
+"Right to a jury trial for criminal and civil cases",1791,7
+"Protects from cruel and unusual punishment",1791,8
+"Addresses our enumerated rights",1791,9
+"Federal powers that are note stated in the Constitution are reserved for the states",1791,10
+"Limits the power of the federal courts to hear law suits brought against state government",1795,11
+"Revises the procedure for electing the President and Vice President",1804,12
+"Outlawe slavery and forced labor except for a punishment crime committed",1865,13
+"Guarantees citizenship to all people born or nationalized in the USA",1868,14
+"No state can take away the right to vote based on race or color",1870,15
+"Congress is given the power to tax incomes",1913,16
+"Gave citizens the right to elect senators",1913,17
+"Prohibition of liquor",1919,18
+"Gave women the right to vote",1920,19
+"Procedures for outgoing president and the new president coming in",1933,20
+"Repeal of prohibition",1933,21
+"Limit on presidential terms",1951,22
+"District of Columbia receives electoral votes",1961,23
+"Prohibits federal and state governments from charging poll tax",1964,24
+"Presidential succession and presidential disability",1967,25
+"Lowered the voting age from 21 to 18",1971,26
+"Congressional pay raises take effect after the next election",1992,27

@@ -12,7 +12,7 @@ iframe {
     position:                 absolute;
     left:                     0;
     top:                      0;
-    overflow:                 hidden;
+    overflow:                 hidden; 
     border-style:             solid;
     border-width:             0px;
     border-radius:            5px;
@@ -35,7 +35,7 @@ iframe {
     position:                absolute;
     left:                    0;
     top:                     0;
-    width:                   16vw;
+    width:                   24vw;
     text-align:              center;
     line-height:             9.5vh;
 }        
@@ -44,30 +44,75 @@ iframe {
     text-decoration:         none;
     color:                   #ffffff;
     font-size:               4vh;
+    display:                 block;
 }
 
 #nav-bar-top {
     position:                absolute;
-    left:                    16.3vw;
-    width:                   66vw;
+    left:                    24.3vw;
+    width:                   61vw;
     height:                  100%;
+    z-index:                 101;
+}
+
+#nav-bar-top td {
+    padding:                 0;
+    text-align:              center;
+}
+
+#nav-bar-top span {
+    color:                   white;
+    padding:                 0 0.25vw;
+    font-size:               3.5vw;
+}
+
+#nav-bar-top a {
+    text-decoration:         none;
+    color:                   white;
+}
+
+#nav-bar-top p {
+    margin:                  0;
+    font-size:               0.8vw;
 }
 
 #nav-bar-top img {
-    height:                  100%;
-    margin:                  0 8%;
+    max-width:               15.25vw;
+    height:                  6vh;
 }
 
 #nav-bar-bottom {
     position:                absolute;
-    left:                    16.3vw;
-    width:                   66vw;
+    left:                    24.3vw;
+    width:                   61vw;
     height:                  100%;
+    z-index:                 101;
+}
+
+#nav-bar-bottom td {
+    padding:                 0;  
+    text-align:              center;
+}
+
+#nav-bar-bottom span {
+    color:                   white;
+    padding:                 0 0.1vw;
+    font-size:               1vw;
+}
+
+#nav-bar-bottom a { 
+    text-decoration:         none;
+    color:                   white;
+}
+
+#nav-bar-bottom p { 
+    margin:                  0;
+    font-size:               0.3vw;  
 }
 
 #nav-bar-bottom img {
-    height:                  100%;
-    margin:                  0 9.7%;
+    max-width:               15.25vw;
+    height:                  2vh;
 }
 
 #center {                     
@@ -91,7 +136,7 @@ iframe {
 #ut-branding {
     position:                absolute;
     right:                   0;
-    width:                   16vw;
+    width:                   14vw;
     text-align:              center;
     line-height:             4vh;
 }    
@@ -139,7 +184,7 @@ iframe {
     width:                30vw;
     height:               30vh;
     margin:               -15vh 0 0 -15vw; /* shift top-left corner of div by 1/2 the width and height to center */
-    background-color:     rgba(89, 115, 116, 0.6);
+    background-color:     rgba(89, 115, 116, 0.7);
 
     font-size:            7vh;
     text-align:           center;

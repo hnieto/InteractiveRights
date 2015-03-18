@@ -7,45 +7,333 @@ body {
     font-family:           Refrigerator-Deluxe-Light;
     background-color:      #000000;
     margin:                0px;
+    overflow:              hidden; 
 }
 
 canvas {
     outline:               none; 
     position:              absolute;
-    left:                  16.3vw;
+    left:                  24.3vw;
+    border-radius:         50%;
 }
 
-.snippet {
+.fakeToolTip {
     position:              absolute;
-    padding:               0.5vh 0.5vw;
+    width:                 6vw;
+    height:                1vh;
+    z-index:               -100;
+}
+
+#ringToolTip1 {
+   left:                   42vw; 
+   top:                    11vh;
+}
+
+#ringToolTip2 {
+   left:                   50vw; 
+   top:                    19vh;
+}
+
+#ringToolTip3 {
+   left:                   49vw; 
+   top:                    27vh;
+}
+
+#ringToolTip4 {
+   left:                   43vw;
+   top:                    35vh;
+}
+
+#ringToolTip5 {
+   right:                  51vw;
+   top:                    34.3vh;
+}
+
+#timeControlToolTip1 {
+   left:                   44.5vw; 
+   top:                    48.3vh;
+}
+
+#timeControlToolTip2 {
+   left:                   46vw; 
+   top:                    55vh; 
+   width:                  2vw !important;
+}
+
+#timeControlToolTip3 {
+   left:                   48.2vw; 
+   top:                    56.5vh; 
+   width:                  2.4vw !important;
+}
+
+#timeControlToolTip4 {
+   right:                  47.4vw; 
+   top:                    55vh; 
+   width:                  2vw !important;
+}
+
+#countryGroupToolTip {
+   left:                   24.3vw; 
+   top:                    55vh; 
+   width:                  3vw !important;
+}
+
+#snippetFairy {
+    position:              absolute;
+    top:                   50vh;
+    left:                  50vw;
+    display:               none;
+}
+
+#tooManySnippets {
+    display:               none;
+    font-family:           Refrigerator-Deluxe-Light;
+    font-size:             0.4vw;
+    text-align:            center;
+    color:                 white; 
+    width:                 4.5vw;
+    height:                4.5vh;
+    background:            rgba(0, 65, 64, 0.75);
+    z-index:               1;  
+    position:              absolute;
     border-radius:         3px;
-    background:            rgba(114, 150, 144, 0.3);
+    -moz-border-radius:    3px;
+    -webkit-border-radius: 3px;
+}
+
+#tooManySnippets p {
+    margin-top:            20%;
+    margin-bottom:         0;
+}
+
+#warningExitButton1 {
+    display:               inline-block;
+    width:                 25%;
+    height:                35%;
+    font-size:             0.6vw;
+    float:                 right;
+    background:            rgba(245, 59, 59, 0.239216);
+}
+
+
+#duplicateSnippet {
+    display:               none;
+    font-family:           Refrigerator-Deluxe-Light;
+    font-size:             0.4vw;
+    text-align:            center;
+    color:                 white; 
+    width:                 4.5vw;
+    height:                4.5vh;
+    background:            rgba(0, 65, 64, 0.75);
+    z-index:               1;  
+    position:              absolute;
+    border-radius:         3px;
+    -moz-border-radius:    3px;
+    -webkit-border-radius: 3px;
+}
+
+#duplicateSnippet p { 
+    margin-top:            20%;
+    margin-bottom:         0;  
+}
+
+#warningExitButton2 {
+    display:               inline-block;
+    width:                 25%;
+    height:                35%;
+    font-size:             0.6vw;
+    float:                 right;
+    background:            rgba(245, 59, 59, 0.239216);
+}
+
+#snippetContainer {
+    position:              absolute;
+    left:                  0;
+    top:                   0;
+    width:                 24vw;;
+    height:                100vh;
+    z-index:               1; 
+    border-right:          .3vw solid #323232;
+}
+
+#snippetContainerTitle {
+    font-family:           Refrigerator-Deluxe-Light;
+    font-size:             1vw;
+    color:                 white;
+    width:                 100%;
+    height:                6%;
+    line-height:           6vh;
+    margin-bottom:         3%;
+    text-align:            center;
+    background:            rgba(59, 245, 242, 0.17);
+    z-index:               1;
+}
+
+.snippetHolder {
+    position:              relative;
+    margin:                0 auto;
+    width:                 90%;
+    height:                31%;
+    border-top:            1px solid rgba(0,0,0,0);
+    border-radius:         3px;
+    -moz-border-radius:    3px;
+    -webkit-border-radius: 3px;
+}
+
+.snippetBox {
+    height:                80%;
+    margin-bottom:         2%;
+    border:                1px solid gray;
     color:                 white;
     text-align:            center;
-    overflow:              auto;
-    -webkit-transition:    all 1s ease-in-out;
-    transition:            all 1s ease-in-out;
+    overflow:              hidden;
 }
 
-.hide {
-    visibility:            hidden;
-    width:                 0;
-    height:                0;
+.snippetTitle {
+    text-align:            center;
+    font-family:           Refrigerator-Deluxe-Light;
+    font-size:             1vw;
+    color:                 gray; 
+    width:                 100%;
+    height:                10%;
+    display:               inline-block;
 }
 
-.show {
-    visibility:            visible !important;
-    left:                  17vw !important;
-    top:                   2vh !important;
-    width:                 20vh !important;
-    height:                20vh !important;
+.snippetCloseButton {
+    position:              absolute;
+    top:                   0;
+    right:                 0;
+    text-align:            center;
+    font-family:           Refrigerator-Deluxe-Light;
+    font-size:             1vw;
+    color:                 gray; 
+    width:                 10%;
+    height:                10%;
+    background:            rgba(240, 169, 169, 0.24);
+    display:               inline-block;
+}
+
+#clearAllSnippets {
+    font-family:           Refrigerator-Deluxe-Light;
+    font-size:             1vw;
+    color:                 white;
+    width:                 90%;
+    height:                5%;
+    text-align:            center;
+    margin:                0 auto;
+    background:            rgba(245, 59, 59, 0.239216);
+    border-radiius:        3px;
+    -moz-border-radius:    3px;
+    -webkit-border-radius: 3px;
+}
+
+.snippetTitle #countryName {
+   font-size:              2vh; 
+   margin:                 0; 
+   color:                  #cccc00; 
+   display:                inline-block;
+}
+
+.snippetTitle #rightName {
+   font-size:              2vh;
+   margin:                 0; 
+   color:                  #ffffbb;
+   display:                inline-block;
+}
+
+.snippetTitle .warningTitle {
+   font-size:              3vh;
+   color:                  #E2343E;
+   margin-bottom:          0;
+}
+
+.snippetBox .warningDetail {
+   font-size:              2.5vh;
+   color:                  #E2343E;
+   margin:                 12% 0;
+}
+
+.snippetBox mark {
+    background-color:      rgba(114, 150, 144, 0.298039);;
+    color:                 white;
+}
+
+.snippetBox section h3 {
+    font-size:             2.5vh;
+    margin-bottom:         0;
+}
+
+.snippetBox section p { 
+    font-size:             2vh;
+    text-align:            justify;
+    padding:               0 0.3vw;
+    margin-top:            0;
+    margin-bottom:         1vh
+}
+
+#snippetToolTip {
+    left:                 1.2vw; 
+    top:                  10.5vh;
+    width:                21.5vw; 
+    height:               25vh; 
+    border:               1px solid white;
+    background-color:     black;
+    color:                white;
+    text-align:           center;
+}
+
+#snippetToolTip mark {
+    background-color:      rgba(114, 150, 144, 0.298039);;
+    color:                 white;
+}
+
+#snippetToolTip section h3 {
+    font-size:             2.5vh;
+    margin-bottom:         0;  
+}
+
+#snippetToolTip section p { 
+    font-size:             2vh;
+    text-align:            justify;
+    padding:               0 0.3vw;
+    margin-top:            0;  
+    margin-bottom:         1vh 
+}
+
+.arrow-down {
+  position:                absolute;
+  left:                    17vw;
+  top:                     23.5vh;
+  bottom:                  0;
+	width:                   0; 
+	height:                  0; 
+	border-left:             11.5vh solid transparent;
+	border-right:            11.5vh solid transparent;
+	border-top:              2.5vh solid rgba(114, 150, 144, 0.3);
+}
+
+#groupTable {
+  position:                absolute;
+  left:                    24.3vw;
+  top:                     41vh; 
+  table-layout:            fixed;
+  width:                   3vw;
+}
+
+#groupTable td {
+  height:                  1vw;
+  color:                   white;
+  font-size:               0.5vw;
+  text-align:              center;
+  border:                  1px solid rgba(160, 160, 160, 0.5);
+  border-radius:           3px;
+  -moz-border-radius:      3px;
+  -webkit-border-radius:   3px;
 }
 
 .button {
-    -moz-border-radius:    3px; 
-    -webkit-border-radius: 3px; 
     font-family:           Refrigerator-Deluxe-Light;
-    font-size:             1vw;
+    font-size:             0.8vw;
     color:                 white; 
     width:                 9.2vw;
     height:                5vh;
@@ -53,18 +341,21 @@ canvas {
     background:            rgba(59, 245, 242, 0.17);
     z-index:               1;
     position:              absolute;
+    border-radius:         3px;
+    -moz-border-radius:    3px;
+    -webkit-border-radius: 3px;
 }
 
 #addCountryButton {
     top:                   0.5vh;
-    right:                 17.5vw;
+    right:                 16.5vw;
 }
 
 .box {
     -moz-border-radius:    3px; 
     -webkit-border-radius: 3px; 
     width:                 7vw;
-    height:                0vh;
+    height:                87vh;
     background:            rgba(59, 245, 242, 0.17);
     color:                 white;
     z-index:               1;
@@ -76,44 +367,39 @@ canvas {
     transition:            0.5s;
 }
 
-.resize {
-    height:                52.7vh;
-}
-
 #letters {
     top:                   6.2vh;
-    right:                 25.2vw;
+    right:                 24.2vw;
     width:                 1.5vw;
 }
 
-#letters a {
+.letter {
   font-size:               0.7vw;
   text-decoration:         none;
-  display:                 inline-block;
+  display:                 block;
   color:                   white;
   text-align:              center;
   background-color:        rgba(106, 113, 106, 0.4);
   border-radius:           1px;
-  width:                   1.5vw;
-  margin-bottom:           0.5vh;
+  border-bottom:           1px solid rgba(39, 37, 37, .5);
 }
 
 #addCountryBox {
-    top:                   6.2vh;
-    right:                 17.5vw;
+  top:                     6.2vh;
+  right:                   16.5vw;
+  overflow:                hidden;
 }
 
-#countryBoxOverlay {
-    top:                   6.2vh;
-    right:                 17.5vw;
-    background:            rgba(119, 119, 119, 0.31); 
-    display:               none;
+#countryListOverlay {
+  top:                     6.2vh;
+  right:                   16.5vw;
+  background:              rgba(0,0,0,0); 
 }
 
 #addCountryBox ul {
-  list-style-type:        none;
-  margin:                 0;
-  padding:                0;
+  list-style-type:         none;
+  margin:                  0;
+  padding:                 0;
 }
  
 #addCountryBox li {
@@ -126,66 +412,52 @@ canvas {
 #addCountryBox li:last-child {
   border:                  none;
 }
- 
-#addCountryBox li a { 
-  font-size:               1vw;
-  width:                   1.1vw;
-  text-decoration:         none;
-  display:                 inline;
-  text-align:              center;
-}
 
-#plus {
-  color:                   #00FF00;
-  float:                   left;
-}
-
-#plusBackground {
-  width:                   1.1vw;
-  height:                  3vh;
-  position:                absolute;
-  background-color:        rgba(106, 113, 106, 0.4);
-  border-radius:           3px;
-  z-index:                 -1;
-}
-
-#plusBlocker {
-  width:                   1.1vw;
-  height:                  3vh;
-  position:                absolute;
-  background-color:        rgba(18, 18, 18, 0.8);
-  border-radius:           3px;
-}
-
-#minus {
-  color:                   #FF0000;
-  float:                   right;
-}
-
-#minusBackground {
-  width:                   1.1vw;
-  height:                  3vh;
-  position:                absolute;
-  right:                   0px;
-  background-color:        rgba(106, 113, 106, 0.4);
-  border-radius:           3px;
-  z-index:                 -1;
-}
-
-#minusBlocker {
-  width:                   1.1vw;
-  height:                  3vh;
-  position:                absolute;
-  right:                   0px;
-  background-color:        rgba(18, 18, 18, 0.8);
-  border-radius:           3px;
-}
-
-#addCountryBox li p {
+#addCountryBox li p { 
   display:                 inline;
   font-size:               0.35vw; 
 }
 
-::-webkit-scrollbar { 
-    display: none; 
+#letterIndicator {
+  font-size:               0.6vw !important;
+}
+ 
+.plus {
+  font-size:               1vw;
+  width:                   1.1vw;
+  display:                 inline;
+  text-align:              center;
+  color:                   #00FF00;
+  float:                   left;
+  border-radius:           2px;
+  background-color:        rgba(106, 113, 106, 0.4);
+  text-decoration:         none;
+}
+
+.minus {
+  font-size:               1vw;
+  width:                   1.1vw;
+  display:                 inline;
+  text-align:              center;
+  color:                   #FF0000;
+  float:                   right;
+  border-radius:           2px;
+  background-color:        rgba(106, 113, 106, 0.4);
+  text-decoration:         none;
+}
+
+#clearAllCountries {
+  text-align:              center;
+  right:                   16.5vw;
+  bottom:                  0.5vh;
+  background:              rgba(245, 59, 59, 0.239216);
+}
+
+#opentour img {
+    width:                 3vw;
+    height:                3vw;
+    border:                0;
+    position:              absolute;
+    top:                   1.5vh;
+    left:                  25vw;
 }

@@ -3,25 +3,25 @@
   right:                   0;  
   top:                     0;  
   height:                  100vh;
-  width:                   16vw;
+  width:                   13vw;
   border-left:             0.3vw solid #323232;  
   padding:                 0 0.5vw;
+  z-index:                 1000000;
 } 
 
 #mainTitle {
   color:                   #cccc00 !important;
-  font-size:               4vh !important;
+  font-size:               3vh !important;
   margin:                  1vh 0; 
 }
 
 .question {
   color:                   #ccaa22;
-  font-size:               2.0vh; 
 }
 
 #description p,li {
   color:                   white;
-  font-size:               1.4vh; 
+  font-size:               2vh; 
 }
 
 #description a {
@@ -33,6 +33,6 @@
 }
 
 #description img {
-  width:                   2vw;
-  height:                  2vw;
+  width:                   3vw;
+  height:                  3vw;
 }

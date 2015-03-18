@@ -1,20 +1,98 @@
+@font-face {
+    font-family:           Refrigerator-Deluxe-Light;
+    src:                   url('../../refrigerator_deluxe_light.ttf');
+}    
+
 body {
-    background-color: #000000;
-    margin: 0px;
-}
-
-html {
-    overflow: hidden;
-}
-
-#buttonTree {
-    width: 100%;
-    margin: 0 auto;
-    padding: 0px;
+    font-family:           Refrigerator-Deluxe-Light;
+    background-color:      #000000;
+    margin:                0px;
 }
 
 canvas {
-    outline: none;
-/* position: fixed;
-bottom: 0px; */
+    outline:               none; 
+    position:              absolute;
+}
+
+#trainingBubble {
+    width:                 8vw;
+    height:                8vw;
+    position:              absolute;
+    top:                   37vh;
+    left:                  39vw;
+    display:               none;
+    z-index:               10000000;
+}
+
+#trainingFlag {
+    width:                 2vw;
+    height:                2vw;
+    position:              absolute;
+    top:                   48vh;
+    left:                  42vw;
+    display:               none;    
+    z-index:               10000000;
+}
+
+#textBubble {
+    width:                 17vw;
+    height:                5vw;
+    position:              absolute;
+    top:                   35vh;
+    left:                  46.7vw;
+    background:            white;
+    border-radius:         10px;
+    text-align:            center;
+    display:               none; 
+    z-index:               10000000;
+}
+
+#textBubble p {
+    margin:                0;
+    font-size:             0.74vw;
+}
+
+#name {
+    font-size:             1vw !important;
+    margin-top:	           0.4vh !important;
+}
+
+#ratio {
+    margin-top:	           0.4vh !important;
+}
+
+#date {
+    margin-top:            1vh !important;
+}
+
+#bubbleToolTip1 {
+    position:              absolute;
+    width:                 8vw;
+    height:                2vw;
+    top:                   43vh;
+    left:                  39vw;
+}
+
+#bubbleToolTip2 {
+    position:              absolute;
+    width:                 8vw;
+    height:                2vw;
+    top:                   38vh;
+    left:                  56vw;
+}
+
+#allCategoriesToolTip {
+    position:              absolute;
+    width:                 5vw;
+    height:                1vw;
+    top:                   2.5vh;
+    left:                  3.5vw;
+}
+
+#categoriesToolTip {
+    position:              absolute;
+    width:                 70vw;
+    height:                1vw;
+    top:                   2.5vh;
+    left:                  14vw;
 }

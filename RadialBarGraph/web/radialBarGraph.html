@@ -1,138 +1,787 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel="stylesheet" type="text/css" href="controls.css">
+    <meta name="viewport" content="width=device-width,user-scalable=no"> <!-- remove 300ms delay between touchstart and mousedown --> 
+
     <link rel="stylesheet" type="text/css" href="radialBarGraph.css">
     <link rel="stylesheet" type="text/css" href="description.css">
-    <script src="../../processing-1.3.6.js"></script>
+    <link rel="stylesheet" type="text/css" href="chardinjs.css">
+    <link rel="stylesheet" type="text/css" href="jquery.mCustomScrollbar.css">
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script> 
+    <script src="../../processing-1.4.1.min.js"></script> 
+    <script src="chardinjs.min.js"></script>           <!-- used for overlay -->
+    <script src="jquery.idle.js"></script>             <!-- detect user inactivity -->
+    <script src="jquery.mCustomScrollbar.js"></script> <!-- custom scrolling -->
+
     <script type="text/javascript">
-        function showSnippet(x, y, snippetID, snippetText) {
-          pauseDraw();
+        var activeSnippets = [];
 
-          // check if a snippet div already exists, if it does, delete it
-          if(document.getElementsByClassName("snippet show").length > 0) {
-            var existingSnippet   = document.getElementsByClassName("snippet show")[0];
-
-            setTimeout(function(){
-              existingSnippet.className  = 'snippet hide';
-            }, 1);
-
-            // wait for transition to end then delete old snippet div
-            existingSnippet.addEventListener("webkitTransitionEnd", function(e){
-              // transitionend fires for each property transitioned, in our case top and left.
-              // since we want to delete the snippetDiv at the end of one transition, 
-              // we need to make sure we only respond to one not all
-              if (e.propertyName == 'top') {
-                var existingSnippetCountryName = existingSnippet.id.split(':')[0];
-                var newSnippetCountryName      = snippetID.split(':')[0];
-
-                // we assign our processing sketch to the variable processingInstance
-                var processingInstance = Processing.getInstanceById('sketch');
-
-                // we call snippetRemoved inside our Processing sketch
-                processingInstance.snippetRemoved(existingSnippetCountryName, newSnippetCountryName);      
-
-                document.body.removeChild(existingSnippet);
-              }
-            }, false);
-
-          } 
-          
-          var newSnippet = document.createElement('div');
-          newSnippet.id  = snippetID;
-          newSnippet.innerHTML    = snippetText;
-          newSnippet.style.left   = document.getElementById('sketch').offsetLeft + x + "px";
-          newSnippet.style.top    = document.getElementById('sketch').offsetTop  + y + "px";
-          newSnippet.style.width  = "0";
-          newSnippet.style.height = "0";
-          newSnippet.style.visibility = "hidden"; 
-
-          document.body.appendChild(newSnippet);
-          newSnippet.addEventListener("webkitTransitionEnd", restartDraw, false);
-
-          setTimeout(function(){
-            newSnippet.className  = "snippet show";
-          }, 1);
-          
-        }
-
-        function changeCircumplex(newCircumplexID) { 
+        function showSnippet(x, y, r, g, b, snippetID, snippetTitle, snippetText) {
           // we assign our processing sketch to the variable processingInstance
           var processingInstance = Processing.getInstanceById('sketch');
 
-          // we call setCircumplex inside our Processing sketch
-          // and pass it the new circumplex id based on which button
-          // was pressed    
-          processingInstance.setCircumplexFromJS(newCircumplexID);
-				}
-  
-				function pauseDraw() {
-          //we assign our processing sketch to the variable processingInstance
+          pauseDraw();
+          var snippetCount  = activeSnippets.length;
+          
+          if(snippetCount < 3 && activeSnippets.indexOf(snippetID) == -1) {
+            var snippetFairy          = document.getElementById('snippetFairy');
+            var fairyCircle           = document.getElementById('fairyCircle');
+            var snippetContainer      = document.getElementById('snippetContainer');
+            var snippetContainerTitle = document.getElementById('snippetContainerTitle');
+            var snippetHolders        = snippetContainer.getElementsByClassName('snippetHolder');
+            var snippetBoxes          = snippetContainer.getElementsByClassName('snippetBox');             
+            var snippetTitles         = snippetContainer.getElementsByClassName('snippetTitle');
+            var snippetCloseButtons   = snippetContainer.getElementsByClassName('snippetCloseButton');
+            for(i=0; i<snippetBoxes.length; i++) {
+              if(snippetBoxes[i].getAttribute("data-occupied") == "false") {
+                // start animation to draw user's attention from where they clicked towards the snippet container
+                fairyCircle.style.fill            = "rgb(" + r + "," + g + "," + b + ")";
+                snippetFairy.style.left           = document.getElementById('sketch').offsetLeft + x - $("#snippetFairy").width()/2  + "px"; 
+                snippetFairy.style.top            = document.getElementById('sketch').offsetTop  + y - $("#snippetFairy").height()/2 + "px";
+                snippetFairy.style.display        = "block";
+                animationInProcess                = true;
+
+                var destinationX = parseInt($("#" + snippetHolders[i].id).css("marginLeft").replace('px', ''), 10) + 
+                                   $("#" + snippetBoxes[i].id).width()/2 - 
+                                   $("#snippetFairy").width()/2;
+
+                var destinationY = $("#" + snippetContainerTitle.id).height() + 
+                                   $("#" + snippetBoxes[i].id).height()/2 + 
+                                   $("#" + snippetHolders[i].id).height()*i - $("#snippetFairy").height()/2;
+
+                $( "#snippetFairy" ).animate(
+                  {
+                    left: destinationX + "px",
+                    top:  destinationY + "px",
+                  }, 
+                 
+                  {  
+                    duration: 1000,
+                    easing:   'swing',
+                    complete: function() {
+                      // keep track of snippets to avoid duplicates
+                      activeSnippets.push(snippetID);                     
+                      snippetBoxes[i].setAttribute("data-snippetID", snippetID);
+ 
+                      // hide fairy
+                      snippetFairy.style.display        = "none";
+
+                      // populate with snippet text
+                      snippetTitles[i].innerHTML        = snippetTitle;
+                      snippetBoxes[i].innerHTML         = snippetText;
+                      snippetBoxes[i].style.background  = "rgba(" + r + "," + g + "," + b + ",0.2)"; //"rgba(114, 150, 144, 0.3)";
+                      snippetBoxes[i].setAttribute("data-occupied", "true");
+
+                      // add custom scrollbar
+                      $("#" + snippetBoxes[i].id).mCustomScrollbar({
+                        theme:              "rounded",
+                        scrollbarPosition:  "outside",
+                        scrollInertia:      0,
+                        //contentTouchScroll: 2,
+                        mouseWheel:         { enable: true },
+      
+                        callbacks:{
+                          onScrollStart: function(){
+                            pauseDraw();
+                          },
+
+                          onScroll:      function() {
+                            restartDraw()
+                          }
+                        }
+                      });
+ 
+                      // activate close button
+                      snippetCloseButtons[i].style.background = "rgba(245, 59, 59, 0.24)";
+                      snippetCloseButtons[i].style.color      = "white";
+                      restartDraw();
+                   }  
+                });
+
+                break; 
+              }
+            }
+          }
+
+          else if(snippetCount < 3 && activeSnippets.indexOf(snippetID) != -1) {
+            var warning           = document.getElementById('duplicateSnippet');
+            warning.style.left    = document.getElementById('sketch').offsetLeft + x - $("duplicateSnippet").width()/2  + "px"; 
+            warning.style.top     = document.getElementById('sketch').offsetTop  + y - $("duplicateSnippet").height()/2 + "px";
+            warning.style.display = "block";              
+          }
+
+          else {
+            var warning           = document.getElementById('tooManySnippets');
+            warning.style.left    = document.getElementById('sketch').offsetLeft + x - $("#tooManySnippets").width()/2  + "px"; 
+            warning.style.top     = document.getElementById('sketch').offsetTop  + y - $("#tooManySnippets").height()/2 + "px";
+            warning.style.display = "block"; 
+          }
+        }
+
+        function deleteSnippet(snippetHolder, snippetTitle, snippetBox, snippetCloseButton) {
+          if(snippetBox.getAttribute("data-occupied") == "true") { 
+            // delete custom scrollbar
+            $("#" + snippetBox.id).mCustomScrollbar("destroy"); 
+
+            // clear snippet box and reset css
+            snippetTitle.innerHTML      = "Country : Right";
+            snippetBox.innerHTML        = "";
+            snippetBox.style.background = "none"; 
+            snippetBox.setAttribute("data-occupied", "false");
+
+            // remove snippetID from activeSnippets array
+            var snipID         = snippetBox.getAttribute("data-snippetID");
+            var indexOfElement = activeSnippets.indexOf(snipID);
+            activeSnippets.splice(indexOfElement, 1);
+
+            // deactivate close button
+            snippetCloseButton.style.background = "rgba(240, 169, 169, 0.24)";
+            snippetCloseButton.style.color      = "gray";
+            snippetCloseButton.onclick          = null;
+          }
+        }
+
+        function deleteAllSnippets(){
+          var snippetContainer    = document.getElementById('snippetContainer');
+          var snippetHolders      = snippetContainer.getElementsByClassName('snippetHolder');
+          var snippetBoxes        = snippetContainer.getElementsByClassName('snippetBox');             
+          var snippetTitles       = snippetContainer.getElementsByClassName('snippetTitle');
+          var snippetCloseButtons = snippetContainer.getElementsByClassName('snippetCloseButton');
+          for(i=0; i<snippetBoxes.length; i++) {
+            deleteSnippet(snippetHolders[i], snippetTitles[i], snippetBoxes[i], snippetCloseButtons[i]);
+          }
+
+          // don't forget to empty activeSnippets array
+          activeSnippets = [];
+        }
+
+      	function pauseDraw() {
+          // we assign our processing sketch to the variable processingInstance
           var processingInstance = Processing.getInstanceById('sketch');
 
-					processingInstance.noLoop();	
-				}
+	        processingInstance.noLoop();	
+	      }
 
         function restartDraw() {
-          //we assign our processing sketch to the variable processingInstance
+          // we assign our processing sketch to the variable processingInstance
           var processingInstance = Processing.getInstanceById('sketch');
 
           processingInstance.loop();  
         }
 
-        function resize() {
-          pauseDraw();
-          var box          = document.getElementById("addCountryBox");
-          var currentClass = box.className;
-          if(currentClass == "box") box.className += " resize";
-          else box.className = "box";
-
-          var letters          = document.getElementById("letters");
-          var currentClass = letters.className;
-          if(currentClass == "box") letters.className += " resize";
-          else letters.className = "box";
-
-          box.addEventListener("webkitTransitionEnd", restartDraw, false);
-        }
-
         function readyToDraw() {
+          setupScrolling();
+          setupSnippetButtons();
+          setupCountryListButtons();
+          setupGroupButtons();
+          launchTutorial();
+
           parent.trackLoadedVisualizations(); 
         }
 
-        function addCountry(country) {
-          //we assign our processing sketch to the variable processingInstance
+        function changeCircumplex(index) {
+          // we assign our processing sketch to the variable processingInstance
           var processingInstance = Processing.getInstanceById('sketch');
-          
-          processingInstance.insertNewCountry(country); 
-        }
 
-
-        function removeCountry(country) {
-          //we assign our processing sketch to the variable processingInstance
-          var processingInstance = Processing.getInstanceById('sketch');
-          
-          processingInstance.deleteCountry(country); 
+          return function(){
+            if (document.getElementById('changeCircumplex' + index)){
+              processingInstance.setCircumplexFromJS(index);
+            }
+          }         
         }
 
     </script>
 </head>
 <body>
 
-  <div id="controls"></div>
+  <div id="snippetContainer">
+    <div id="snippetContainerTitle">Compare Constitutional Excerpts From 2012</div>
+    <div id="snippetHolder1" class="snippetHolder">
+      <div class="snippetTitle">Country : Right</div>
+      <div class="snippetCloseButton">X</div>
+      <div id="snippetBox1" class="snippetBox" data-occupied="false"></div>
+    </div>
+    
+    <div id="snippetHolder2" class="snippetHolder">
+      <div class="snippetTitle">Country : Right</div>
+      <div class="snippetCloseButton">X</div>
+      <div id="snippetBox2" class="snippetBox" data-occupied="false"></div>
+    </div>
+
+    <div id="snippetHolder3" class="snippetHolder">
+      <div class="snippetTitle">Country : Right</div>
+      <div class="snippetCloseButton">X</div>
+      <div id="snippetBox3" class="snippetBox" data-occupied="false"></div>
+    </div>
+  </div>
 
   <canvas id="sketch" data-processing-sources="../RadialBarGraph.pde ../Country.pde ../Category.pde ../Year.pde ../TimeController.pde"></canvas>
 
-  <div class="button"  id="addCountryButton" align="center" onclick="resize()">Edit Country List</div>
-  
+  <table id="groupTable"></table>
+
+  <div id="snippetToolTip" class="fakeToolTip toolTip" data-intro="Hold ring for 2 seconds to view an excerpt from that country's constitution" data-position="right"><section><h3>Amendment VI</h3><p>In all criminal prosecutions, the accused shall enjoy the right to a speedy and public trial, by an impartial jury of the State and district wherein the crime shall have been committed, which district shall have been previously ascertained by law, and to be informed of the nature and cause of the accusation; to be confronted with the witnesses against him; to have compulsory process for obtaining witnesses in his favor, and to have the Assistance of Counsel for his defence.</p></section></div>
+  <div id="ringToolTip1" class="fakeToolTip toolTip" data-intro="Rotate wheel by touching and dragging along one of its rings" data-position="right"></div>
+  <div id="ringToolTip2" class="fakeToolTip toolTip" data-intro="Tap a Category ring to view all its rights" data-position="left"></div>
+  <div id="ringToolTip3" class="fakeToolTip toolTip" data-intro="Tap here to view description" data-position="left"></div>
+  <div id="ringToolTip4" class="fakeToolTip toolTip" data-intro="Hold for 2 seconds to view an excerpt from this country's constitution" data-position="left"></div>
+  <div id="ringToolTip5" class="fakeToolTip toolTip" data-intro="Tap to select a different category or to return to the 'All Categories' view" data-position="right"></div>
+
+  <div id="timeControlToolTip1" class="fakeToolTip toolTip" data-intro="Move cursor to change the current year" data-position="left"></div>
+  <div id="timeControlToolTip2" class="fakeToolTip toolTip" data-intro="Decrease year by 1" data-position="left"></div>
+  <div id="timeControlToolTip3" class="fakeToolTip toolTip" data-intro="Loop years" data-position="bottom"></div>
+  <div id="timeControlToolTip4" class="fakeToolTip toolTip" data-intro="Increase year by 1" data-position="right"></div>
+
+  <div id="countryGroupToolTip" class="fakeToolTip toolTip" data-intro="Country groups" data-position="bottom"></div>
+
+  <svg id="snippetFairy" style="width:0.5vw; height:0.5vw;"> <circle id="fairyCircle" cx="50%" cy="50%" r="48%"></circle> </svg>
+
+  <div id="tooManySnippets">
+    <div id="warningExitButton1">x</div>
+    <p>Excerpt Limit Reached</br>Delete at least 1 excerpt</p>
+  </div>
+
+  <div id="duplicateSnippet">
+    <div id="warningExitButton2">x</div>
+    <p>Duplicate Excerpt</br>Choose another right or country</p>
+  </div>
+
+  <div class="button"  id="addCountryButton" align="center">Add/Remove Countries</div>
+ 
   <div class="box" id="letters"></div>
 
+  <div id="countryListOverlay" class="box toolTip" data-intro="Tap '+' or '-' button to add or remove countries from wheel" data-position="left"></div>
   <div class="box" id="addCountryBox">
     <ul id="countryList"></ul>
   </div> 
  
-  <div class="box resize" id="countryBoxOverlay"></div>
- 
+  <div id="clearAllCountries" class="button toolTip" data-active="true" data-intro="Remove ALL countries in wheel" data-position="left">Remove All Countries</div>
+
   <div id="description"></div>
+
+  <div id="opentour" class="hide" data-toggle="chardinjs"><img src="help-icon.jpg" alt="help" data-intro="Open tutorial" data-position="bottom"></div>
+
+<script type="text/javascript"> 
+
+  /********************/
+  /*      BUTTONS     */
+  /********************/
+
+  // snippets
+  function setupSnippetButtons() {
+    var snippetButtons = document.getElementsByClassName('snippetCloseButton');
+    for(var i=0;i<snippetButtons.length;i++){
+      snippetButtons[i].addEventListener('touchstart', snippetButtonHandler, false);
+      snippetButtons[i].addEventListener('mousedown',  snippetButtonHandler, false);
+    }
+  }
+
+  function snippetButtonHandler(e){
+    var deleteButton = e.target; 
+    var snipHolder   = deleteButton.parentNode;
+    var snipTitle    = snipHolder.getElementsByTagName('div')[0];
+    var snipBox      = snipHolder.getElementsByTagName('div')[2];
+    deleteSnippet(snipHolder, snipTitle,  snipBox, deleteButton);
+    closeSnippetWarning();
+    e.preventDefault();
+    e.stopPropagation();
+    return false;       
+  }
+
+  document.getElementById('warningExitButton1').addEventListener('touchstart', function(e) {
+    closeSnippetWarning();
+    e.preventDefault();
+    e.stopPropagation();
+    return false; 
+  });
+
+
+  document.getElementById('warningExitButton1').addEventListener('mousedown', function(e) {
+    closeSnippetWarning();
+    e.preventDefault();
+    e.stopPropagation();
+    return false; 
+  });
+
+  document.getElementById('warningExitButton2').addEventListener('touchstart', function(e) {
+    closeSnippetWarning();
+    e.preventDefault();
+    e.stopPropagation();
+    return false; 
+  });
+
+
+  document.getElementById('warningExitButton2').addEventListener('mousedown', function(e) {
+    closeSnippetWarning();
+    e.preventDefault();
+    e.stopPropagation();
+    return false; 
+  });
+
+  function closeSnippetWarning() {
+    document.getElementById('tooManySnippets').style.display = "none";
+    document.getElementById('duplicateSnippet').style.display = "none";
+  }
+  
+  // center text in closeSnippetButtons vertically
+  var buttonHeight = $("#snippetHolder1").height() * 0.10;
+  $(".snippetCloseButton").css("line-height",  buttonHeight + "px");
+  $(".snippetTitle").css("line-height",  buttonHeight + "px");
+
+  // country list
+  function setupCountryListButtons() {
+    var clearWheelButton = document.getElementById('clearAllCountries');
+    clearWheelButton.addEventListener('touchstart', clearWheelButtonHandler, false); 
+    clearWheelButton.addEventListener('mousedown',  clearWheelButtonHandler, false);    
+  }  
+
+  function addCountry(country) {
+    // we assign our processing sketch to the variable processingInstance
+    var processingInstance = Processing.getInstanceById('sketch');
+    processingInstance.insertNewCountry(country); 
+  }
+
+  function removeCountry(country) {
+    // we assign our processing sketch to the variable processingInstance
+    var processingInstance = Processing.getInstanceById('sketch');
+    processingInstance.deleteCountry(country); 
+  }
+
+  function deleteAllCountries() {
+    // we assign our processing sketch to the variable processingInstance
+    var processingInstance = Processing.getInstanceById('sketch');
+         
+    deleteAllSnippets();
+    processingInstance.clearCircumplex();
+  }
+
+  function clearWheelButtonHandler(e){
+    deleteAllCountries();
+    e.preventDefault();
+    e.stopPropagation();
+    return false; 
+  }
+
+
+  /********************/
+  /*  COUNTRY GROUPS  */
+  /********************/
+
+  function setupGroupButtons() {
+    var t   = document.getElementById('groupTable');
+    var tds = t.getElementsByTagName('tr');
+
+    for(var i=0;i<tds.length;i++){
+      tds[i].addEventListener('touchstart', groupButtonHandler, false);
+      tds[i].addEventListener('mousedown',  groupButtonHandler, false);
+    }
+  }
+
+  function groupButtonHandler(e){
+    // we assign our processing sketch to the variable processingInstance
+    var processingInstance = Processing.getInstanceById('sketch');
+
+    var groupButton = e.target; 
+    var groupName   = groupButton.innerHTML;
+    processingInstance.loadNewGroup(groupName);
+    e.preventDefault();
+    e.stopPropagation();
+    return false;       
+  }
+
+  /********************/
+  /*    SCROLLING     */
+  /********************/
+
+  function setupScrolling() {
+
+    // jump to letter on button click
+		$(".letter").click(function(e){
+	  	e.preventDefault();
+     // pauseDraw();
+      to='#' + $(this).html();
+			$('#addCountryBox').mCustomScrollbar("scrollTo",to, {
+        scrollInertia: 1000,
+        callbacks:{
+          onScrollStart: function(){
+            pauseDraw();
+          },
+
+          onScroll:      function() {
+            restartDraw()
+          }
+        }  
+
+      });
+		});
+
+    
+    // customize country list scroll bar
+    $("#addCountryBox").mCustomScrollbar({
+      theme:              "light",
+      scrollbarPosition:  "outside",
+      autoHideScrollbar:  "true",
+      scrollInertia:      0,
+      //contentTouchScroll: 25,
+      mouseWheel:         { enable: true },
+      
+      callbacks:{
+        onScrollStart: function(){
+          pauseDraw();
+        },
+
+        onScroll:      function() {
+          restartDraw()
+        }
+      }
+      
+    });
+
+  }
+
+  /********************/
+  /* VIS HELP OVERLAY */
+  /********************/
+
+  // launch overview on help button click 
+  // pause sketch for smooth transitions
+  document.getElementById('opentour').addEventListener('touchstart', function(e) {
+    launchTutorial();
+    e.preventDefault();
+    e.stopPropagation();
+    return false; 
+  });
+
+  document.getElementById('opentour').addEventListener('mousedown', function(e) {
+    launchTutorial();
+    e.preventDefault();
+    e.stopPropagation();
+    return false; 
+  });
+
+  function launchTutorial() {
+    var processingInstance   = Processing.getInstanceById('sketch');
+
+    $('#snippetToolTip').css('display', 'block'); 
+
+    // hide time controller tips if vis is in mobile mode
+    if(processingInstance.getMode() == "Mobile") {
+      $('#timeControlToolTip1').css('display', 'none');
+      $('#timeControlToolTip2').css('display', 'none');
+      $('#timeControlToolTip3').css('display', 'none');
+      $('#timeControlToolTip4').css('display', 'none');
+    }
+
+    // display appropriate tips depending on which wheel is active
+    if(processingInstance.getCurrentCircumplex() == "Category Wheel") {
+      $('#ringToolTip3').css('display', 'none');
+      $('#ringToolTip4').css('display', 'none');
+      $('#ringToolTip5').css('display', 'none');
+      $('#ringToolTip2').css('display', 'block');
+    }
+
+    else {
+      $('#ringToolTip3').css('display', 'block');
+      $('#ringToolTip4').css('display', 'block');
+      $('#ringToolTip5').css('display', 'block');
+      $('#ringToolTip2').css('display', 'none');
+    }
+
+    // disable highlighted DOM objects. If we don't, user can reactivate sketch prematurely
+    document.getElementById('clearAllCountries').style.background = "rgba(240, 169, 169, 0.24)";
+    document.getElementById('clearAllCountries').style.color      = "gray";
+    document.getElementById('clearAllCountries').removeEventListener("touchstart", clearWheelButtonHandler);
+    document.getElementById('clearAllCountries').removeEventListener("mousedown",  clearWheelButtonHandler);
+
+    pauseDraw();
+    $('body').chardinJs('start');
+
+    // adjust the height of the country list tool tip
+    $("div[data-id='countryListOverlay']").children(".chardinjs-tooltip").css("top", "15vh"); 
+  }
+
+
+  // show overview if user is inactive 
+  $(document).idle({
+    onIdle: launchTutorial,
+    onActive: function(){
+      $('body').chardinJs('stop'); 
+    },
+    events: 'touchstart mousedown',
+    idle: 5*60*1000
+  });
+
+  
+  // hide overlay if tooltips are tapped
+  function killOverlay() {$('body').chardinJs('stop');}
+  var toolTips = document.getElementsByClassName('toolTip');
+  for(var i=0; i<toolTips.length; i++){ 
+    toolTips[i].addEventListener('touchstart', killOverlay, false);
+    toolTips[i].addEventListener('mousedown',  killOverlay, false);
+  }
+
+  // hide overlay if the tooltip text boxes are tapped
+  // these events can only be added after overlay is created, hence listening to chardinJs:start event
+  $('body').on('chardinJs:start', function(){
+    var toolTipTexts = document.getElementsByClassName('chardinjs-tooltiptext');
+    for(var i=0; i<toolTipTexts.length; i++){
+      toolTipTexts[i].addEventListener('touchstart', killOverlay, false);
+      toolTipTexts[i].addEventListener('mousedown',  killOverlay, false);
+    }
+  });
+
+
+  // make sure to restart the processing sketch once overview is closed
+  $('body').on('chardinJs:stop', function(){
+    // re-enable DOM objects 
+    document.getElementById('clearAllCountries').style.background = "rgba(245, 59, 59, 0.24)";
+    document.getElementById('clearAllCountries').style.color      = "white";
+    document.getElementById('clearAllCountries').addEventListener('touchstart', clearWheelButtonHandler, false); 
+    document.getElementById('clearAllCountries').addEventListener('mousedown',  clearWheelButtonHandler, false); 
+
+    document.getElementById('snippetToolTip').style.display = "none"; 
+
+    restartDraw();
+  });
+
+
+  /*******************/
+  /* CANVAS ROTATION */
+  /*******************/
+
+  var sketch             = document.getElementById('sketch');
+  var sketchOffsetLeft   = sketch.offsetLeft;
+  var sketchStartAngle   = sketch.setAttribute('currentRotation', '0');
+  var cursorStartAngle   = 0;
+  var cursorEndAngle     = 0;
+  var rotationAngle      = 0;
+  var validDraggableArea = false;
+  var spinning           = false;
+  var snippetAnimating   = false;
+  var timer;
+
+  function getCoord(e, c) {
+    return /touch/.test(e.type) ? (e.originalEvent || e).changedTouches[0]['page' + c] : e['page' + c];
+  }
+  
+  sketch.addEventListener('touchstart', function(e) {
+    // only read the first touch. ignore the rest
+    if(e.targetTouches.length > 1) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    
+    printEvent(e);
+    cursorStart(e);
+    e.preventDefault();
+    e.stopPropagation();
+    return false; 
+  });
+  
+  sketch.addEventListener('touchmove', function(e) {
+    if(e.changedTouches[0].identifier == 0) {
+      printEvent(e);
+      cursorMoved(e);
+    }
+    
+    e.preventDefault();
+    e.stopPropagation();
+    return false; 
+  });
+  
+  sketch.addEventListener('touchend', function(e) {
+    if(e.changedTouches[0].identifier == 0) {
+      printEvent(e);
+      cursorEnd(e);
+    }
+    
+    e.preventDefault(); 
+    e.stopPropagation();
+    return;
+  });
+  
+  
+  sketch.addEventListener('mousedown', function(e) {
+    sketch.setAttribute('cursorState', 'down');
+    printEvent(e);
+    cursorStart(e);
+    e.preventDefault();
+    e.stopPropagation();
+    return false; 
+  });
+  
+  sketch.addEventListener('mousemove', function(e) {
+    if(sketch.getAttribute('cursorState') == 'down') {
+      printEvent(e);
+      cursorMoved(e);
+    }
+    e.preventDefault();
+    e.stopPropagation();
+    return false; 
+  });
+  
+  sketch.addEventListener('mouseup', function(e) {
+    sketch.setAttribute('cursorState', 'up');
+    printEvent(e);
+    cursorEnd(e);
+    e.preventDefault(); 
+    e.stopPropagation();
+    return;
+  });
+  
+  
+  function printEvent(e) {
+    var eventType = e.type;
+    console.log(eventType + ": " + getCoord(e, 'X') + "," + getCoord(e, 'Y'));
+    
+    // add new line to distinguish between clicks
+    if(eventType == 'mouseup' || eventType == 'touchend') console.log("");
+  }
+  
+  
+  function cursorStart(e) {
+    // stop rendering sketch to speed up response time
+    pauseDraw();
+
+    // reset snippet animating flag
+    snippetAnimating = false;
+
+    var processingInstance          = Processing.getInstanceById('sketch');
+    var sketchCenterX               = processingInstance.getSketchWidth()/2;
+    var sketchCenterY               = processingInstance.getSketchHeight()/2; 
+    var timeControllerRadius        = processingInstance.getControllerRadius();
+    var circumplexRadius            = processingInstance.getCircumplexRadius();
+    var numberOfVisualizedCountries = processingInstance.getNumberOfVisualizedCountries();
+    var cursorX                     = getCoord(e, 'X') - sketchOffsetLeft;
+    var cursorY                     = getCoord(e, 'Y');
+    var distFromCenter              = Math.floor(Math.sqrt(Math.pow(cursorX - sketchCenterX, 2) + Math.pow(cursorY - sketchCenterY, 2)));
+ 
+    // determine initial angle of mouse relative to the center of the canvas
+    cursorStartAngle                = Math.atan2(cursorY - sketchCenterY, cursorX - sketchCenterX);
+    sketchStartAngle                = parseFloat(sketch.getAttribute('currentRotation'));
+
+    // atan2 function used to calculate start angle only returns values between PI and -PI
+    // we need to modify the returned value to get values between 0 and 2PI
+    var adjustedCursorStartAngle = (cursorStartAngle < 0) ? cursorStartAngle+2*Math.PI : cursorStartAngle;
+    
+    // compensate for canvas rotation before sending the cursor angle back to Processing sketch
+    if(rotationAngle > 0) {
+      adjustedCursorStartAngle = (adjustedCursorStartAngle-rotationAngle < 0) ? 2*Math.PI+(adjustedCursorStartAngle-rotationAngle) : adjustedCursorStartAngle-rotationAngle;
+    } 
+
+    else {
+      adjustedCursorStartAngle = (adjustedCursorStartAngle-rotationAngle > 2*Math.PI) ? (adjustedCursorStartAngle-rotationAngle)-2*Math.PI : adjustedCursorStartAngle-rotationAngle;
+    }
+
+    processingInstance.updateMouseAngle(adjustedCursorStartAngle);
+
+    // only rotate if mouse inside circumplex
+    if( distFromCenter > timeControllerRadius && distFromCenter < circumplexRadius && numberOfVisualizedCountries > 0) { 
+      validDraggableArea = true;
+
+      if(processingInstance.getCurrentCircumplex() == "Rights Wheel") {
+        timer = setTimeout(function(){
+          //console.log("long touch detected");
+          snippetAnimating = true;
+          processingInstance.longTouchTrue();
+        }, 500);
+      } 
+
+    } 
+    
+    else {
+      validDraggableArea = false;
+    }
+
+    // pass touches to Processing sketch
+    processingInstance.cursorDown(cursorX, cursorY);
+  }
+
+  
+  function cursorMoved(e) {
+      //stops short touches from firing the event
+      if (timer) clearTimeout(timer); // clearTimeout, not cleartimeout..
+
+      var processingInstance   = Processing.getInstanceById('sketch');
+      var sketchCenterX        = processingInstance.getSketchWidth()/2;
+      var sketchCenterY        = processingInstance.getSketchHeight()/2; 
+      var cursorX              = getCoord(e, 'X') - sketchOffsetLeft;
+      var cursorY              = getCoord(e, 'Y');
+
+      // pass touch to Processing sketch
+      processingInstance.cursorMove(cursorX, cursorY);
+
+      if(validDraggableArea) {
+        // determine current angle of mouse relative to center of canvas 
+        cursorEndAngle = Math.atan2(cursorY - sketchCenterY, cursorX - sketchCenterX);
+
+        // new canvas rotation value must account for previous canvas angle
+        rotationAngle  = cursorEndAngle - cursorStartAngle + sketchStartAngle;
+
+        // ignore minor changes in canvas angle
+        // touch is not as precise as mouse. users sometimes change x,y between touch down and touch up
+        if(Math.abs(cursorEndAngle-cursorStartAngle) > 0.00) {
+
+          // restart Processing to allow the vis to switch TimeController states
+          // only do this once at the beginning of the spinning gesture
+          if(!spinning) restartDraw();       
+          spinning = true;
+          processingInstance.rotationOn(0);
+    
+          // rotate canvas via css
+          sketch.style.webkitTransform = 'rotate(' + rotationAngle + 'rad)';        
+          sketch.style.mozTransform    = 'rotate(' + rotationAngle + 'rad)'; 
+          sketch.style.msTransform     = 'rotate(' + rotationAngle + 'rad)'; 
+          sketch.style.oTransform      = 'rotate(' + rotationAngle + 'rad)'; 
+          sketch.style.transform       = 'rotate(' + rotationAngle + 'rad)'; 
+        
+          // save canvas's new angle for the next time user rotates it 
+          sketch.setAttribute('currentRotation', rotationAngle);
+        }
+
+        else {
+          spinning = false;
+        }
+      }
+      
+      // if user is interacting with another portion of the canvas like the TimeController
+      // restart Processing sketch in order for the changes to take effect immediately
+      else {
+        restartDraw();
+      }
+  }
+  
+  function cursorEnd(e) {        
+    //stops short touches from firing the event
+    if (timer) clearTimeout(timer); // clearTimeout, not cleartimeout..
+
+    var processingInstance   = Processing.getInstanceById('sketch');
+    var cursorX              = getCoord(e, 'X') - sketchOffsetLeft;
+    var cursorY              = getCoord(e, 'Y');
+
+    // pass touch to Processing sketch
+    processingInstance.cursorUp(cursorX, cursorY);
+
+    if(spinning) {
+      validDraggableArea = false;
+      spinning           = false;     
+      processingInstance.rotationOff(rotationAngle);
+   } 
+
+    if(!snippetAnimating) restartDraw();
+  }
+
+  // prevent auto-scroll when canvas is rotated 
+  var initScrollTop = $(document).scrollTop();
+  $(document).scroll(function(event) {     
+    if ( initScrollTop != $(document).scrollTop() ) {
+      $(document).scrollTop( initScrollTop );
+    }
+    return false;
+  });
+  
+</script>
 
 </body> 
 </html>

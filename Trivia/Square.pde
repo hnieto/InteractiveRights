@@ -62,23 +62,33 @@ class Square {
     rectMode(CORNER);
     //set color to the rect
     if (inactiveCorrect) {
-      if (greenFade < 100) {
+      if (greenFade < 20) {
         greenFade++;
       }
     } else if (inactiveWrong) {
-      if (redFade < 100) {
+      if (redFade < 20) {
         redFade++;
       }
     }
     setColor();
     fill(c);
     //draw the rectangle
-    rect(0, 0, w, h);
+    stroke(255);
+    strokeWeight(2);
+    rect(0, 0, w, h, 5, 5, 5, 5);
+    
     //display text
     textAlign(CENTER);
-    textSize(h/9);
-    fill(255);
-    text("Amendment\n" + answerNumber, w/2, h/2);
+    if(inactiveCorrect || inactiveWrong || incorrect){
+      fill(255);
+    }else{
+      fill(0);
+    }
+    textFont(scriptFont);
+    textSize(h/6);
+    text("Amendment", w/2, h/4);
+    textSize(h/2);
+    text(answerNumber, w/2, h*0.8);
     
     popMatrix();
     popStyle();
@@ -116,13 +126,15 @@ class Square {
       c = color(128, 128, 128)//color(255, 0, 0); CHECK WITH THIS?
     } else {//can still be clicked
       //purple
-      c = color(255, 0, 255, 128);
+      //c = color(255, 0, 255, 128);
+      //parchment color
+      //c = #B7A159;#F8ECC2;
+      c = color(60, 60, 40);
     }
   }
 
   void resetFlags() {
     //reset state of boxes so that they can be clicked again
-    c            = color(255, 0, 255, 128);
     pointsReceived = 0;
     clicked = false;
     inactiveCorrect = false;
