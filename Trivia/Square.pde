@@ -1,6 +1,13 @@
 class Square {
   //Wiggle const
   static final float WIGGLE = 2.0;
+  
+  //Some basic color constants used:
+  static final color RED = color(255,0,0,51);
+  static final color GREEN = color(0,255,0,51);
+  static final color PURPLE = color(255, 0, 255, 128);
+  static final color PARCHMENT = color(60, 60, 40);
+  static final color GREY = color(128, 128, 128);
 
   // coordinate of the square
   float   x, y;   
@@ -18,16 +25,17 @@ class Square {
 
   //variable to store the color of the square
   color c;
+//CLEAN UP?  
   //Lets the box turn green for a short time before going grey
-  int greenFade;
-  int redFade;
+//  int greenFade;
+//  int redFade;
 
   Square(float x, float y, float w, float h, int answerNumber) {
     this.x       = x;
     this.y       = y;
     this.w       = w;
     this.h       = h;
-    c            = color(255, 0, 255, 128);
+    c            = PARCHMENT;
     this.answerNumber  = answerNumber;
     pointsReceived = 0;
     
@@ -38,8 +46,9 @@ class Square {
     //incorrect = guessed wrong, reset for each new question
     incorrect = false;
 
-    greenFade = 0;
-    redFade = 0;
+//CLEAN UP?
+    //greenFade = 0;
+    //redFade = 0;
 
     wiggling = false;
     wiggle = WIGGLE;
@@ -60,6 +69,9 @@ class Square {
       translate(x, y);
     }
     rectMode(CORNER);
+    
+    /*
+    CLEAN UP?
     //set color to the rect
     if (inactiveCorrect) {
       if (greenFade < 20) {
@@ -70,6 +82,8 @@ class Square {
         redFade++;
       }
     }
+    */
+    
     setColor();
     fill(c);
     //draw the rectangle
@@ -114,22 +128,18 @@ class Square {
 
   //sets the color of the square based on the flags
   void setColor() {
-    //gray [color(128, 128, 128)]
     if (inactiveCorrect) {
       //fade to pale green
-      c = color(greenFade, 255, greenFade);
+      //c = color(greenFade, 255, greenFade);
+      c = GREEN;
     } else if (inactiveWrong) {
       //fades to pale red
-      c = color(255, redFade, redFade);
+      //c = color(255, redFade, redFade);
+      c = RED;
     } else if (incorrect) {
-      //red
-      c = color(128, 128, 128)//color(255, 0, 0); CHECK WITH THIS?
+      c = GREY;
     } else {//can still be clicked
-      //purple
-      //c = color(255, 0, 255, 128);
-      //parchment color
-      //c = #B7A159;#F8ECC2;
-      c = color(60, 60, 40);
+      c = PARCHMENT;
     }
   }
 
@@ -141,8 +151,9 @@ class Square {
     inactiveWrong = false;
     incorrect = false;
 
-    greenFade = 0;
-    redFade = 0;
+//CLEAN UP
+//    greenFade = 0;
+//    redFade = 0;
 
     wiggling = false;
     wiggle = WIGGLE;

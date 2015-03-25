@@ -1,29 +1,31 @@
-/*
-TODO:
- overlay comes up at the beginning after user restarts. works fine the first time around
- floating score (like in/out)
- clean up code/divide up into methods
- remove the isReady state
- improve the arrow touch code
- */
+//TODO:
+//  add "next" next to the arrows
+//  remove the isReady state (the extra tap state)
+//  clean up code/divide up into methods
+//  bonus points for consecutive guesses?
+//  fix the line that prints the initial time
+//  move hint to status bar?
+
 
 /* @pjs font='../data/RefrigeratorDeluxeLight.ttf, ../data/Digital.ttf, ../data/VladimirScript.ttf'; */
 
+//Total time for a round of the game in seconds
 static final int MAX_TIME =  120;
+//Number of questions asked; the number of us amendments
 static final int NUM_QUESTIONS = 27;
 
-//Color for status bar
+//Color for status bar -- brownish-red
 color statusBarColor = color(40, 10, 10);
 
-int wait = 5*1000;
 int startTime;
-boolean timerOn = true;//false;
+boolean timerOn = true;
 boolean hintRequested = false;
 int countdown;
 
 // Arraylists for the questions and squares
 ArrayList<Question> questionList;
 ArrayList<Square> squareList;
+ArrayList<Popup> popupList;
 
 //question index
 int count;
@@ -34,6 +36,7 @@ int score;
 int attempt;
 int attempts[] = new int[3];
 
+//Graphics section
 //variable to set the size of the window
 float sketchWidth; 
 float sketchHeight;
@@ -49,12 +52,12 @@ float gapWidth;
 float posX;
 float posY;
 
-//Lower bound for the status bar
+//Lower bound (y coordinate) for the status bar
 float statusBarBound;
 
 //Variables to cause the screen to wait for input
-boolean waiting;
-boolean ready;
+boolean waiting;          //waiting means that the vis is in the state between questions
+boolean ready;            //ready means that the game is ready to start a new game
 int     arrowColorTimer;
 int     selectedArrowColor;
 color[] arrowColors = new color[2];
@@ -71,7 +74,6 @@ void setup() {
   //javascript function to set sketch size according to the width of the browser
   setCanvasSize();
   size(sketchWidth, sketchHeight);
-  //    size(1600, 900);    //FOR DEBUG
   background(255);
   noStroke();
   frameRate(30);
@@ -92,11 +94,12 @@ void setup() {
 
   //Set game to begin after user input
   waiting = false;
-  ready = true;// false;
+  ready = true;
   arrowColors[0] = color(255, 0, 0);     // red
   arrowColors[1] = color(255, 255, 255); // white
 
   // Initialize the ArrayLists
+  popupList = new ArrayList<Popup>();
   questionList = new ArrayList<Question>();
   squareList = new ArrayList<Square>(); 
   attempts = [0, 0, 0];
@@ -152,7 +155,6 @@ void setup() {
 }
 
 
-
 void draw() {
   background(0);
 
@@ -161,6 +163,7 @@ void draw() {
     //display each square
     box.display();
   }
+  
   //display statusBar
   fill(statusBarColor);
   rect(0, 0, sketchWidth, statusBarBound);
@@ -173,8 +176,8 @@ void draw() {
   if (!ready) {
     //show that we are waiting for user input
     textSize(sketchWidth/37.5);
-    String restart = "TAP ANYWHERE TO START";
-    text(restart, (sketchWidth-textWidth(restart))/2 + textWidth(restart)/2, sketchHeight*7/16);
+//    String restart = "TAP ANYWHERE TO START";
+//    text(restart, (sketchWidth-textWidth(restart))/2 + textWidth(restart)/2, sketchHeight*7/16);
     
     // display starting score
     textFont(digitalFont);
@@ -184,11 +187,25 @@ void draw() {
     
     // display starting time
     text("TIME: 2:00", sketchWidth*0.9, sketchHeight/21);
-  } else if (count >= NUM_QUESTIONS) {  //Check if round finished
-    //round complete -- show points received
-    for (Square box : squareList) {    
-      //display each square
-      box.showPoints();
+  } else
+
+  if (count >= NUM_QUESTIONS) {  //Check if round finished
+//    //round complete -- show points received
+//    for (Square box : squareList) {    
+//      //display each square
+//      box.showPoints();
+//    }
+
+    
+    for(int i=0; i < popupList.size(); i++){
+        Popup pop = popupList.get(i);
+        pop.adjust();
+        if(pop.alpha <= 0){
+            popupList.remove(pop);
+            i--;
+        }else{
+            pop.display();
+        }
     }
 
     timerOn = false;
@@ -209,8 +226,8 @@ void draw() {
     }
     text(stats, (sketchWidth-textWidth(stats))/2 + textWidth(stats)/2, sketchHeight/6);
 
-    String restart = "TAP ANYWHERE TO RESTART";
-    text(restart, (sketchWidth-textWidth(restart))/2 + textWidth(restart)/2, sketchHeight*7/16);
+//    String restart = "TAP ANYWHERE TO RESTART";
+//    text(restart, (sketchWidth-textWidth(restart))/2 + textWidth(restart)/2, sketchHeight*7/16);
     document.getElementById("overlay").style.display = "none";
     
   } else {
@@ -227,14 +244,29 @@ void draw() {
     text(questionList.get(count).question, (sketchWidth-textWidth(questionList.get(count).question))/2
       + textWidth(questionList.get(count).question)/2, sketchHeight/6);
       
+    //Display popups
+    for(int i=0; i < popupList.size(); i++){
+        Popup pop = popupList.get(i);
+        pop.adjust();
+        if(pop.alpha <= 0){
+            popupList.remove(pop);
+            i--;
+        }else{
+            pop.display();
+        }
+    }  
+      
     //Display Hint
     pushStyle();
     noFill();
     stroke(204, 204, 0);
     rect(sketchWidth*0.52 + textWidth(questionList.get(count).question)/2, sketchHeight*.13, sketchWidth*0.05, sketchHeight*0.045, 5, 5, 5, 5);
     fill(204, 204, 0);
-    if(hintRequested) text(questionList.get(count).hint, sketchWidth*0.545 + textWidth(questionList.get(count).question)/2, sketchHeight/6);
-    else text("Hint", sketchWidth*0.545 + textWidth(questionList.get(count).question)/2, sketchHeight/6);
+    if(hintRequested){
+      text(questionList.get(count).hint, sketchWidth*0.545 + textWidth(questionList.get(count).question)/2, sketchHeight/6);
+    }else{
+      text("Hint", sketchWidth*0.545 + textWidth(questionList.get(count).question)/2, sketchHeight/6);
+    }
     popStyle();
 
     //Reset size to normal
@@ -250,32 +282,12 @@ void draw() {
     }
 
     if (waiting) {
-      // enable HTML overlay
+      // enable HTML overlay to block the touches on the boxes
       document.getElementById("overlay").style.display = "block";
       
-      // show hint 
+      // show hint if not already shown
       hintRequested = true;
-      
-      pushStyle();
-      // toggle arrow color between white and red
-      if (millis() - arrowColorTimer > 500) {
-        selectedArrowColor++;
-        arrowColorTimer = millis();
-      }
-      
-      // draw arrow at top and bottom for ADA compliancy
-      fill(arrowColors[selectedArrowColor % arrowColors.length]);
-      triangle((width - statusBarBound*0.5), (statusBarBound*1.25), 
-               (width - statusBarBound*0.5), (statusBarBound*1.75), 
-               (width - statusBarBound*0.1), (statusBarBound*1.5));
-      rect(width - statusBarBound*0.6, statusBarBound*1.4, width*0.005, height*0.02);
-      //bottom arrow
-      triangle((width - statusBarBound*0.5), (height - statusBarBound*0.25), 
-               (width - statusBarBound*0.5), (height - statusBarBound*0.75), 
-               (width - statusBarBound*0.1), (height - statusBarBound*0.5));
-      rect(width - statusBarBound*0.6, height - statusBarBound*0.4, width*0.005, 0-height*0.02);
-      
-      popStyle(); 
+      drawArrows();
     }
 
     //To display score
@@ -310,9 +322,32 @@ void draw() {
   }
 }
 
+void drawArrows(){
+  pushStyle();
+  // toggle arrow color between white and red
+  if (millis() - arrowColorTimer > 500) {
+    selectedArrowColor++;
+    arrowColorTimer = millis();
+  }
+  
+  // draw arrow at top and bottom for ADA compliancy
+  fill(arrowColors[selectedArrowColor % arrowColors.length]);
+  triangle((width - statusBarBound*0.75), (statusBarBound*1.25), 
+           (width - statusBarBound*0.75), (statusBarBound*2.00), 
+           (width - statusBarBound*0.10), (statusBarBound*1.625));
+  rect(width - statusBarBound*0.95, statusBarBound*1.425, width*0.01, height*0.04);
+  //bottom arrow
+  triangle((width - statusBarBound*0.75), (height - statusBarBound*0.25), 
+           (width - statusBarBound*0.75), (height - statusBarBound*1.00), 
+           (width - statusBarBound*0.10), (height - statusBarBound*0.625));
+  rect(width - statusBarBound*0.95, height - statusBarBound*0.425, width*0.01, 0-height*0.04);
+  
+  popStyle(); 
+}
+
 boolean nextSelected(float mx, float my) {
-  boolean topArrow = ((width - statusBarBound/2) <= mx && mx <= width &&  statusBarBound <= my && my <= (2*statusBarBound));
-  boolean botArrow = ((width - statusBarBound/2) <= mx && mx <= width &&  height - statusBarBound >= my && my >= height - (2*statusBarBound));
+  boolean topArrow = ((width - statusBarBound) <= mx && mx <= width &&  statusBarBound <= my && my <= (2.25*statusBarBound));
+  boolean botArrow = ((width - statusBarBound) <= mx && mx <= width &&  height - (1.25*statusBarBound) <= my && my <= height);
   return topArrow || botArrow;
 }
 
@@ -334,6 +369,8 @@ void cursorDown(float x, float y) {
   if (!ready) {
     ready = true;  
     timerOn = true;
+    
+  //Check if click hint  
   } else if(hintSelected(cursorX, cursorY)){
     hintRequested = true;
   }else if (waiting && nextSelected(cursorX, cursorY)) {
@@ -346,9 +383,8 @@ void cursorDown(float x, float y) {
 
     // disable HTML overlay
     document.getElementById("overlay").style.display = "none";
-  } else if (count >= NUM_QUESTIONS) {
-    reset();
   } else {
+    //Clicked a box -- do necessary scorekeeping
     for (Square box : squareList) {
       //scan to see which square was clicked, and mark it
       if (box.selected(cursorX, cursorY)) {
@@ -365,27 +401,33 @@ void cursorDown(float x, float y) {
           result ="Correct (Amendment " + questionList.get(count).answer + ")";
           recordGameHistory(questionList.get(count).question, attempts[0], attempts[1], attempts[2], questionList.get(count).answer, "right");
 
-          //This should work, but it doesn't?
           int points = MAX_POINT_VALUE - questionList.get(count).attempts + 1;
+          //Slightly less points if you use a hint
+          if(hintRequested && points > 0){
+            points--;
+          }
+          popupList.add(new Popup(box.x + box.w/2, box.y, "+"+points, true));
+
           score += points;
           box.pointsReceived = points;
 
           //hold question and answer on the screen until click
           waiting = true;
-
+          
           resetAnswers();
         } else {
           // to automatically answer after 3 attempts
           //Activate Incorrect Action (wiggle)
           box.wiggling = true;
           if (questionList.get(count).attempts > 2) {
-            //ADD THIS!
-            //squareList.get(questionList.get(count).answer - 1).highlight = true;
-            squareList.get(questionList.get(count).answer - 1).inactiveWrong = true;
-            squareList.get(questionList.get(count).answer - 1).setColor();
-            result ="The correct answer was Amendment " + questionList.get(count).answer;
+            int ans = questionList.get(count).answer;
+            Square correctBox = squareList.get(ans - 1);
+            correctBox.inactiveWrong = true;
+            correctBox.setColor();
+            result = "The correct answer was Amendment " + ans;
 
-            recordGameHistory(questionList.get(count).question, attempts[0], attempts[1], attempts[2], questionList.get(count).answer, "wrong"); 
+            recordGameHistory(questionList.get(count).question, attempts[0], attempts[1], attempts[2], ans, "wrong"); 
+            popupList.add(new Popup(correctBox.x + correctBox.w/2, correctBox.y, "WRONG", false));
 
             //hold question and answer on the screen until click
             waiting = true;
@@ -400,8 +442,13 @@ void cursorDown(float x, float y) {
       }
     }
   }
+  if (count >= NUM_QUESTIONS) {
+      timerOn = false;
+      reset();
+  } 
 }
 
+//Reset is called to start an entirely new round of the game
 void reset() {
   for (Square box : squareList) {
     box.resetFlags();
@@ -417,18 +464,19 @@ void reset() {
   //make screen wait for user
   ready = false;
   hintRequested = false;
-  clearGameHistory();
   //call the JS method to start the overlay
-  launchTutorial();
+//  launchTutorial();
+  clearGameHistory();
 }
 
-
+//This is called to reset the status of the squares clicked for each question in a round
 void resetAnswers() {
   attempts = [0, 0, 0];
   for (Square box : squareList) {
     box.incorrect = false;
     box.setColor();
   }
+  hintRequested = false;
 }
 
 //This parses a file by comma, or by quotes if a statement has commas in it   
@@ -448,6 +496,7 @@ String[] splitLine(String line) {
   return strings;
 }
 
+//Shuffles the question order for every round
 ArrayList<Question> shuffle(ArrayList<Question> list) {
   //generate a new random seed - need to call javascript to do so (doesn't work in processing)
   randomSeed(getRand());
@@ -461,10 +510,10 @@ ArrayList<Question> shuffle(ArrayList<Question> list) {
   return list;
 }
 
-/*
-/*********************************************/
-/*       PDE/JAVASCRIPT COMMUNICATION        */
-/*********************************************/
+//*
+//*********************************************/
+//*       PDE/JAVASCRIPT COMMUNICATION        */
+//*********************************************/
 
 function setCanvasSize() {
 
