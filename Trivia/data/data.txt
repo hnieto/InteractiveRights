@@ -1,5 +1,5 @@
 "Freedom of religion, press, speech, assembly, and petition",1791,1
-"Guaranteed the right to bear arms",1791",2
+"Guaranteed the right to bear arms",1791,2
 "Guaranteed the right to not have to quarter soldiers",1791,3
 "Guaranteed the right to be free from un-reasonable searches and seizures",1791,4
 "Provided freedom from self-incrimination",1791,5
@@ -7,12 +7,12 @@
 "Guaranteed the right to a jury trial for criminal and civil cases",1791,7
 "Protected from cruel and unusual punishment",1791,8
 "Addressed our enumerated rights",1791,9
-"Federal powers that are not stated in the Constitution are reserved for the states",1791,10
-"Limited the power of the federal courts to hear law suits brought against state government",1795,11
+"Federal powers are limited to those stated in the Constitution”,1791,10
+“Laid the foundation for sovereign immunity for states”,1795,11
 "Revised the procedure for electing the President and Vice President",1804,12
-"Outlawed slavery",1865,13
+“Abolishes slavery",1865,13
 "Guaranteed citizenship to all people born or nationalized in the USA",1868,14
-"Prevented any state from taking away the right to vote based on race or color",1870,15
+"Prevented the denial of the right to vote based on race or color",1870,15
 "Gave Congress the power to tax incomes",1913,16
 "Gave citizens the right to elect senators",1913,17
 "Enacted the prohibition of liquor",1919,18
@@ -22,6 +22,6 @@
 "Set limit on presidential terms",1951,22
 "Gave District of Columbia electoral votes",1961,23
 "Prohibited the federal and state governments from charging poll tax",1964,24
-"Claried presidential succession in cases when the current president can no longer serve",1967,25
+"Clarified presidential succession and filling vacancies for the Vice President”,1967,25
 "Lowered the voting age from 21 to 18",1971,26
 "Declared that congressional pay raises take effect after the next election",1992,27
