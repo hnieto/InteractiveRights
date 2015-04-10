@@ -1,7 +1,7 @@
 @font-face {
     font-family:      Refrigerator-Deluxe-Light;
     src:              url('../../refrigerator_deluxe_light.ttf');
-}   
+}
 
 body {
     font-family:           Refrigerator-Deluxe-Light;
@@ -11,17 +11,17 @@ body {
 
 #scoringHistory {
     position:              absolute;
-    left:                  0;  
-    top:                   0;  
+    left:                  0;
+    top:                   0;
     width:                 24vw;;
     height:                100vh;
-    z-index:               1;  
+    z-index:               1;
     border-right:          .3vw solid #323232;
 }
 
 #scoreTable {
     width:                 98%;
-    margin:                1%; 
+    margin:                1%;
     color:                 white;
     border-collapse:       collapse;
     table-layout:          fixed;
@@ -78,9 +78,9 @@ html {
 }
 
 canvas {
-    outline:               none; 
+    outline:               none;
     position:              absolute;
-    left:                  24.3vw; 
+    left:                  24.3vw;
 }
 
 #overlay {
@@ -109,16 +109,16 @@ canvas {
 }
 
 #scoreToolTip {
-    left:                  31vw;  
-    top:                   2.5vh; 
-    width:                 5vw; 
+    left:                  31vw;
+    top:                   2.5vh;
+    width:                 5vw;
     height:                2vh;
 }
 
 #timerToolTip {
-    right:                 21.5vw; 
-    top:                   2.5vh; 
-    width:                 2vw; 
+    right:                 21.5vw;
+    top:                   2.5vh;
+    width:                 2vw;
     height:                2vh;
 }
 
@@ -127,22 +127,46 @@ canvas {
 }
 
 #boxToolTip1 {
-    left:                  39vw; 
-    bottom:                37vh; 
-    width:                 5vw; 
+    left:                  39vw;
+    bottom:                37vh;
+    width:                 5vw;
     height:                2vh;
 }
 
 #boxToolTip2 {
-    left:                  52.5vw; 
-    bottom:                37vh; 
-    width:                 5vw; 
+    left:                  52.5vw;
+    bottom:                37vh;
+    width:                 5vw;
     height:                2vh;
 }
 
 #boxToolTip3 {
-    left:                  66vw; 
-    bottom:                37vh; 
-    width:                 5vw; 
+    left:                  66vw;
+    bottom:                37vh;
+    width:                 5vw;
     height:                2vh;
+}
+
+#restartButton {
+    top:		6vh;
+    right:		17.8vw;
+    width: 		5vw;
+    height:		3vh;
+    line-height:	3vh;
+    font-size:		1.5vw;
+    background:		rgb(8, 42, 44);
+}
+
+.button {
+    -moz-border-radius:    3px;
+    -webkit-border-radius: 3px;
+    font-family:           Refrigerator-Deluxe-Light;
+    font-size:             2vw;
+    color:                 white;
+    width:                 15vw;
+    height:                5vh;
+    line-height:           5vh;
+    background:            rgba(59, 245, 242, 0.17);
+    z-index:               1;
+    position:              absolute;
 }

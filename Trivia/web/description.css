@@ -6,6 +6,7 @@
   width:                   13vw;
   border-left:             0.3vw solid #323232;  
   padding:                 0 0.5vw;
+  z-index:                 1000000;
 } 
 
 #mainTitle {
