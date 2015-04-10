@@ -34,48 +34,54 @@
         cell2.style.fontSize = "0.7vw";
         cell3.style.fontSize = "0.7vw";
         cell4.style.fontSize = "0.7vw";
-        cell5.style.fontSize = "0.7vw"; 
+        cell5.style.fontSize = "0.7vw";
 
-        // background color 
+        // background color
         // make it really easy to tell which one is right or wrong
         if(rightOrWrong == "right") {
           cell1.style.backgroundColor = "rgba(0, 255, 0, 0.2)";
           cell2.style.backgroundColor = "rgba(0, 255, 0, 0.2)";
           cell3.style.backgroundColor = "rgba(0, 255, 0, 0.2)";
-          cell4.style.backgroundColor = "rgba(0, 255, 0, 0.2)"; 
-          cell5.style.backgroundColor = "rgba(0, 255, 0, 0.2)"; 
+          cell4.style.backgroundColor = "rgba(0, 255, 0, 0.2)";
+          cell5.style.backgroundColor = "rgba(0, 255, 0, 0.2)";
         }
 
         else {
           cell1.style.backgroundColor = "rgba(255, 0, 0, 0.2)";
           cell2.style.backgroundColor = "rgba(255, 0, 0, 0.2)";
           cell3.style.backgroundColor = "rgba(255, 0, 0, 0.2)";
-          cell4.style.backgroundColor = "rgba(255, 0, 0, 0.2)"; 
-          cell5.style.backgroundColor = "rgba(255, 0, 0, 0.2)"; 
+          cell4.style.backgroundColor = "rgba(255, 0, 0, 0.2)";
+          cell5.style.backgroundColor = "rgba(255, 0, 0, 0.2)";
         }
-      } 
-                              
-      function clearGameHistory(){    
+      }
+
+      function clearGameHistory(){
         for (var i = document.getElementById("scoreTable").rows.length; i > 1; i--) {
           document.getElementById("scoreTable").deleteRow(i - 1);
-        } 
+        }
       }
+
+      function restart() {
+        console.log("restarting game");
+	      var processingInstance = Processing.getInstanceById('sketch');
+        processingInstance.setRestartFromJS();
+	    }
 
 	    function pauseDraw() {
         //we assign our processing sketch to the variable processingInstance
         var processingInstance = Processing.getInstanceById('sketch');
-        processingInstance.noLoop();	
+        processingInstance.noLoop();
 	    }
 
       function restartDraw() {
         //we assign our processing sketch to the variable processingInstance
         var processingInstance = Processing.getInstanceById('sketch');
-        processingInstance.loop();  
+        processingInstance.loop();
       }
 
       function readyToDraw() {
         launchTutorial();
-        parent.trackLoadedVisualizations(); 
+        parent.trackLoadedVisualizations();
       }
 
     </script>
@@ -104,17 +110,19 @@
   </div>
 
   <canvas id="sketch" data-processing-sources="../Trivia.pde ../Square.pde ../Question.pde ../Popup.pde"></canvas>
-  <div id="scoreToolTip" class="fakeToolTip toolTip" data-intro="Maximum of 3 points per question. Lose 1 point per attempt." data-position="bottom"></div>  
+  <div id="scoreToolTip" class="fakeToolTip toolTip" data-intro="Maximum of 3 points per question. Lose 1 point per attempt." data-position="bottom"></div>
   <div id="timerToolTip" class="fakeToolTip toolTip" data-intro="Don't forget to watch the timer"                             data-position="left"></div>
   <div id="arrowToolTip" class="fakeToolTip toolTip" data-intro="Next question"                                               data-position="bottom"></div>
   <div id="boxToolTip1"  class="fakeToolTip toolTip" data-intro="Each amemdment can only be selected once"                    data-position="bottom"></div>
   <div id="boxToolTip2"  class="fakeToolTip toolTip" data-intro="Three attempts per question"                                 data-position="bottom"></div>
   <div id="boxToolTip3"  class="fakeToolTip toolTip" data-intro="Correct answers are marked GREEN. Wrong answers are marked RED." data-position="bottom"></div>
-  
+
+  <div class="button"  id="restartButton" align="center" onmousedown="restart()">Restart</div>
+
   <div id="overlay"></div>
 
   <div id="description"></div>
-  
+
   <div id="opentour" class="hide" data-toggle="chardinjs"><img src="help-icon.jpg" alt="help" data-intro="Open tutorial" data-position="bottom"></div>
 
   <script type="text/javascript">
@@ -127,26 +135,26 @@
 
     sketch.addEventListener('touchstart', function(e) {
       //console.log('touchstart');
-      e.preventDefault(); 
+      e.preventDefault();
       e.stopPropagation();
 
       var processingInstance          = Processing.getInstanceById('sketch');
       var cursorX                     = getCoord(e, 'X') - sketchOffsetLeft;
       var cursorY                     = getCoord(e, 'Y');
- 
+
       // pass touches to Processing sketch
       processingInstance.cursorDown(cursorX, cursorY);
     });
 
     sketch.addEventListener('mousedown', function(e) {
       //console.log('mousedown');
-      e.preventDefault(); 
+      e.preventDefault();
       e.stopPropagation();
 
       var processingInstance          = Processing.getInstanceById('sketch');
       var cursorX                     = getCoord(e, 'X') - sketchOffsetLeft;
       var cursorY                     = getCoord(e, 'Y');
- 
+
       // pass touches to Processing sketch
       processingInstance.cursorDown(cursorX, cursorY);
     });
@@ -155,13 +163,13 @@
     /* VIS HELP OVERLAY */
     /********************/
 
-    // launch overview on help button click 
+    // launch overview on help button click
     // pause sketch for smooth transitions
     document.getElementById('opentour').addEventListener('touchstart', function(e) {
       launchTutorial();
       e.preventDefault();
       e.stopPropagation();
-      return false; 
+      return false;
     });
 
 
@@ -169,12 +177,12 @@
       launchTutorial();
       e.preventDefault();
       e.stopPropagation();
-      return false; 
+      return false;
     });
 
     function launchTutorial() {
       var processingInstance   = Processing.getInstanceById('sketch');
-   
+
       if(processingInstance.isArrowVisible()) $('#arrowToolTip').css('display', 'block');
       else $('#arrowToolTip').css('display', 'none');
 
@@ -182,11 +190,11 @@
       $('body').chardinJs('start');
     }
 
-    // show overview if user is inactive 
+    // show overview if user is inactive
     $(document).idle({
       onIdle: launchTutorial,
       onActive: function(){
-        $('body').chardinJs('stop'); 
+        $('body').chardinJs('stop');
       },
       events: 'touchstart mousedown',
       idle: 5*60*1000
@@ -196,7 +204,7 @@
     // hide overlay if tooltips are tapped
     function killOverlay() {$('body').chardinJs('stop');}
     var toolTips = document.getElementsByClassName('toolTip');
-    for(var i=0; i<toolTips.length; i++){ 
+    for(var i=0; i<toolTips.length; i++){
       toolTips[i].addEventListener('touchstart', killOverlay, false);
       toolTips[i].addEventListener('mousedown',  killOverlay, false);
     }
