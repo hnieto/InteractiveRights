@@ -33,6 +33,12 @@ class Bubble {
     float vx1, vx2;
     float vy1, vy2;
     
+    float offsetX;
+    float offsetY;
+    
+    float textOffsetX;
+    float textOffsetY;
+    
     float terminalVx;
     float terminalVy;
     
@@ -40,9 +46,6 @@ class Bubble {
     float GravityY;
     float gravitateToX;
     float gravitateToY;
-    
-    float textOffsetX;
-    float textOffsetY;
     
     boolean hasSpring;
     
@@ -77,9 +80,6 @@ class Bubble {
         gravitateToX = width/2;//((2*right.category + 1)/2)*width/(categories.length+1);
         gravitateToY = height/2;
         
-        textOffsetX = 0;
-        textOffsetY = 0;
-        
         this.rightName = right.right_name;
         this.radius = getRadius();
         
@@ -96,11 +96,19 @@ class Bubble {
         destroying = true;
     }
     
+    void setSpring(){
+        if(selected != 0 && selected != right.category)
+            return false;
+        hasSpring = true;
+    }
+    
     void collide() {
         if(!collideFlag)  return;
         Bubble bub;
         for (int i=initialSize; i<bubbles.size(); i++){
             bub = bubbles.get(i);
+            if(!(help || selected == 0 || (bub.right.category == selected && this.right.category == selected)
+                                      || (bub.right.category != selected && this.right.category != selected)))  continue;
             if(bub != this && bub.collideFlag){
                 float dx = bub.x - x;
                 float dy = bub.y - y;
@@ -128,14 +136,20 @@ class Bubble {
         }   
     }
     
-    void moveByTouch(float touchX, float touchY){
+    //moveByTouch returns true if successful
+    boolean moveByTouch(float touchX, float touchY){
+        if(selected != 0 && selected != right.category)
+            return false;
+      
         terminalVx = 100;
         terminalVy = 100;
     
-        vx = (touchX - x)/throwEase;
-        vy = (touchY - y)/throwEase;
-        x = touchX;
-        y = touchY;
+        vx = (touchX - offsetX - x)/throwEase;
+        vy = (touchY - offsetY - y)/throwEase;
+        x = touchX - offsetX;
+        y = touchY - offsetY;
+        
+        return true;
     }
     void move(){
         vy2 = vy1;
@@ -144,7 +158,7 @@ class Bubble {
         vx1 = vx;
         if(!hasSpring){
           
-            if(y > height/4){
+            if(y > height/4 || right.category == selected){
                 terminalVx = 100;
                 terminalVy = 100;
             }
@@ -153,7 +167,7 @@ class Bubble {
 //                vy += Gravity;
 //            }
             
-            if(selected != 0 && !help){
+            if(selected != 0 && !help && selected == right.category){//remove the &&selected==... to have non-selected gravitate to the corners
                 if(selected != right.category){
                     gravitateToX = x > width/2? width : 0;
                     gravitateToY = y > height/2? height : 0;
@@ -167,9 +181,22 @@ class Bubble {
                 else             collideFlag = true;
                 GravityX = (gravitateToX - x)/(throwEase*200);
                 GravityY = (gravitateToY - y)/(throwEase*200);
-                float limit;
-                if(selected != right.category)  limit = map(Year, start_year, end_year, 75, 1100);
-                else                            limit = map(Year, start_year, end_year, 75, 500);
+                //float limit;
+                if(selected != right.category)  limit = map(Year, start_year, end_year, 75, 1100);//FOR THE CORNERS THING
+                else{//THE CENTER ONE, ie, the one that matters -- 114 is a hardcoded number!!
+                    float area = 0;
+                    for (int i=initialSize; i<bubbles.size(); i++){
+                      bub = bubbles.get(i);
+                      if(bub.category == selected)
+                          area += bub.radius*bub.radius*PI;
+                    }
+                      
+                    limit = (selectedSize)*(selectedSize)*(700 - 55)/1140 + 55;
+//                    limit = sqrt(area)/2;
+                    if(Year > 2000){
+                        limit += (Year - 2000)*13;
+                    }
+                }
 //                float distance = sqrt((gravitateToX - x)*(gravitateToX - x) + (gravitateToY - y)*(gravitateToY - y));
 //                if(distance < limit){
 //                  vx += GravityX;
@@ -243,8 +270,8 @@ class Bubble {
             y = (height*7/8 - radius) - MARGIN - BOUNDRY_SIZE;
             vy *= 0 - groundFriction; 
         } 
-        else if (y - radius - BOUNDRY_SIZE - (rectHeight - height/200) < 0) {//TOP --- height/12 is margin, but Pjs doesn't like calling margin here
-            y = radius + BOUNDRY_SIZE + (rectHeight - height/200);            //rectHeight varies based on what is selected
+        else if (y - radius - BOUNDRY_SIZE - (rectHeight - 10) < 0) {//TOP --- height/12 is margin, but Pjs doesn't like calling margin here
+            y = radius + BOUNDRY_SIZE + (rectHeight - 10);            //rectHeight varies based on what is selected
             vy *= 0 - wallFriction;
         }
         
@@ -258,25 +285,17 @@ class Bubble {
     // This function calculates radius size
     float getRadius(){
       if(help)  return height/25;
+      else if(onlyUS){
+        return ((right.count[Year-start_year].year_count + 100) * height / 3000);
+      }
       else{
           //return ((right.count[Year-start_year].year_count + 100) * height / 4400);
-          int count = countrycount[Year - start_year];
-//          console.log(count);
-          float n = (right.count[Year-start_year].year_count / count);
-          return n*(height/10 - height/50) + (height/50);
+          
+//          int count = countrycount[Year - start_year];
+//          float n = (right.count[Year-start_year].year_count / (count));
+//          return n*(height/10 - height/50) + (height/50);
+          return right.yearRadius[Year - start_year];
       }
-      
-      
-//      float r;
-//      if(onlyUS){
-//        r = ((right.count[Year-start_year].year_count + 100) * height / 3000);
-//      }
-//      else{
-//        if(mode==1)  r = map((right.count[Year-start_year].year_count / countrycount[Year-start_year]), 0, 1, height/50, height/10);
-//        else         r = ((right.count[Year-start_year].year_count + 100) * height / 4400);
-////        r = ((right.count[Year-start_year].year_count + 190) * height / 5600);
-//      }
-//      return r;
     }
     
     void display() {
@@ -323,14 +342,18 @@ class Bubble {
         if (procjs) textAlign(CENTER);
         else        textAlign(CENTER, BOTTOM);
         
-        stroke(255); //white circumference
-        
         strokeWeight(BOUNDRY_SIZE);
         
-        int alpha = 35;
+        int alpha = 28;
         if(selected == 0 || selected == right.category){
           alpha = 255;
         }
+        
+        if(holder == 998)
+          stroke(#FFFF00, alpha);
+        else
+          stroke(255, alpha); //white circumference
+        
         if(right.category > 7)
           fill(colorArray[0], alpha);
         else
@@ -345,9 +368,20 @@ class Bubble {
         fill(0,0,0);
         float fontSize = radius/3.5;
         textSize(fontSize); //text always fits in bubble
-        if(procjs)    text(rightName, 0 - 0.9*radius, (0-radius/3), radius*1.8, 4*fontSize);
-        else          text(rightName, 0, (0-radius/3), radius*1.8, 4*fontSize);
+        
+        // print introduced year for 5 years
+        if(Year - right.introduced < 5)
+           text(right.introduced, 0 - 0.9*radius, (0-radius/3) - (textAscent() + textDescent())*1.4, radius*1.8, 4*fontSize);
+        
+        // print right name
+        text(rightName, 0 - 0.9*radius, (0-radius/3), radius*1.8, 4*fontSize);
+        
+        //print number of countries (size)
 //        text(str(right.count[Year-start_year].year_count), 0, radius/5);
+        
+        pushStyle();
+        
+        tint(255, alpha);
         
         imageMode(CENTER, TOP);
         //print USflag not number!!!!!!!!!!!!!!!!!!!
@@ -368,6 +402,8 @@ class Bubble {
         }
         else  flagSize = 400;
         
+        popStyle();
+        
         //debugging text: displays x and y velocities
 //            text(vx+"",  0, (0-radius/3)+10, radius*1.8, 4*fontSize);
 //            text(vy+"",  0, (0-radius/3)+25, radius*1.8, 4*fontSize);
@@ -385,18 +421,20 @@ class Bubble {
     }
      
     void showText(){
+      pushStyle();
         rectMode(CORNER);    //this was LEFT before
         textAlign(CENTER, TOP);
         
         fill(255,255,255);
         float regFont = width/96;   //font size of 20 on lasso
         float boldFont = width/80;  //bolded font for title 
-        stroke(255);
+        stroke(0);
         textSize(boldFont);
         //misspelled on purpose, because cannot use Width and Height.
         float wdith = width/5.2;
         float txtWdith = textWidth(right.description);
-        float txtHieght = textAscent() + textDescent();
+                float txtHieght = textAscent() + textDescent();
+
         float hieght = (ceil(txtWdith/wdith) + 3)*txtHieght*5/4; //this is based on the number of lines to write: description is variable length, but there are always 3 more lines
         
         textOffsetX = 0;
@@ -424,13 +462,41 @@ class Bubble {
 //        }else{
 //            text("This right was never introduced in the US.",0,hieght - txtHieght*9/4, wdith, (hieght-(3*txtHieght)+10)*2);
 //        }
-        text("This right was first introduced in "+right.introduce+" in "+right.introduced+".", 0, hieght - txtHieght*9/4, wdith, (hieght-(3*txtHieght))*2);
+        text("This right was first introduced in "+right.introduce10[0]+" in "+right.introduced+".", 0, hieght - txtHieght*9/4, wdith, (hieght-(3*txtHieght))*2);
         
-        String plurality = " countries in ";
-        if(right.count[Year-start_year].year_count == 1)  plurality = " country in ";
+        String plurality = " countries ";
+        if(right.count[Year-start_year].year_count == 1)  plurality = " countries ";//used to be " country in "
         //This should always be the last line in the box
-        text("This right was guaranteed in "+right.count[Year-start_year].year_count+"/"+countrycount[Year-start_year]+plurality+Year+".", 0, hieght - txtHieght*9/8, wdith, txtHieght*2);      
+        String outText1 = "This right was guaranteed in ";
+        String outText2 = right.count[Year-start_year].year_count+"/"+countrycount[Year-start_year]+plurality+"in "+Year+".";
+        
+        textAlign(LEFT);
+        text(outText1, (wdith - textWidth(outText1 + outText2))/2, hieght - txtHieght*9/8, wdith, txtHieght*2);
+        fill(#0000FF);
+        text(outText2, (wdith - textWidth(outText1 + outText2))/2 + textWidth(outText1), hieght - txtHieght*9/8, wdith, txtHieght*2);
+        stroke(#0000FF);
+        strokeWeight(1);
+        line((wdith - textWidth(outText1 + outText2))/2 + textWidth(outText1), hieght - txtHieght/4, (wdith + textWidth(outText1 + outText2))/2, hieght - txtHieght/4);
+
+        
+        //text("This right was guaranteed in "+right.count[Year-start_year].year_count+"/"+countrycount[Year-start_year]+plurality+"in "+Year+".", 0, hieght - txtHieght*9/8, wdith, txtHieght*2);      
          
         popMatrix();
-    } 
+      popStyle();
+    }
+    
+    boolean textContains(float x, float y){
+        float wdith = width/5.2;
+        float regFont = width/96;   //font size of 20 on lasso
+        pushStyle();
+        textSize(regFont);
+        float txtHieght = textAscent() + textDescent();
+        popStyle();
+
+        if((x - textOffsetX > this.x + this.radius + wdith/2 && x + textOffsetX < this.x + this.radius + wdith)
+          &&(y - textOffsetY > this.y - txtHieght*2 && y + textOffsetY < this.y)){
+            return true;
+        }
+        return false;
+    }
 }

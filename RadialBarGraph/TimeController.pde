@@ -164,6 +164,7 @@ class TimeController {
         
         // timeline years
         pushStyle();
+        textFont(defaultFont);
         textSize(fontSize*0.7);
         text(years[0],                                  -timelineW/2, tickY-tickH*0.7);
         text((years[0] + (int)((years[1]-years[0])/4)), -timelineW/4, tickY+tickH*0.9);
@@ -325,5 +326,13 @@ class TimeController {
       rewind         = false; 
       fastforward    = false;
     }    
+  }
+  
+  void updateTimeLine(){
+    years         = yearRange;
+    numberOfYears = years[1]-years[0];
+    
+    if(year < years[0]) year = years[0];
+    tickX = map(year, years[0], years[1], timelineX-timelineW/2, timelineW/2);    
   }
 }

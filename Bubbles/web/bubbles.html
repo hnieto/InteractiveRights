@@ -26,6 +26,8 @@
         }
 
         function readyToDraw() {
+          launchTutorial();
+        
           parent.trackLoadedVisualizations(); 
         }
 
@@ -174,9 +176,13 @@
       var processingInstance   = Processing.getInstanceById('sketch');
       pauseDraw();
 
-      document.getElementById('trainingBubble').style.display = 'block';
-      document.getElementById('trainingFlag').style.display   = 'block';
-      document.getElementById('textBubble').style.display     = 'block';
+      document.getElementById('trainingBubble').style.display        = 'block';
+      document.getElementById('trainingFlag').style.display          = 'block';
+      document.getElementById('textBubble').style.display            = 'block';
+      document.getElementById('categoriesToolTip').style.display     = 'block';
+      document.getElementById('allCategoriesToolTip').style.display  = 'block';
+      document.getElementById('bubbleToolTip1').style.display        = 'block';
+      document.getElementById('bubbleToolTip2').style.display        = 'block';
       $('body').chardinJs('start');
     }
 
@@ -211,9 +217,14 @@
 
     // make sure to restart the processing sketch once overview is closed
     $('body').on('chardinJs:stop', function(){
-      document.getElementById('trainingBubble').style.display = 'none';
-      document.getElementById('trainingFlag').style.display   = 'none';
-      document.getElementById('textBubble').style.display     = 'none';
+      document.getElementById('trainingBubble').style.display        = 'none';
+      document.getElementById('trainingFlag').style.display          = 'none';
+      document.getElementById('textBubble').style.display            = 'none';
+      document.getElementById('categoriesToolTip').style.display     = 'none';
+      document.getElementById('allCategoriesToolTip').style.display  = 'none';
+      document.getElementById('bubbleToolTip1').style.display        = 'none';
+      document.getElementById('bubbleToolTip2').style.display        = 'none';
+
       restartDraw();
     });
 

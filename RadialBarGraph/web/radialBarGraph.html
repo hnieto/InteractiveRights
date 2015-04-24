@@ -16,6 +16,7 @@
 
     <script type="text/javascript">
         var activeSnippets = [];
+        var snippetAnimating = false;
 
         function showSnippet(x, y, r, g, b, snippetID, snippetTitle, snippetText) {
           // we assign our processing sketch to the variable processingInstance
@@ -95,6 +96,7 @@
                       // activate close button
                       snippetCloseButtons[i].style.background = "rgba(245, 59, 59, 0.24)";
                       snippetCloseButtons[i].style.color      = "white";
+                      snippetAnimating = false;
                       restartDraw();
                    }  
                 });
@@ -109,6 +111,7 @@
             warning.style.left    = document.getElementById('sketch').offsetLeft + x - $("duplicateSnippet").width()/2  + "px"; 
             warning.style.top     = document.getElementById('sketch').offsetTop  + y - $("duplicateSnippet").height()/2 + "px";
             warning.style.display = "block";              
+            snippetAnimating = false;
           }
 
           else {
@@ -116,6 +119,7 @@
             warning.style.left    = document.getElementById('sketch').offsetLeft + x - $("#tooManySnippets").width()/2  + "px"; 
             warning.style.top     = document.getElementById('sketch').offsetTop  + y - $("#tooManySnippets").height()/2 + "px";
             warning.style.display = "block"; 
+            snippetAnimating = false;
           }
         }
 
@@ -215,8 +219,10 @@
       <div id="snippetBox3" class="snippetBox" data-occupied="false"></div>
     </div>
   </div>
-
+  
+  <div id="circleTitle"></div>
   <canvas id="sketch" data-processing-sources="../RadialBarGraph.pde ../Country.pde ../Category.pde ../Year.pde ../TimeController.pde"></canvas>
+  <div id="canvasOverlay"></div>
 
   <table id="groupTable"></table>
 
@@ -339,12 +345,20 @@
     // we assign our processing sketch to the variable processingInstance
     var processingInstance = Processing.getInstanceById('sketch');
     processingInstance.insertNewCountry(country); 
+
+    // title above wheel should only be shown for pre-determined groups of countries
+    // title should disapear once the user starts creating his own custom wheel
+    document.getElementById('circleTitle').style.display = "none"; 
   }
 
   function removeCountry(country) {
     // we assign our processing sketch to the variable processingInstance
     var processingInstance = Processing.getInstanceById('sketch');
     processingInstance.deleteCountry(country); 
+
+    // title above wheel should only be shown for pre-determined groups of countries
+    // title should disapear once the user starts creating his own custom wheel
+    document.getElementById('circleTitle').style.display = "none"; 
   }
 
   function deleteAllCountries() {
@@ -353,6 +367,10 @@
          
     deleteAllSnippets();
     processingInstance.clearCircumplex();
+
+    // title above wheel should only be shown for pre-determined groups of countries
+    // title should disapear once the user starts creating his own custom wheel
+    document.getElementById('circleTitle').style.display = "none"; 
   }
 
   function clearWheelButtonHandler(e){
@@ -383,10 +401,20 @@
 
     var groupButton = e.target; 
     var groupName   = groupButton.innerHTML;
-    processingInstance.loadNewGroup(groupName);
+    processingInstance.loadNewGroupFromCircle(groupName);
+    document.getElementById('circleTitle').innerHTML     = "Subset of Countries in " + groupName;
+    document.getElementById('circleTitle').style.display = "block"; 
     e.preventDefault();
     e.stopPropagation();
     return false;       
+  }
+
+  function changeGroupByBubbles(newCountryGroup, categoryNumber, year, bubbleRight) {
+     // we assign our processing sketch to the variable processingInstance
+    var processingInstance = Processing.getInstanceById('sketch');
+    processingInstance.loadNewGroupFromBubbles(newCountryGroup, categoryNumber, year, bubbleRight); 
+    document.getElementById('circleTitle').innerHTML     = "Subset of Countries that Support " + bubbleRight;
+    document.getElementById('circleTitle').style.display = "block"; 
   }
 
   /********************/
@@ -557,7 +585,7 @@
   var rotationAngle      = 0;
   var validDraggableArea = false;
   var spinning           = false;
-  var snippetAnimating   = false;
+//  var snippetAnimating   = false;
   var timer;
 
   function getCoord(e, c) {
@@ -700,9 +728,6 @@
 
   
   function cursorMoved(e) {
-      //stops short touches from firing the event
-      if (timer) clearTimeout(timer); // clearTimeout, not cleartimeout..
-
       var processingInstance   = Processing.getInstanceById('sketch');
       var sketchCenterX        = processingInstance.getSketchWidth()/2;
       var sketchCenterY        = processingInstance.getSketchHeight()/2; 
@@ -721,7 +746,10 @@
 
         // ignore minor changes in canvas angle
         // touch is not as precise as mouse. users sometimes change x,y between touch down and touch up
-        if(Math.abs(cursorEndAngle-cursorStartAngle) > 0.00) {
+        if(Math.abs(cursorEndAngle-cursorStartAngle) > 0.03) {
+
+          //stops short touches from firing the event
+          if (timer) clearTimeout(timer); // clearTimeout, not cleartimeout..
 
           // restart Processing to allow the vis to switch TimeController states
           // only do this once at the beginning of the spinning gesture

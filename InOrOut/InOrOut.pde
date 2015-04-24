@@ -13,6 +13,7 @@ Bubble currentlyPressed;    //selected bubble - Switch to arraylist for TUIO
 ArrayList<Bubble> bubbles;
 ArrayList<Popup> popups;
 ArrayList<Bubble> levelProgress;
+ArrayList<Integer> done;
 
 Panel panel;
 //A list of the (index of) rights (bubbles) already created
@@ -95,6 +96,7 @@ String[] splitLine(String line){
             substringcount = i+1;
         }
     }
+    stringlist.add(line.substring(substringcount, line.length()));
     String[] strings = new String[stringlist.size()];
     strings = stringlist.toArray(strings);
     return strings;
@@ -146,6 +148,7 @@ void setup() {
     // Create ArrayLists	
     bubbles = new ArrayList<Bubble>();
     popups = new ArrayList<Popup>();
+    done = new ArrayList<Integer>();
     int margin = 10;
 //      float rx = random(margin,width-margin);
 //      float ry = 110;
@@ -176,7 +179,12 @@ void draw() {
     for(int i=0; i<bubbles.size(); i++){
         bubble = bubbles.get(i);
         bubble.collide();
-        bubble.move();
+        if(bubble.hasSpring){
+            bubble.vx = 0;
+            bubble.vy = 0;
+        }
+        else
+            bubble.move();
         bubble.display();
     }
     PreviousYear = Year;
@@ -289,6 +297,7 @@ void nextLevel(){
     document.getElementById('addCountryButton').style.visibility = 'visible';
     document.getElementById('letters').style.visibility          = 'visible';
     document.getElementById('addCountryBox').style.visibility    = 'visible';
+    document.getElementById('countryListOverlay').style.display  = 'block';
   }
   
   if(!waitflag) return;
@@ -297,6 +306,7 @@ void nextLevel(){
   document.getElementById('addCountryButton').style.visibility = 'hidden';
   document.getElementById('letters').style.visibility          = 'hidden';
   document.getElementById('addCountryBox').style.visibility    = 'hidden';
+  document.getElementById('countryListOverlay').style.display  = 'none';
   
   level++;
   for(int i=0; i<(5 + 2*(level-1)); i++){
@@ -329,6 +339,7 @@ void endGame(){
   score = 0;
   time = totalTime;
   pointInc = 1;
+  done.clear();
   clearGameHistory();
 }
   

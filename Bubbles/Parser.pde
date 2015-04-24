@@ -12,6 +12,7 @@ int[] importantyears;
 
 class year_node{
     int year_count;
+    ArrayList<String> countries;
     boolean US_flag;
 }
 
@@ -21,8 +22,9 @@ class Right{
     String description;
     int category;
     int USintroduced;
-    String introduce;
-    int introduced;//false if String introduce is empty
+    String[] introduce10;
+    int introduced;//year
+    int[] yearRadius;
 }
 
 Right[] rightarray;
@@ -40,6 +42,7 @@ String[] splitLine(String line){
             substringcount = i+1;
         }
     }
+    stringlist.add(line.substring(substringcount, line.length()));
     String[] strings = new String[stringlist.size()];
     strings = stringlist.toArray(strings);
     return strings;
@@ -80,12 +83,14 @@ if(onMobile){
      
     rightarray = new Right[table[0].length-start];
      
-    for(int i=0; i<(table[0].length-start); i++){
+    for(int i=0; i<(table[0].length-start); i++){//loops through every right
         rightarray[i] = new Right();
         rightarray[i].right_name = table[0][i+start];
         rightarray[i].count = new year_node[(end_year-start_year) + 1];
         rightarray[i].description = table[1][i+start];
         rightarray[i].description = rightarray[i].description.replace("\"", "");
+        rightarray[i].yearRadius = new int[(end_year-start_year) + 1];
+        ArrayList<String> introduceList = new ArrayList<String>();
         
         for(int j=0; j<categories.length; j++){
             for(int k=0; k<lines.length-1; k++){
@@ -98,6 +103,7 @@ if(onMobile){
         for(int j=0; j<=(end_year-start_year); j++){
             rightarray[i].count[j] = new year_node();
             rightarray[i].count[j].US_flag = false;
+            rightarray[i].count[j].countries = new ArrayList<String>();
             
             for(int k=2; k<table.length; k++){
                 
@@ -107,9 +113,12 @@ if(onMobile){
                   
                     //if right is "1. yes" then increase count for year
                     if((table[k][i+start].equals("1. yes")) || (table[k][i+start].equals("2. full")) || (table[k][i+start].equals("1. conditional")) ){
+                        rightarray[i].count[j].countries.add(table[k][2]);
                         if(rightarray[i].introduced == 0){
-                            rightarray[i].introduce = table[k][2];
                             rightarray[i].introduced = j+start_year;
+                        }
+                        if(introduceList.size() < 10 && !introduceList.contains(table[k][2])){
+                            introduceList.add(table[k][2]);
                         }
                         rightarray[i].count[j].year_count++;
                         
@@ -134,7 +143,11 @@ if(onMobile){
                     k += ((j+start_year) - int(table[k][3])) - 1;
                 }
             }
-        }
+            
+            float n = (rightarray[i].count[j].year_count / countrycount[j]);
+            rightarray[i].yearRadius[j] = n*(height/10 - height/50) + (height/50);
+        }//end of j-loop
+        rightarray[i].introduce10 = introduceList.toArray();
     }
     for(int i = start_year; i <= end_year; i += 40){
         importantYears.add(i);

@@ -1,10 +1,3 @@
-//TODO:
-//  remove the extra taps state between states
-//  clean up code
-//  move hint to status bar? (hide yellow box at beginning)
-//only restarts from restart button?
-
-
 /* @pjs font='../data/RefrigeratorDeluxeLight.ttf, ../data/Digital.ttf, ../data/VladimirScript.ttf'; */
 
 //Total time for a round of the game in seconds
@@ -55,7 +48,8 @@ float statusBarBound;
 
 //Variables to cause the screen to wait for input
 boolean waiting;          //waiting means that the vis is in the state between questions
-boolean ready;            //ready means that the game is ready to start a new game
+//Remove ready state!
+//boolean ready;            //ready means that the game is ready to start a new game
 boolean restartflag;      //Flag to be triggered when the HTML restart button is pressed
 boolean safeToClearHistory; //shows when it is safe to clear the history -- can't do in reset because it shows immediately
 int     arrowColorTimer;
@@ -94,7 +88,7 @@ void setup() {
 
   //Set game to begin after user input
   waiting = false;
-  ready = true;
+//  ready = true;
   restartflag = false;
   safeToClearHistory = false;
   arrowColors[0] = color(255, 0, 0);     // red
@@ -168,6 +162,7 @@ void draw() {
 
   //If we need to reset
   if(restartflag){
+    timerOn = false;
     reset();
   }
 
@@ -186,28 +181,31 @@ void draw() {
   //reset fill
   fill(255);
 
-  //state before round starts
-  if (!ready) {
-    //show that we are waiting for user input
-    textSize(sketchWidth/37.5);
-    //    String restart = "TAP ANYWHERE TO START";
-    //    text(restart, (sketchWidth-textWidth(restart))/2 + textWidth(restart)/2, sketchHeight*7/16);
+//Removing ready state
+//  //state before round starts
+//  if (!ready) {
+//    //show that we are waiting for user input
+//    textSize(sketchWidth/37.5);
+//    //    String restart = "TAP ANYWHERE TO START";
+//    //    text(restart, (sketchWidth-textWidth(restart))/2 + textWidth(restart)/2, sketchHeight*7/16);
+//
+//    // display starting score
+//    textFont(digitalFont);
+//    fill(255, 0, 0);
+//    String currScore = "Score: " + score;
+//    text(currScore, sketchWidth*0.15, sketchHeight/21);
+//
+//    // display starting time
+//    String sTime;
+//    if (MAX_TIME%60 < 10) {
+//      sTime = "Time: " + (int)(MAX_TIME/60) + ":0" + MAX_TIME%60;
+//    } else {
+//      sTime = "Time: " + (int)(MAX_TIME/60) + ":" + MAX_TIME%60;
+//    }
+//    text(sTime, sketchWidth*0.9, sketchHeight/21);
+//  } else 
 
-    // display starting score
-    textFont(digitalFont);
-    fill(255, 0, 0);
-    String currScore = "Score: " + score;
-    text(currScore, sketchWidth*0.15, sketchHeight/21);
-
-    // display starting time
-    String sTime;
-    if (MAX_TIME%60 < 10) {
-      sTime = "Time: " + (int)(MAX_TIME/60) + ":0" + MAX_TIME%60;
-    } else {
-      sTime = "Time: " + (int)(MAX_TIME/60) + ":" + MAX_TIME%60;
-    }
-    text(sTime, sketchWidth*0.9, sketchHeight/21);
-  } else if (count >= NUM_QUESTIONS) {  //Check if round finished
+  if (count >= NUM_QUESTIONS) {  //Check if round finished
 
     for (int i=0; i < popupList.size (); i++) {
       Popup pop = popupList.get(i);
@@ -249,6 +247,19 @@ void draw() {
     textSize(fullTextSize * (((float)questionList.get(count).size)/FULL_SIZE));
     if (questionList.get(count).size < FULL_SIZE) {
       questionList.get(count).size++;
+    }else{
+      //Display Hint after question animation
+      pushStyle();
+      noFill();
+      stroke(204, 204, 0);
+      rect(sketchWidth*0.52 + textWidth(questionList.get(count).question)/2, sketchHeight*.13, sketchWidth*0.05, sketchHeight*0.045, 5, 5, 5, 5);
+      fill(204, 204, 0);
+      if (hintRequested) {
+        text(questionList.get(count).hint, sketchWidth*0.545 + textWidth(questionList.get(count).question)/2, sketchHeight/6);
+      } else {
+        text("Hint", sketchWidth*0.545 + textWidth(questionList.get(count).question)/2, sketchHeight/6);
+      }
+      popStyle();
     }
 
     //Display question
@@ -265,20 +276,7 @@ void draw() {
       } else {
         pop.display();
       }
-    }  
-
-    //Display Hint
-    pushStyle();
-    noFill();
-    stroke(204, 204, 0);
-    rect(sketchWidth*0.52 + textWidth(questionList.get(count).question)/2, sketchHeight*.13, sketchWidth*0.05, sketchHeight*0.045, 5, 5, 5, 5);
-    fill(204, 204, 0);
-    if (hintRequested) {
-      text(questionList.get(count).hint, sketchWidth*0.545 + textWidth(questionList.get(count).question)/2, sketchHeight/6);
-    } else {
-      text("Hint", sketchWidth*0.545 + textWidth(questionList.get(count).question)/2, sketchHeight/6);
     }
-    popStyle();
 
     //Reset size to normal
     textSize(fullTextSize);
@@ -384,13 +382,16 @@ void cursorDown(float x, float y) {
   cursorX    = x;
   cursorY    = y;
 
-  //check if done
-  if (!ready) {
-    ready = true;  
-    timerOn = true;
-
-    //Check if click hint
-  } else if (hintSelected(cursorX, cursorY)) {
+//removing ready
+//  //check if done
+//  if (!ready) {
+//    ready = true;  
+//    timerOn = true;
+//
+//    //Check if click hint
+//  } else
+  
+  if (hintSelected(cursorX, cursorY)) {
     hintRequested = true;
   } else if (waiting && nextSelected(cursorX, cursorY)) {
     //click to continue after question
@@ -475,14 +476,14 @@ void cursorDown(float x, float y) {
   //End conditions -- the restart is presesd, or the game times out
   if (count >= NUM_QUESTIONS) {
     timerOn = false;
-    reset();
+    //reset();
   }
 }
 
 //Reset is called to start an entirely new round of the game
 void reset() {
   //pause on end screen to show results -- resumes on touch
-  launchTutorial();
+  //launchTutorial();
 
   for (Square box : squareList) {
     box.resetFlags();
@@ -496,11 +497,13 @@ void reset() {
   count = 0;
   score = 0;
   //make screen wait for user
-  ready = false;
+//  ready = false;
   hintRequested = false;
   waiting = false;
+  document.getElementById("overlay").style.display = "none";
   safeToClearHistory = true;
   restartflag = false;
+  timerOn = true;
 }
 
 //This is called to reset the status of the squares clicked for each question in a round

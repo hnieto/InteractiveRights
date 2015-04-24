@@ -10,11 +10,31 @@ body {
     overflow:              hidden; 
 }
 
+#circleTitle {
+    position:              absolute;
+    left:                  40vw;
+    z-index:               1;
+    height:                2.5vh;
+    width:                 20vw;
+    color:                 #cccc00;
+    text-align:            center;
+    font-size:             1vw;
+}
+
 canvas {
     outline:               none; 
     position:              absolute;
     left:                  24.3vw;
     border-radius:         50%;
+}
+
+#canvasOverlay {
+      position:            absolute;
+      left:                24.3vw;
+      width:               50vw;
+      height:              100vh;
+      z-index:             -1;
+      background-color:    rgba(0, 0, 0, 0);
 }
 
 .fakeToolTip {

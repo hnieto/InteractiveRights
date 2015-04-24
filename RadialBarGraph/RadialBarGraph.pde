@@ -85,11 +85,9 @@ void setup() {
     parseRights("../data/rights_mobile.csv");
   }
   else {
-    //parseCategories("../data/alex_02232015_categorization.csv");
     parseCategories("../data/substantive_categorization_021514.csv");
     parseRights("../data/rights.csv");
   }
-  parseGroups("../data/region_group.csv");
   parseSnippets("../data/snippets_021514.csv");
   
   // time controls
@@ -98,6 +96,7 @@ void setup() {
   controllerRadius           = shortestDistanceFromCenter/3;
   timecontroller             = new TimeController(controllerRadius, yearRange);
   timecontroller.init();
+  parseGroups("../data/region_group.csv"); // groups have different time ranges so we have to call this function once timecontroller has been initialized 
 
   // javascript function to create HTML elements
   generateAlphabetList();
@@ -354,14 +353,15 @@ void drawRightsCircumplex(Category category) {
 /*********************************************/
 
 void drawCountryNames() {   
-  textSize(fontSize*2);
+  if(visualizedCountries.size()>30) textSize(fontSize);
+  else textSize(fontSize*2);
   float delta           = (visualizedCountries.size() > 1) ? TWO_PI/visualizedCountries.size() : 3*PI; 
   float startTheta      = 0.0;
   float thickness       = (circumplexRadius-controllerRadius)/numberOfRights;
   
   for (int i=0; i<visualizedCountries.size(); i++) {
     Country countryObject = visualizedCountries.get(i);
-    String[] name = {countryObject.name.toUpperCase(), countryObject.existence[0] + " - " + countryObject.existence[1]};
+    String[] name = (visualizedCountries.size()>30) ? {countryObject.name.toUpperCase()} : {countryObject.name.toUpperCase(), countryObject.existence[0] + " - " + countryObject.existence[1]};
     float outerRadius         = circumplexRadius + thickness*4;
     float outerRadiusReversed = circumplexRadius + thickness*9;
 
@@ -401,8 +401,8 @@ void drawCountryNames() {
           rotate(theta-PI/2);
     
           // Display the character
-          pushStyle();
-          if(j==0) textSize(fontSize*2);
+          pushStyle(); //<>//
+          if(j==0 && name.length>1) textSize(fontSize*2); //<>// //<>//
           else textSize(fontSize);
           fill(letter_color);
           text(currentChar, 0, 0);
@@ -445,7 +445,7 @@ void drawCountryNames() {
     
           // Display the character
           pushStyle();
-          if(j==0) textSize(fontSize*2);
+          if(j==0 && name.length>1) textSize(fontSize*2);
           else textSize(fontSize);
           fill(letter_color);
           text(currentChar, 0, 0);
@@ -611,9 +611,7 @@ int getTextLength(String txt) {
 /*                PARSE CSVs                 */
 /*********************************************/
 
-void parseCategories(String csv) {
-  int startTime = millis();
-  
+void parseCategories(String csv) {  
   largestCategoryLength   = 0;
   String[] lines          = loadStrings(csv);
   String[] categoryTitles = split(lines[0], '|');
@@ -643,14 +641,10 @@ void parseCategories(String csv) {
     if (category.rights.size() > largestCategoryLength) largestCategoryLength = category.rights.size();
     
   }
-  
-//  println("Parse Categories - Elapsed Time: " + (millis()-startTime)/1000);
 }
 
 
 void parseRights(String csv) {
-  int startTime = millis();
-
   // reads CSV header column and returns only the Right strings
   String[] rows                = loadStrings(csv);
   String[] columns             = split(rows[0].replaceAll("\"", ""), ',');
@@ -691,7 +685,7 @@ void parseRights(String csv) {
         String right              = rightsColumns.get(j);
         String rightAvailability  = row[rightIterator];
 
-        if (rightAvailability.equals("1. yes") || rightAvailability.equals("2. full")) {
+        if (rightAvailability.equals("1. yes") || rightAvailability.equals("2. full") || rightAvailability.equals("1. conditional")) {
           year.addRight(right);
           year.addCateogry(findCategoryForRight(right));
         }     
@@ -700,9 +694,7 @@ void parseRights(String csv) {
       countryObject.addYear(year);
       countryObject.addYear((Integer)currentYear, year);
     }            
-  }
-  
-//  println("Parse Rights - Elapsed Time: " + (millis()-startTime)/1000);
+  }  
 }
 
 
@@ -731,8 +723,8 @@ void parseGroups(String csv) {
   }
   
   // set random group as default
-  String randGroup    = groupNames.get((int)random(groupNames.size()));
-  loadNewGroup(randGroup);
+  String randGroup = groupNames.get((int)random(groupNames.size()));
+  loadNewGroup(groups.get(randGroup));
 }
 
 
@@ -1025,8 +1017,23 @@ void setCircumplexFromJS(int circumplexID) {
   currentCircumplex = circumplexID;
 }
 
+void loadNewGroupFromCircle(String groupName) {
+  loadNewGroup(groups.get(groupName));
+}
 
-void loadNewGroup(String newGroupName) {    
+void loadNewGroupFromBubbles(String[] groupArray, int categoryID, int newYear, String bubbleRight) {
+  setCircumplexFromJS(categoryID);
+  timecontroller.year = newYear;
+  
+  ArrayList<Country> groupList = new ArrayList<Country>();
+  for(int i=0; i<groupArray.length; i++) {
+    Country countryObject = countryMap.get(groupArray[i]);
+    if (countryObject != null) groupList.add(countryObject);
+  }
+  loadNewGroup(groupList);
+}
+
+void loadNewGroup(ArrayList<Country> countryGroup) {    
   
   // no need to do this on the first time around since visualizedCountries hasn't been initialized yet
   if(visualizedCountries != null) {
@@ -1038,7 +1045,7 @@ void loadNewGroup(String newGroupName) {
   }
     
   // update visualizedCountries w/ newly selected group
-  visualizedCountries = groups.get(newGroupName);
+  visualizedCountries = countryGroup;
   
   // used to find optimal time range
   int earliestStartYear = 2012;
@@ -1048,6 +1055,8 @@ void loadNewGroup(String newGroupName) {
     Country countryObject = visualizedCountries.get(j);
     
     int yearCount = countryObject.years.size();
+    // only consider the country if it contains at least 1 year with rights
+    // new zealand for example has none for every year ?
     if(yearCount > 0) {
       int firstYear = countryObject.years.get(0).number;
       int lastYear  = countryObject.years.get(yearCount-1).number;
@@ -1061,6 +1070,7 @@ void loadNewGroup(String newGroupName) {
   
   yearRange[0] = earliestStartYear;
   yearRange[1] = latestEndYear;
+  timecontroller.updateTimeLine();
   
   generateCountryList();
 }
@@ -1073,7 +1083,9 @@ void insertNewCountry(String country) {
      countryObject.recentlyAdded = true; 
      countryObject.savedTime     = millis();
      
-     // enable overlay to prevent mulitple country addtitions before animation completes
+     // enable overlays to prevent mulitple country addtitions before animation completes
+     // and to disable interrupting the animation by touching the canvas
+     document.getElementById('canvasOverlay').style.zIndex          = "1";
      document.getElementById('countryListOverlay').style.background = "rgba(18, 18, 18, 0.4)";
      document.getElementById('countryListOverlay').style.zIndex     = "2";
       
@@ -1104,7 +1116,9 @@ void deleteCountry(String country) {
      countryObject.recentlyRemoved = true;
      countryObject.savedTime     = millis();
      
-     // enable overlay to prevent mulitple country deletions before animation completes
+     // enable overlays to prevent mulitple country deletions before animation completes
+     // and to disable interrupting the animation by touching the canvas
+     document.getElementById('canvasOverlay').style.zIndex          = "1";
      document.getElementById('countryListOverlay').style.background = "rgba(18, 18, 18, 0.4)";
      document.getElementById('countryListOverlay').style.zIndex     = "2";
      
