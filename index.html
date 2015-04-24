@@ -48,6 +48,25 @@
           var overlayDIV = document.getElementById("overlay");
           overlayDIV.parentNode.removeChild(overlayDIV);
         }
+      }
+
+      function changeCircleOfRights(newCountryList, categoryID, currentYear, rightName) {
+        document.getElementById("visDiv2").contentWindow.changeGroupByBubbles(newCountryList, categoryID, currentYear, rightName);
+        document.getElementById("visDiv2").contentWindow.killOverlay();
+        document.getElementById("visDiv2").contentWindow.restartDraw();
+
+        document.getElementById("visDiv1").style.visibility           = "hidden"; 
+        document.getElementById("visDiv1").style.zIndex               = 1;
+        document.getElementById("visDiv1").contentWindow.pauseDraw();
+        document.getElementById("visDivIcon1a").src                   = "images/visDivIcon1_w.png";
+        document.getElementById("visDivIcon1b").src                   = "images/visDivIcon1_w.png";
+
+        document.getElementById("visDiv2").style.visibility           = "visible"; 
+        document.getElementById("visDiv2").style.zIndex               = "100";
+        document.getElementById("visDivIcon2a").src                   = "images/visDivIcon2_y.png";
+        document.getElementById("visDivIcon2b").src                   = "images/visDivIcon2_y.png";
+
+        currentVis = 2;
       } 
 
     </script>
@@ -65,42 +84,50 @@
       </div>
       <table id="nav-bar-top">
         <tr>
-          <td onmousedown="changeVis(1)" ontouchstart="changeVis(1)">
+          <td colspan="2">
+            <p class="viz groupTitle">Visualizations</p>
+          </td>
+          <td colspan="2">
+            <p class="game groupTitle">Games</p>
+          </td>
+        </tr>
+        <tr>
+          <td class="viz" onmousedown="changeVis(1)" ontouchstart="changeVis(1)">
             <span>1</span><a href="#"><img src="images/visDivIcon1_y.png" id="visDivIcon1a"/><p>Raining Rights</p></a>
           </td>
-          <td onmousedown="changeVis(2)" ontouchstart="changeVis(2)">
-            <span>2</span><a href="#"><img src="images/visDivIcon2_w.png" id="visDivIcon2a"/><p>In/Out</p></a>
+          <td class="viz" onmousedown="changeVis(2)" ontouchstart="changeVis(2)">
+            <span>2</span><a href="#"><img src="images/visDivIcon2_w.png" id="visDivIcon2a"/><p>Circle of Rights</p></a>
           </td>
-          <td onmousedown="changeVis(3)" ontouchstart="changeVis(3)">
-            <span>3</span><a href="#"><img src="images/visDivIcon3_w.png" id="visDivIcon3a" /><p>Trivia</p></a>   
+          <td class="game" onmousedown="changeVis(3)" ontouchstart="changeVis(3)">
+            <span>3</span><a href="#"><img src="images/visDivIcon3_w.png" id="visDivIcon3a" /><p>In/Out</p></a>   
           </td>
-          <td onmousedown="changeVis(4)" ontouchstart="changeVis(4)">
-            <span>4</span><a href="#"><img src="images/visDivIcon4_w.png" id="visDivIcon4a"/><p>Circle of Rights</p></a>
+          <td class="game" onmousedown="changeVis(4)" ontouchstart="changeVis(4)">
+            <span>4</span><a href="#"><img src="images/visDivIcon4_w.png" id="visDivIcon4a"/><p>Trivia</p></a>
           </td>
       </table>
 		</div>
 	
     <div id="center">
       <iframe id="visDiv1" src="Bubbles/web/bubbles.html" 	            width="100%" height="100%" style="visibility:visible; z-index:100" seamless></iframe>
-      <iframe id="visDiv2" src="InOrOut/web/inOrOut.html"               width="100%" height="100%" style="visibility:hidden;"              seamless></iframe> 
-      <iframe id="visDiv3" src="Trivia/web/trivia.html"                 width="100%" height="100%" style="visibility:hidden;"              seamless></iframe>  
-      <iframe id="visDiv4" src="RadialBarGraph/web/radialBarGraph.html" width="100%" height="100%" style="visibility:hidden;"              seamless></iframe>
+      <iframe id="visDiv2" src="RadialBarGraph/web/radialBarGraph.html" width="100%" height="100%" style="visibility:hidden;"              seamless></iframe> 
+      <iframe id="visDiv3" src="InOrOut/web/inOrOut.html"               width="100%" height="100%" style="visibility:hidden;"              seamless></iframe>  
+      <iframe id="visDiv4" src="Trivia/web/trivia.html"                 width="100%" height="100%" style="visibility:hidden;"              seamless></iframe>
     </div>
 
 		<div id="footer">
       <table id="nav-bar-bottom">
         <tr>
-          <td onmousedown="changeVis(1)" ontouchstart="changeVis(1)">
+          <td class="viz" onmousedown="changeVis(1)" ontouchstart="changeVis(1)">
             <span>1</span><a href="#"><img src="images/visDivIcon1_y.png" id="visDivIcon1b"/><p>Raining Rights</p></a></a>
           </td>
-          <td onmousedown="changeVis(2)" ontouchstart="changeVis(2)">
-            <span>2</span><a href="#"><img src="images/visDivIcon2_w.png" id="visDivIcon2b"/><p>In/Out</p></a>
+          <td class="viz" onmousedown="changeVis(2)" ontouchstart="changeVis(2)">
+            <span>2</span><a href="#"><img src="images/visDivIcon2_w.png" id="visDivIcon2b"/><p>Circle of Rights</p></a>
           </td>
-          <td onmousedown="changeVis(3)" ontouchstart="changeVis(3)">
-            <span>3</span><a href="#"><img src="images/visDivIcon3_w.png" id="visDivIcon3b"/><p>Trivia</p></a>  
+          <td class="game" onmousedown="changeVis(3)" ontouchstart="changeVis(3)">
+            <span>3</span><a href="#"><img src="images/visDivIcon3_w.png" id="visDivIcon3b"/><p>In/Out</p></a>  
           </td>
-          <td onmousedown="changeVis(4)" ontouchstart="changeVis(4)">
-            <span>4</span><a href="#"><img src="images/visDivIcon4_w.png" id="visDivIcon4b"/><p>Circle of Rights</p></a>
+          <td class="game" onmousedown="changeVis(4)" ontouchstart="changeVis(4)">
+            <span>4</span><a href="#"><img src="images/visDivIcon4_w.png" id="visDivIcon4b"/><p>Trivia</p></a>
           </td>
         </tr>
       </table>

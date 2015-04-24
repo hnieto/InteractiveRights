@@ -60,10 +60,24 @@ iframe {
     text-align:              center;
 }
 
+.groupTitle {
+    color:                   white;
+    letter-spacing:          0.5vw;
+    font-weight:             bold;
+}
+
+.viz {
+    background-color:        rgb(42,85,133);
+}
+
+.game {
+    background-color:        rgb(52, 95, 143);
+}
+
 #nav-bar-top span {
     color:                   white;
     padding:                 0 0.25vw;
-    font-size:               3.5vw;
+    font-size:               2vw;
 }
 
 #nav-bar-top a {
@@ -78,7 +92,7 @@ iframe {
 
 #nav-bar-top img {
     max-width:               15.25vw;
-    height:                  6vh;
+    height:                  5.2vh;
 }
 
 #nav-bar-bottom {

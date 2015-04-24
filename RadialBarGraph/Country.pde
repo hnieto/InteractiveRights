@@ -87,12 +87,13 @@ class Country {
     
     // reset alpha for next time country is added
     // update country "+" and "-" anchor links
-    // disable countryList overlay 
+    // disable overlays
     else if(recentlyAdded && passedTime>timeToWait) {
       visualize     = true;
       recentlyAdded = false;
       alpha = 225;
       generateCountryList();
+      document.getElementById('canvasOverlay').style.zIndex          = "-1";
       document.getElementById('countryListOverlay').style.background = "rgba(0, 0, 0, 0)";
       document.getElementById('countryListOverlay').style.zIndex     = "1";
       document.getElementById('opentour').style.display              = "block";
@@ -115,7 +116,7 @@ class Country {
     
     // reset alpha for next time country is removed
     // update country "+" and "-" anchor links
-    // disable countryList overlay     
+    // disable overlays     
     else if(recentlyRemoved && passedTime>timeToWait) {
       visualize       = false;
       recentlyRemoved = false;
@@ -131,6 +132,7 @@ class Country {
       }
       
       generateCountryList();
+      document.getElementById('canvasOverlay').style.zIndex          = "-1";
       document.getElementById('countryListOverlay').style.background = "rgba(0, 0, 0, 0)";
       document.getElementById('countryListOverlay').style.zIndex     = "1";
       document.getElementById('opentour').style.display              = "block";
@@ -231,13 +233,14 @@ class Country {
     
     // reset alpha for next time country is added
     // update country "+" and "-" anchor links
-    // disable countryList overlay 
+    // disable overlays
     else if(recentlyAdded && passedTime>timeToWait) {
       visualize     = true;
       recentlyAdded = false;
       alpha = 225;
       generateCountryList();
       
+      document.getElementById('canvasOverlay').style.zIndex          = "-1";
       document.getElementById('countryListOverlay').style.background = "rgba(0, 0, 0, 0)";
       document.getElementById('countryListOverlay').style.zIndex     = "1";
       document.getElementById('opentour').style.display              = "block";
@@ -260,7 +263,7 @@ class Country {
     
     // reset alpha for next time country is removed
     // update country "+" and "-" anchor links
-    // disable countryList overlay     
+    // disable overlays  
     else if(recentlyRemoved && passedTime>timeToWait) {
       visualize       = false;
       recentlyRemoved = false;
@@ -276,6 +279,7 @@ class Country {
       }
       
       generateCountryList();
+      document.getElementById('canvasOverlay').style.zIndex          = "-1";
       document.getElementById('countryListOverlay').style.background = "rgba(0, 0, 0, 0)";
       document.getElementById('countryListOverlay').style.zIndex     = "1";
       document.getElementById('opentour').style.display              = "block";
@@ -358,4 +362,3 @@ class Country {
     return counter;
   } 
 }
-

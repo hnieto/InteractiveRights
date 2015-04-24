@@ -281,9 +281,17 @@
     });
 
     function launchTutorial() {
+      document.getElementById('inToolTip').style.display           = 'block';
+      document.getElementById('outToolTip').style.display          = 'block';
+      document.getElementById('addCountryButton').style.display    = 'block';
+    
       var processingInstance   = Processing.getInstanceById('sketch');
       pauseDraw();
       $('body').chardinJs('start');
+        document.getElementById('inToolTip').style.display           = 'none';
+        document.getElementById('outToolTip').style.display          = 'none';
+        document.getElementById('addCountryButton').style.display    = 'none';
+        document.getElementById('countryListOverlay').style.display  = 'none';
     }
 
     // show overview if user is inactive 

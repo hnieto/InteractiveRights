@@ -81,6 +81,12 @@ class Bubble {
 //          txt = "Amendment "+index+":\n"+amendments[index2];
 //        }
         int index = (int) random(19, 136);
+        
+        while(done.contains(index))
+            index = (int) random(19, 136);
+            
+        done.add(index);
+        
         String available = table[selected][index];
         
         if(available.equals("1.yes") || available.equals("2.full")){

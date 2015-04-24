@@ -50,7 +50,7 @@ class Slider {
     }
 
     // Drawing the box
-    void display(boolean onlyYear) {
+    void display() {
     
         pushStyle();
         textAlign(CENTER, CENTER);
@@ -62,36 +62,28 @@ class Slider {
         fill(40, 10, 10);
         stroke(255, 0, 0, 0);//150);
         rect(width/2, height*15/16, width, height/8);
-
-        if(!onlyYear){
-            fill(255, 0, 0, 150);
-            rect(x, y, bar_length+bar_height, bar_height, bar_height/2);
-          
-            fill(255, 0, 0);
-            if(sliding){
-                ellipse(slidingX, y, w, h);
-                slidingV += ((thumbX + initialX)/2 - slidingX)/1;
-                slidingX += slidingV;
-                if(slidingX == thumbX)  sliding = false;
-            }
-            else{ 
-                ellipse(thumbX, thumbY, w, h);
-            }
+           
+        fill(255, 0, 0, 150);
+        rect(x, y, bar_length+bar_height, bar_height, bar_height/2);
+      
+        fill(255, 0, 0);
+        if(sliding){
+            ellipse(slidingX, y, w, h);
+            slidingV += ((thumbX + initialX)/2 - slidingX)/1;
+            slidingX += slidingV;
+            if(slidingX == thumbX)  sliding = false;
+        }
+        else{ 
+            ellipse(thumbX, thumbY, w, h);
         }
       
         popMatrix();
         
         textAlign(CENTER, CENTER);
         
-        fill(255, 0, 0);
         textFont(digitalFont);
         textSize(height/20);
-        if(!onlyYear){
-            text(Year, x, y-height/24);
-        }
-        else{
-            text(Year, x, y);
-        }
+        text(Year, slide.x, slide.y-height/24);
         
   //    textSize(height/108);
   //    text(created_counter, slide.x, slide.y-height/18);
@@ -106,26 +98,25 @@ class Slider {
         textFont(defaultFont);
         textSize(height/108);
         
-        if(!onlyYear){
-            float offset = height/40;
-            float y1 = bar_height*1.1;
-            float y2 = offset - bar_height/2;
-            for(int j=0; j<importantyears.length; j++){
-                int i = importantyears[j];
-                pushMatrix();
-                translate(map(i, start_year, end_year, x-bar_length/2, x+bar_length/2), y-offset);
-                strokeWeight(2);
-                stroke(255, 0, 0, 150);
-                line(0, y1, 0, y2);
-                rotate(-PI/3);
-                text(i, 0, 0);
-                popMatrix();
-                offset *= 0-1;
-                y1 *= 0-1;
-                y2 *= 0-1;
-            }
-        }
+        //print the important years
         
+        float offset = - height/40;
+        float y1 = - bar_height*1.1;
+        float y2 = offset + bar_height/2;
+        for(int j=0; j<importantyears.length; j++){
+            int i = importantyears[j];
+            pushMatrix();
+            translate(map(i, start_year, end_year, x-bar_length/2, x+bar_length/2), y-offset);
+            strokeWeight(2);
+            stroke(255, 0, 0, 150);
+            line(0, y1, 0, y2);
+            rotate(-PI/3);
+            text(i, 0, 0);
+            popMatrix();
+            offset *= -1;
+            y1 *= -1;
+            y2 *= -1;
+        }
         popStyle();
     }
 }
